@@ -50,7 +50,7 @@ void ActionSearch::readMenuActions(QMenu* menu,QStringList names)
 
 
 		QString actionName = action->text().replace("&", "");
-		if (!actionName.isEmpty() && action->isEnabled())
+		if (!actionName.isEmpty() && action->isEnabled() && !action->menu())
 		{
             actionName = names.join(" → ") + " → " + actionName;
 

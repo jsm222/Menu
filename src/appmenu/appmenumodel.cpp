@@ -527,8 +527,16 @@ void AppMenuModel::updateApplicationMenu(const QString &serviceName, const QStri
 
     connect(m_importer.data(), &DBusMenuImporter::menuUpdated, this, [=](QMenu *menu) {
         m_menu = m_importer->menu();
+         QList<QAction*> acts = m_menu->actions();
 
-        if (m_menu.isNull() || menu != m_menu) {
+        QAction *a = acts.last();
+        if (a->menu() && a->menu() == menu) { // If last top-level menu is menu we are done?!
+            m_importer->m_done=true;
+        }
+
+        if (m_menu.isNull() || m_importer->m_done) {
+            setMenuAvailable(true);
+            emit modelNeedsUpdate();
             return;
         }
 
@@ -572,6 +580,7 @@ void AppMenuModel::updateApplicationMenu(const QString &serviceName, const QStri
             requestActivateIndex(it - actions.begin());
         }
     });
+
 }
 
 bool AppMenuModel::nativeEventFilter(const QByteArray &eventType, void *message, long *result)
