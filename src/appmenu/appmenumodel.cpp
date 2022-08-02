@@ -527,7 +527,13 @@ void AppMenuModel::updateApplicationMenu(const QString &serviceName, const QStri
 
     connect(m_importer.data(), &DBusMenuImporter::menuUpdated, this, [=](QMenu *menu) {
         m_menu = m_importer->menu();
+         if(!m_menu) {
+		return;
+	}
          QList<QAction*> acts = m_menu->actions();
+         if(acts.isEmpty()) {
+             return;
+         }
 
         QAction *a = acts.last();
         if (a->menu() && a->menu() == menu) { // If last top-level menu is menu we are done?!
