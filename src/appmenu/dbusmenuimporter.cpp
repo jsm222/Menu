@@ -504,11 +504,6 @@ void DBusMenuImporter::updateMenu(QMenu *menu)
 
     // Firefox deliberately ignores "aboutToShow" whereas Qt ignores" opened", so we'll just send both all the time...
     d->sendEvent(id, QStringLiteral("opened"));
-    for(QAction *a : action->menu()->actions()) {
-        if(a->menu()) {
-        updateMenu(a->menu());
-        }
-    }
 }
 
 
