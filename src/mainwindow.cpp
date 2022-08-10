@@ -61,7 +61,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     setAttribute(Qt::WA_NoSystemBackground, false);
     // setAttribute(Qt::WA_TranslucentBackground);
-    setWindowFlags(Qt::FramelessWindowHint);
+    setWindowFlags(Qt::FramelessWindowHint | Qt::WindowDoesNotAcceptFocus);
 
     KWindowSystem::setOnDesktop(effectiveWinId(), NET::OnAllDesktops);
 
@@ -94,8 +94,8 @@ MainWindow::MainWindow(QWidget *parent)
     animation->setEndValue(QPoint(qApp->primaryScreen()->geometry().x(),qApp->primaryScreen()->geometry().y()));
     animation->setEasingCurve(QEasingCurve::OutCubic);
     animation->start(QPropertyAnimation::DeleteWhenStopped);
-    this->activateWindow(); // probono: Ensure that we have the focus when menu is launched so that one can enter text in the search box
-    m_mainPanel->raise(); // probono: Trying to give typing focus to the search box that is in there. Needed? Does not seem tp hurt
+    //this->activateWindow(); // probono: Ensure that we have the focus when menu is launched so that one can enter text in the search box
+    //m_mainPanel->raise(); // probono: Trying to give typing focus to the search box that is in there. Needed? Does not seem tp hurt
 
 }
 

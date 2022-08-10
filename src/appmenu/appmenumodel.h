@@ -82,7 +82,7 @@ public:
     void setWinId(const QVariant &id);
 
     QMenu *menu() { return m_menu; }
-
+    void forceUpdate();
 signals:
     void requestActivateIndex(int index);
 
@@ -117,7 +117,7 @@ private:
     bool m_menuAvailable;
     bool m_updatePending = false;
     bool m_visible = true;
-
+    QList<QMenu*> m_awaitsUpdate;
     QRect m_screenGeometry;
 
     QVariant m_winId{-1};

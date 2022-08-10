@@ -137,7 +137,9 @@ void AppMenuModel::setFilterChildren(bool hideChildren)
     emit filterChildrenChanged();
 }
 
-
+void AppMenuModel::forceUpdate() {
+    onActiveWindowChanged(KWindowSystem::activeWindow());
+}
 bool AppMenuModel::menuAvailable() const
 {
     return m_menuAvailable;
@@ -510,6 +512,7 @@ QVariant AppMenuModel::data(const QModelIndex &index, int role) const
 
 void AppMenuModel::updateApplicationMenu(const QString &serviceName, const QString &menuObjectPath)
 {
+    m_awaitsUpdate.clear();
     if (m_serviceName == serviceName && m_menuObjectPath == menuObjectPath) {
         if (m_importer) {
 		QMetaObject::invokeMethod(m_importer, "updateMenu", Qt::QueuedConnection);
@@ -541,7 +544,7 @@ void AppMenuModel::updateApplicationMenu(const QString &serviceName, const QStri
 
             if(a->menu()) {
 		           m_importer->updateMenu(a->menu());
-
+                   m_awaitsUpdate << a->menu();
             }
             // signal dataChanged when the action changes
             connect(a, &QAction::changed, this, [this, a] {
@@ -561,7 +564,12 @@ void AppMenuModel::updateApplicationMenu(const QString &serviceName, const QStri
         }
 
 
-    if(m_menu && !m_menu->actions().isEmpty() && m_menu->actions().last() == menu->menuAction()) {
+    if(m_awaitsUpdate.contains(menu)) {
+        m_awaitsUpdate.removeAt(m_awaitsUpdate.indexOf(menu));
+    }
+
+    if(m_awaitsUpdate.isEmpty()) {
+    //if(m_menu && ! m_menu->actions().isEmpty() && m_menu->actions().last() == menu->menuAction()) {
             setMenuAvailable(true);
             emit menuParsed();
           }

@@ -25,6 +25,7 @@
 #include <QHBoxLayout>
 #include <QDebug>
 #include <QMenu>
+#include <QWidgetAction>
 #include <QX11Info>
 #include <QApplication>
 
@@ -324,11 +325,20 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
     // searchLineWidget->setLayout(searchLineLayout);
     searchLineWidget->setObjectName("SearchLineWidget");
     // layout->addWidget(searchLineWidget, 0, Qt::AlignRight);
-    layout->addWidget(searchLineWidget, 0, Qt::AlignLeft);
-    searchLineWidget->show();
-
+   // layout->addWidget(searchLineWidget, 0, Qt::AlignLeft);
     // Prepare System menu
+    m_searchMenu = new QMenu("Search");
+    connect(m_searchMenu,&QMenu::aboutToShow,[this]() {  m_appMenuModel->forceUpdate();});
+
+
     m_systemMenu = new QMenu("System");
+
+    QWidgetAction *widgetAction = new QWidgetAction(this);
+    widgetAction->setDefaultWidget(searchLineEdit);
+    m_searchMenu->addAction(widgetAction);
+
+
+
     m_systemMenu->setToolTipsVisible(true); // Works; shows the full path
     QAction *aboutAction = m_systemMenu->addAction(tr("About This Computer"));
     connect(aboutAction, SIGNAL(triggered()), this, SLOT(actionAbout()));
@@ -393,6 +403,8 @@ AppMenuWidget::~AppMenuWidget() {
 void AppMenuWidget::integrateSystemMenu(QMenuBar *menuBar) {
     if(!menuBar || !m_systemMenu)
         return;
+
+    menuBar->addMenu(m_searchMenu);
 
     menuBar->addMenu(m_systemMenu);
 }

@@ -84,6 +84,7 @@ private:
 /// For System Main Menu.
 private:
     QMenu *m_systemMenu;
+     QMenu *m_searchMenu;
     void integrateSystemMenu(QMenuBar*);
 
 private:
