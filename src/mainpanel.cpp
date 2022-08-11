@@ -97,7 +97,9 @@ void MainPanel::rebuildSystemMenu()
         m_layout->insertWidget(0, m_appMenuWidget);
     }
 }
-
+void MainPanel::triggerFocusMenu() {
+    m_appMenuWidget->focusMenu();
+}
 void MainPanel::loadModules()
 {
     loadModule("datetime", m_dateTimeLayout);

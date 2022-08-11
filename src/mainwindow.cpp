@@ -57,7 +57,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Prevent menubar from becoming faded/translucent if we use a compositing manager
     // that fades/makes translucent inactive windows
-    m_mainPanel->setWindowFlags(Qt::WindowDoesNotAcceptFocus);
+   // m_mainPanel->setWindowFlags(Qt::WindowDoesNotAcceptFocus);
 
     setAttribute(Qt::WA_NoSystemBackground, false);
     // setAttribute(Qt::WA_TranslucentBackground);

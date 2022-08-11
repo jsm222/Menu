@@ -28,7 +28,6 @@
 #include <QWidgetAction>
 #include <QX11Info>
 #include <QApplication>
-
 #include <QAbstractItemView>
 #include <QDBusConnection>
 #include <QDBusConnectionInterface>
@@ -326,11 +325,10 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
     searchLineWidget->setObjectName("SearchLineWidget");
     // layout->addWidget(searchLineWidget, 0, Qt::AlignRight);
    // layout->addWidget(searchLineWidget, 0, Qt::AlignLeft);
-    // Prepare System menu
     m_searchMenu = new QMenu("Search");
-    connect(m_searchMenu,&QMenu::aboutToShow,[this]() {  m_appMenuModel->forceUpdate();});
+    connect(m_searchMenu,&QMenu::aboutToShow,[this]() { m_appMenuModel->forceUpdate(); searchLineEdit->activateWindow();});
 
-
+    // Prepare System menu
     m_systemMenu = new QMenu("System");
 
     QWidgetAction *widgetAction = new QWidgetAction(this);
@@ -394,6 +392,14 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
     updateActionSearch(m_menuBar);
 }
 
+
+void AppMenuWidget::focusMenu() {
+    QMouseEvent event(QEvent::MouseButtonPress,QPoint(0,0),QPoint(0,0),Qt::LeftButton,0,0);
+    QApplication::sendEvent(m_menuBar,&event);
+    /*m_searchMenu->exec(m_searchMenu->mapToGlobal(QPoint(0,0)));*/
+    qobject_cast<QWidgetAction*>(m_searchMenu->actions().at(0))->defaultWidget()->show();
+    qobject_cast<QWidgetAction*>(m_searchMenu->actions().at(0))->defaultWidget()->setFocus();
+}
 AppMenuWidget::~AppMenuWidget() {
     if(actionSearch) {
         delete actionSearch;

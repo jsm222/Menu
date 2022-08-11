@@ -36,7 +36,7 @@ public:
     void loadModules();
     void loadModule(const QString &pluginName, QHBoxLayout *layout);
     void rebuildSystemMenu();
-
+    void triggerFocusMenu();
 protected:
     void mouseDoubleClickEvent(QMouseEvent *e) override;
 

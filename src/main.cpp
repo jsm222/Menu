@@ -59,6 +59,7 @@ void rebuildSystemMenuSignalHandler(int sig){
 
 int main(int argc, char **argv)
 {
+
     QtSingleApplication instance(argc, argv);
     if (instance.sendMessage("Wake up!")) {
         return 0;
@@ -97,15 +98,15 @@ int main(int argc, char **argv)
 
     MainWindow w;
     window = &w;
-    QTimer::singleShot(500, window, &MainWindow::show); // probono: Will this prevent the menu from showing up in random places for a slit-second?
-
-    instance.setActivationWindow(&w);
+    //QTimer::singleShot(500, window, &MainWindow::show); // probono: Will this prevent the menu from showing up in random places for a slit-second?
+    w.show();
+    //instance.setActivationWindow(&w);
 
     //set up a signal for SIGUSR1
     signal(SIGUSR1, rebuildSystemMenuSignalHandler);
 
-    QObject::connect(&instance, SIGNAL(messageReceived(const QString&)),
-             &w, SLOT(append(const QString&)));
+    QObject::connect(&instance, &QtSingleApplication::messageReceived,
+             [&w]() { w.m_mainPanel->triggerFocusMenu(); });
 
     return instance.exec();
 }
