@@ -129,7 +129,6 @@ private:
     WId m_delayedMenuWindowId = 0;
 
     QPointer<QMenu> m_menu;
-
     QDBusServiceWatcher *m_serviceWatcher;
     QString m_serviceName;
     QString m_menuObjectPath;

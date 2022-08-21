@@ -218,6 +218,8 @@ void AppMenuModel::update()
 
 void AppMenuModel::onActiveWindowChanged(WId id)
 {
+    if(id == 0)
+        return;
     qApp->removeNativeEventFilter(this);
 
     auto pw = qobject_cast<QWidget*>(parent());

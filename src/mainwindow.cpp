@@ -36,11 +36,11 @@
 
 MainWindow::MainWindow(QWidget *parent)
     : QFrame(parent),
-      m_fakeWidget(new QWidget(nullptr)),
-      m_mainPanel(new MainPanel)
+      //m_fakeWidget(new QWidget(nullptr)),
+      m_mainPanel(new MainPanel(parent))
 {
     this->setObjectName("menuBar");
-
+    this->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
     qDebug() << "translated: tr(\"Log Out\"):" << tr("Log Out");
     qDebug() << "translated: tr(\"About This Computer\"):" << tr("About This Computer");
 
@@ -52,8 +52,8 @@ MainWindow::MainWindow(QWidget *parent)
     layout->setSpacing(10); // ?
     setLayout(layout);
 
-    m_fakeWidget->setWindowFlags(Qt::FramelessWindowHint | Qt::WindowDoesNotAcceptFocus | Qt::SplashScreen);
-    m_fakeWidget->setAttribute(Qt::WA_TranslucentBackground);
+    //m_fakeWidget->setWindowFlags(Qt::FramelessWindowHint | Qt::WindowDoesNotAcceptFocus | Qt::SplashScreen);
+  //  m_fakeWidget->setAttribute(Qt::WA_TranslucentBackground);
 
     // Prevent menubar from becoming faded/translucent if we use a compositing manager
     // that fades/makes translucent inactive windows
@@ -133,13 +133,14 @@ void MainWindow::initSize()
 
     // probono: Construct a populated(!) QMenuBar so that we can determine
     // its height and use the same height for the MainWindow. Is there a better way?
-    QMenuBar *dummyMenuBar = new QMenuBar;
+    /*QMenuBar *dummyMenuBar = new QMenuBar;
     dummyMenuBar->setContentsMargins(0, 0, 0, 0);
     dummyMenuBar->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Expanding);
     QMenu *dummyMenu = new QMenu;
     dummyMenuBar->addMenu(dummyMenu);
-    qDebug() << "probono: dummyMenu->sizeHint().height():" << dummyMenu->sizeHint().height();
-    setFixedHeight(dummyMenuBar->sizeHint().height());
+    qDebug() << "probono: dummyMenu->sizeHint().height():" << dummyMenu->sizeHint().height();- */
+    //use m_mainPanel instead of dummyMenu
+    setFixedHeight(m_mainPanel->sizeHint().height());
 
     //move this to the active screen and xrandr position
     move(qApp->primaryScreen()->geometry().x(), qApp->primaryScreen()->geometry().y());
@@ -170,8 +171,7 @@ void MainWindow::setStrutPartial()
     QRect r(geometry());
     r.setHeight(1);
     r.setWidth(1);
-    m_fakeWidget->setGeometry(r);
-    m_fakeWidget->setVisible(true);
+
 
     const QRect windowRect = this->rect();
     NETExtendedStrut strut;
@@ -180,7 +180,7 @@ void MainWindow::setStrutPartial()
     strut.top_start = x();
     strut.top_end = x() + width();
 
-    KWindowSystem::setExtendedStrut(m_fakeWidget->winId(),
+    KWindowSystem::setExtendedStrut(winId(),
                                      strut.left_width,
                                      strut.left_start,
                                      strut.left_end,

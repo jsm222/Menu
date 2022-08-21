@@ -80,7 +80,7 @@ MainPanel::MainPanel(QWidget *parent)
 
     layout->setContentsMargins(0, 0, 0, 0);
     setLayout(layout);
-
+    setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Minimum);
     loadModules();
     m_layout = layout;
 }

@@ -326,7 +326,11 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
     // layout->addWidget(searchLineWidget, 0, Qt::AlignRight);
    // layout->addWidget(searchLineWidget, 0, Qt::AlignLeft);
     m_searchMenu = new QMenu("Search");
-    connect(m_searchMenu,&QMenu::aboutToShow,[this]() { m_appMenuModel->forceUpdate(); searchLineEdit->activateWindow();});
+    connect(m_searchMenu,&QMenu::aboutToShow,[this]() {
+        m_appMenuModel->forceUpdate(); searchLineEdit->activateWindow();
+        qobject_cast<QWidgetAction*>(m_searchMenu->actions().at(0))->defaultWidget()->show();
+        qobject_cast<QWidgetAction*>(m_searchMenu->actions().at(0))->defaultWidget()->setFocus();
+    });
 
     // Prepare System menu
     m_systemMenu = new QMenu("System");
@@ -394,11 +398,9 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
 
 
 void AppMenuWidget::focusMenu() {
-    QMouseEvent event(QEvent::MouseButtonPress,QPoint(0,0),QPoint(0,0),Qt::LeftButton,0,0);
+    QMouseEvent event(QEvent::MouseButtonPress,QPoint(0,0),m_menuBar->mapToGlobal(QPoint(0,0)),Qt::LeftButton,0,0);
     QApplication::sendEvent(m_menuBar,&event);
-    /*m_searchMenu->exec(m_searchMenu->mapToGlobal(QPoint(0,0)));*/
-    qobject_cast<QWidgetAction*>(m_searchMenu->actions().at(0))->defaultWidget()->show();
-    qobject_cast<QWidgetAction*>(m_searchMenu->actions().at(0))->defaultWidget()->setFocus();
+
 }
 AppMenuWidget::~AppMenuWidget() {
     if(actionSearch) {
