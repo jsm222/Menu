@@ -419,6 +419,8 @@ void AppMenuWidget::integrateSystemMenu(QMenuBar *menuBar) {
 
 void AppMenuWidget::handleActivated(const QString &name) {
     actionSearch->execute(name);
+    searchLineEdit->clear();
+    m_searchMenu->close();
 }
 
 void AppMenuWidget::updateActionSearch(QMenuBar *menuBar) {
@@ -455,10 +457,11 @@ void AppMenuWidget::updateActionSearch(QMenuBar *menuBar) {
     // static_cast<QListView *>(actionCompleter->popup())->setContentsMargins(10,10,0,10); // FIXME: Does not seem to work, why?
 
     // Empty search field on selection of an item, https://stackoverflow.com/a/11905995
-    QObject::connect(actionCompleter, SIGNAL(activated(const QString&)),
+ 
+    /*QObject::connect(actionCompleter, SIGNAL(activated(const QString&)),
                      searchLineEdit, SLOT(clear()),
                      Qt::QueuedConnection);
-
+*/
     // Make more than 7 items visible at once
     actionCompleter->setMaxVisibleItems(35);
 
