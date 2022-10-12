@@ -23,16 +23,16 @@
 #include <QWidget>
 #include <QMenuBar>
 #include <QToolButton>
+#include <QEvent>
 #include <QPropertyAnimation>
 #include <QCompleter>
 #include <QLineEdit>
 #include <QMessageBox>
+#include <QWidgetAction>
 #include <QFileSystemWatcher>
-
+#include <QTimer>
 #include "appmenu/appmenumodel.h"
 #include "appmenu/menuimporter.h"
-
-#include "actionsearch/actionsearch.h"
 
 class AppMenuWidget : public QWidget
 {
@@ -79,7 +79,7 @@ private slots:
 
 /// For Action Search
 private:
-    void updateActionSearch(QMenuBar*);
+    void updateActionSearch();
 
 /// For System Main Menu.
 private:
@@ -91,7 +91,6 @@ private:
     QWidget *searchLineWidget;
     QLineEdit *searchLineEdit;
     QCompleter *actionCompleter;
-    ActionSearch *actionSearch;
     AppMenuModel *m_appMenuModel;
     MenuImporter *m_menuImporter;
     QWidget *m_buttonsWidget;

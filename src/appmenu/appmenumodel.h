@@ -63,10 +63,10 @@ public:
     QHash<int, QByteArray> roleNames() const override;
 
     void updateApplicationMenu(const QString &serviceName, const QString &menuObjectPath);
-
+    void updateSearch();
     bool filterByActive() const;
     void setFilterByActive(bool active);
-
+    void execute(QString actionName);
     bool filterChildren() const;
     void setFilterChildren(bool hideChildren);
 
@@ -80,9 +80,9 @@ public:
 
     QVariant winId() const;
     void setWinId(const QVariant &id);
-
+    void readMenuActions(QMenu* menu,QStringList names);
     QMenu *menu() { return m_menu; }
-    void forceUpdate();
+
 signals:
     void requestActivateIndex(int index);
 
@@ -105,6 +105,7 @@ signals:
     void menuAvailableChanged();
     void modelNeedsUpdate();
     void menuParsed();
+
     void filterByActiveChanged();
     void filterChildrenChanged();
     void visibleChanged();
@@ -112,6 +113,7 @@ signals:
     void winIdChanged();
 
 private:
+    QMap<QString,QAction*> m_names;
     bool m_filterByActive = false;
     bool m_filterChildren = false;
     bool m_menuAvailable;

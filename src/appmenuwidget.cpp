@@ -53,8 +53,6 @@
 #include <KF5/KWindowSystem/KWindowInfo>
 #include <KF5/KWindowSystem/NETWM>
 
-#include "actionsearch/actionsearch.h"
-
 #if defined(Q_OS_FREEBSD)
 #include <sys/types.h>
 #include <sys/extattr.h>
@@ -92,7 +90,7 @@ public:
                 reinterpret_cast<QLineEdit *>(parent())->clear();
                 reinterpret_cast<QLineEdit *>(parent())->setText("");
             }
-            if (keyEvent->key() == Qt::Key_Tab | Qt::Key_Alt)
+            if (keyEvent->key() == (Qt::Key_Tab | Qt::Key_Alt))
             {
                 // When esc Tab is pressed while cursor is in QLineEdit, also empty the QLineEdit
                 // and prevent the focus from going elsewhere in the menu. This effectively prevents the menu
@@ -315,23 +313,32 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
     searchLineEdit->setFocus(Qt::OtherFocusReason); // searchLineEdit->setFocus(); alone does not always succeed
     searchLineEdit->setToolTip("Alt+Space"); // This is actually a feature not of this application, but some other application that merely launches this application upon Alt+Space
     // layout->addSpacing(10); // Space to the left before the searchLineWidget
-    searchLineWidget = new QWidget(this);
+    //searchLineWidget = new QWidget(this);
     // searchLineWidget->setWindowFlag(Qt::WindowDoesNotAcceptFocus, true); // Does not seem to do anything
-    auto searchLineLayout = new QHBoxLayout(searchLineWidget);
-    searchLineLayout->setContentsMargins(0, 0, 0, 0);
-    // searchLineLayout->setSpacing(3);
-    searchLineLayout->addWidget(searchLineEdit, 0, Qt::AlignLeft);
-    // searchLineWidget->setLayout(searchLineLayout);
-    searchLineWidget->setObjectName("SearchLineWidget");
+    //auto searchLineLayout = new QHBoxLayout(searchLineWidget);
+    //searchLineLayout->setContentsMargins(0, 0, 0, 0);
+  // searchLineLayout->setSpacing(3);
+    //searchLineLayout->addWidget(searchLineEdit, 0, Qt::AlignLeft);
+    // searchLineWidget->setLayout(searchLineLayout);fffffff
+    //searchLineWidget->setObjectName("SearchLineWidget");
     // layout->addWidget(searchLineWidget, 0, Qt::AlignRight);
    // layout->addWidget(searchLineWidget, 0, Qt::AlignLeft);
-    m_searchMenu = new QMenu("Search");
-    connect(m_searchMenu,&QMenu::aboutToShow,[this]() {
-        m_appMenuModel->forceUpdate(); searchLineEdit->activateWindow();
-        qobject_cast<QWidgetAction*>(m_searchMenu->actions().at(0))->defaultWidget()->show();
-        qobject_cast<QWidgetAction*>(m_searchMenu->actions().at(0))->defaultWidget()->setFocus();
+    m_searchMenu = new QMenu("Search",nullptr);
+    connect(m_searchMenu,&QMenu::aboutToShow
+            ,[this]() {
+        searchLineEdit->clear();
+
+        m_appMenuModel->updateSearch();
+        updateActionSearch();
+
+       // searchLineEdit->setFocus();
+       // qobject_cast<QWidgetAction*>(m_searchMenu->actions().at(0))->defaultWidget()->show();
+        //qobject_cast<QWidgetAction*>(m_searchMenu->actions().at(0))->defaultWidget()->setFocus();
     });
-    connect(m_searchMenu,&QMenu::aboutToHide,searchLineEdit,&QLineEdit::clear);
+    connect(m_searchMenu,&QMenu::aboutToHide,this,[this]{
+        searchLineEdit->clear();
+         searchLineEdit->clearFocus();
+    });
     // Prepare System menu
     m_systemMenu = new QMenu("System");
 
@@ -387,25 +394,29 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
     connect(m_appMenuModel, &AppMenuModel::menuParsed, this, &AppMenuWidget::updateMenu);
 
     connect(KWindowSystem::self(), &KWindowSystem::activeWindowChanged, this, &AppMenuWidget::delayUpdateActiveWindow);
-    connect(KWindowSystem::self(), static_cast<void (KWindowSystem::*)(WId, NET::Properties, NET::Properties2)>(&KWindowSystem::windowChanged),
-            this, &AppMenuWidget::onWindowChanged);
+   connect(KWindowSystem::self(), static_cast<void (KWindowSystem::*)(WId, NET::Properties, NET::Properties2)>(&KWindowSystem::windowChanged),
+           this, &AppMenuWidget::onWindowChanged);
 
     // Load action search
-    actionSearch = nullptr;
+
     actionCompleter = nullptr;
-    updateActionSearch(m_menuBar);
+    updateActionSearch();
 }
 
 
 void AppMenuWidget::focusMenu() {
-    QMouseEvent event(QEvent::MouseButtonPress,QPoint(0,0),m_menuBar->mapToGlobal(QPoint(0,0)),Qt::LeftButton,0,0);
+
+
+    QMouseEvent event(QEvent::MouseButtonPress,QPoint(0,0),
+    m_menuBar->mapToGlobal(QPoint(0,0)),Qt::LeftButton,0,0);
     QApplication::sendEvent(m_menuBar,&event);
+    searchLineEdit->setFocus();
+
+
 
 }
 AppMenuWidget::~AppMenuWidget() {
-    if(actionSearch) {
-        delete actionSearch;
-    }
+
 }
 
 void AppMenuWidget::integrateSystemMenu(QMenuBar *menuBar) {
@@ -418,31 +429,32 @@ void AppMenuWidget::integrateSystemMenu(QMenuBar *menuBar) {
 }
 
 void AppMenuWidget::handleActivated(const QString &name) {
-    actionSearch->execute(name);
+    m_appMenuModel->execute(name);
     searchLineEdit->clear();
     m_searchMenu->close();
 }
 
-void AppMenuWidget::updateActionSearch(QMenuBar *menuBar) {
-    if(!menuBar){
-        return;
-    }
+void AppMenuWidget::updateActionSearch() {
 
-    if(!actionSearch) {
-        actionSearch = new ActionSearch;
-    }
 
+/*
     /// Update the action search.
     actionSearch->clear();
     actionSearch->update(menuBar);
-
+*/
     /// Update completer
     if(actionCompleter) {
-        actionCompleter->disconnect();
         actionCompleter->deleteLater();
-    }
+            }
+        actionCompleter = new QCompleter(m_appMenuModel,this);
+        connect(actionCompleter,
+                QOverload<const QString &>::of(&QCompleter::activated),
+                this,
+                &AppMenuWidget::handleActivated);
 
-    actionCompleter = new QCompleter(actionSearch->getActionNames(), this);
+    actionCompleter->setCompletionColumn(0);
+    actionCompleter->setCompletionRole(Qt::UserRole+2);
+    actionCompleter->setCompletionMode(QCompleter::PopupCompletion);
     // TODO: https://stackoverflow.com/a/33790639
     // We could customize more aspects of the list view of the completer by
     //setting the CompletionMode to InlineCompletion, so there will be no popup.
@@ -451,7 +463,7 @@ void AppMenuWidget::updateActionSearch(QMenuBar *menuBar) {
 
     KWindowSystem::setType(actionCompleter->popup()->winId(), NET::DropdownMenu);
 
-    actionCompleter->popup()->setObjectName("actionCompleterPopup");
+    //actionCompleter->popup()->setObjectName("actionCompleterPopup");
     // static_cast<QListView *>(actionCompleter->popup())->setSpacing(10);
     // static_cast<QListView *>(actionCompleter->popup())->setUniformItemSizes(true);
     // static_cast<QListView *>(actionCompleter->popup())->setContentsMargins(10,10,0,10); // FIXME: Does not seem to work, why?
@@ -467,34 +479,31 @@ void AppMenuWidget::updateActionSearch(QMenuBar *menuBar) {
 
     // compute needed width
     // const QAbstractItemView * popup = actionCompleter->popup();
-    // actionCompleter->popup()->setMinimumWidth(350);
-    actionCompleter->popup()->setMinimumWidth(600);
+    actionCompleter->popup()->setMinimumWidth(350);
+    //actionCompleter->popup()->setMinimumWidth(600);
 
-    actionCompleter->popup()->setContentsMargins(100,100,100,100);
+    //actionCompleter->popup()->setContentsMargins(100,100,100,100);
 
     // Make the completer match search terms in the middle rather than just those at the beginning of the menu
     actionCompleter->setCaseSensitivity(Qt::CaseInsensitive);
     actionCompleter->setFilterMode(Qt::MatchContains);
 
     // Set first result active; https://stackoverflow.com/q/17782277. FIXME: This does not work yet. Why?
-    QItemSelectionModel* sm = new QItemSelectionModel(actionCompleter->completionModel());
-    actionCompleter->popup()->setSelectionModel(sm);
-    sm->select(actionCompleter->completionModel()->index(0,0), QItemSelectionModel::Select);
+    //QItemSelectionModel* sm = new QItemSelectionModel(actionCompleter->completionModel());
+    //actionCompleter->popup()->setSelectionModel(sm);
+    //sm->select(actionCompleter->completionModel()->index(0,0), QItemSelectionModel::Select);
 
-    auto* flt = new AutoSelectFirstFilter(searchLineEdit);
-    actionCompleter->popup()->installEventFilter(flt);
+    //auto* flt = new AutoSelectFirstFilter(searchLineEdit);
+    //actionCompleter->popup()->installEventFilter(flt);
 
-    actionCompleter->popup()->setAlternatingRowColors(false);
+    //actionCompleter->popup()->setAlternatingRowColors(false);
     // actionCompleter->popup()->setStyleSheet("QListView::item { color: green; }"); // FIXME: Does not work. Why?
     searchLineEdit->setCompleter(actionCompleter);
 
     // Sort results of the Action Search
     actionCompleter->completionModel()->sort(0,Qt::SortOrder::AscendingOrder);
 
-    connect(actionCompleter,
-            QOverload<const QString &>::of(&QCompleter::activated),
-            this,
-            &AppMenuWidget::handleActivated);
+
 }
 
 
@@ -513,7 +522,7 @@ void AppMenuWidget::updateMenu()
     integrateSystemMenu(m_menuBar); // Insert the 'System' menu first
 
     if (!m_appMenuModel->menuAvailable()) {
-        updateActionSearch(m_menuBar);
+        updateActionSearch();
         return;
     }
 
@@ -527,7 +536,7 @@ void AppMenuWidget::updateMenu()
         }
     }
 
-    updateActionSearch(m_menuBar);
+    updateActionSearch();
 }
 
 void AppMenuWidget::toggleMaximizeWindow()
@@ -606,7 +615,6 @@ void AppMenuWidget::delayUpdateActiveWindow()
 {
     if (m_windowID == KWindowSystem::activeWindow())
         return;
-
     m_windowID = KWindowSystem::activeWindow();
 
     onActiveWindowChanged();
@@ -622,6 +630,8 @@ void AppMenuWidget::onWindowChanged(WId /*id*/, NET::Properties /*properties*/, 
 {
     if (m_windowID == KWindowSystem::activeWindow())
         onActiveWindowChanged();
+    //actionSearch->clear();
+    //actionSearch->update(m_menuBar);
 }
 
 void AppMenuWidget::minimizeWindow()

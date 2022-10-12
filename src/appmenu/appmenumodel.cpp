@@ -1,4 +1,3 @@
-
 /******************************************************************
  * Copyright 2016 Kai Uwe Broulik <kde@privat.broulik.de>
  * Copyright 2016 Chinmoy Ranjan Pradhan <chinmoyrp65@gmail.com>
@@ -137,9 +136,6 @@ void AppMenuModel::setFilterChildren(bool hideChildren)
     emit filterChildrenChanged();
 }
 
-void AppMenuModel::forceUpdate() {
-    onActiveWindowChanged(KWindowSystem::activeWindow());
-}
 bool AppMenuModel::menuAvailable() const
 {
     return m_menuAvailable;
@@ -205,7 +201,7 @@ int AppMenuModel::rowCount(const QModelIndex &parent) const
         return 0;
     }
 
-    return m_menu->actions().count();
+    return m_names.count() ? m_names.count() : m_menu->actions().count();
 }
 
 void AppMenuModel::update()
@@ -488,7 +484,40 @@ QHash<int, QByteArray> AppMenuModel::roleNames() const
     roleNames[ActionRole] = QByteArrayLiteral("activeActions");
     return roleNames;
 }
+void AppMenuModel::readMenuActions(QMenu* menu,QStringList names)
+{
+    // See https://doc.qt.io/qt-5/qaction.html#menu
+    // If a QAction does not have menu in it, then
+    // the pointer returned by QAction::menu will be
+    // null.
+    if (!menu)
+        return;
+    if (!menu->title().isEmpty())
+            names << menu->title();
+    for (auto action: menu->actions())
+    {
+        if (action->menu() != NULL)
+        {
 
+            readMenuActions(action->menu(),names);
+
+        }
+
+
+        QString actionName = action->text().replace("&", "");
+        if(!actionName.isEmpty() && action->isEnabled() &&   action->menu()==NULL) {
+
+
+        actionName = names.join(" → ") + " → " + actionName;
+
+
+
+        m_names.insert(actionName,action);
+    }
+
+    }
+
+}
 QVariant AppMenuModel::data(const QModelIndex &index, int role) const
 {
     const int row = index.row();
@@ -496,6 +525,24 @@ QVariant AppMenuModel::data(const QModelIndex &index, int role) const
     if (row < 0 || !m_menuAvailable || !m_menu) {
         return QVariant();
     }
+
+    if(role == Qt::UserRole+2) {
+        if(index.row()> m_names.count())
+            return QVariant();
+        return m_names.keys().at(index.row());
+    }
+    if(role == Qt::DisplayRole) {
+        if(index.row()> m_names.keys().count())
+            return QVariant();
+        return m_names.keys().at(index.row());
+    }
+   if (row < 0 || !m_menuAvailable || !m_menu || row  > m_menu->actions().count()) {
+     return QVariant();
+    }
+
+
+    //qDebug() << m_menu->actions().at(row)->text();
+
 
     const auto actions = m_menu->actions();
 
@@ -511,7 +558,12 @@ QVariant AppMenuModel::data(const QModelIndex &index, int role) const
 
     return QVariant();
 }
-
+void AppMenuModel::execute(QString actionName)
+{
+    if (m_names.keys().contains(actionName)) {
+        m_names[actionName]->trigger();
+    }
+}
 void AppMenuModel::updateApplicationMenu(const QString &serviceName, const QString &menuObjectPath)
 {
     m_awaitsUpdate.clear();
@@ -553,15 +605,16 @@ void AppMenuModel::updateApplicationMenu(const QString &serviceName, const QStri
                 if (m_menuAvailable && m_menu)
                 {
                     const int actionIdx = m_menu->actions().indexOf(a);
-
                     if (actionIdx > -1) {
                         const QModelIndex modelIdx = index(actionIdx, 0);
                         emit dataChanged(modelIdx, modelIdx);
                     }
+
                 }
             });
 
             connect(a, &QAction::destroyed, this, &AppMenuModel::modelNeedsUpdate);
+
 
         }
 
@@ -573,7 +626,11 @@ void AppMenuModel::updateApplicationMenu(const QString &serviceName, const QStri
     if(m_awaitsUpdate.isEmpty()) {
     //if(m_menu && ! m_menu->actions().isEmpty() && m_menu->actions().last() == menu->menuAction()) {
             setMenuAvailable(true);
+            QStringList names;
+            m_names.clear();
+            readMenuActions(m_menu,names);
             emit menuParsed();
+
           }
     });
 
@@ -591,7 +648,11 @@ void AppMenuModel::updateApplicationMenu(const QString &serviceName, const QStri
         }
     });
 }
-
+void AppMenuModel::updateSearch() {
+    m_names.clear();
+    QStringList names;
+    readMenuActions(m_menu,names);
+    }
 bool AppMenuModel::nativeEventFilter(const QByteArray &eventType, void *message, long *result)
 {
     Q_UNUSED(result);

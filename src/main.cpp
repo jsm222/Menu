@@ -28,7 +28,6 @@
 
 //our main window
 MainWindow* window;
-
 // probono: Subclassing QApplication so that we can see what events are going on
 // https://stackoverflow.com/a/27607947
 class Application final : public QApplication {
@@ -103,9 +102,16 @@ int main(int argc, char **argv)
 
     //set up a signal for SIGUSR1
     signal(SIGUSR1, rebuildSystemMenuSignalHandler);
-
+QTimer delayedSearchFocus;
+delayedSearchFocus.setSingleShot(true);
+delayedSearchFocus.setInterval(200);
+QObject::connect(&delayedSearchFocus,&QTimer::timeout,&w,[&w]() {
+w.m_mainPanel->triggerFocusMenu();
+});
     QObject::connect(&instance, &QtSingleApplication::messageReceived,
-             [&w]() { w.m_mainPanel->triggerFocusMenu(); });
+             [&delayedSearchFocus]() {
+                delayedSearchFocus.start();
+});
 
     return instance.exec();
 }

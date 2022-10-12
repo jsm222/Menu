@@ -32,8 +32,6 @@ set(SRCS
     appmenu/menuimporter.cpp
     appmenu/utils.cpp
     appmenu/utils_p.h
-    actionsearch/actionsearch.h
-    actionsearch/actionsearch.cpp
     qtsingleapplication/qtsingleapplication.h
     qtsingleapplication/qtsingleapplication.cpp
     qtsingleapplication/qtlocalpeer.cpp
