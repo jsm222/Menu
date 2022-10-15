@@ -62,17 +62,18 @@ public:
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QHash<int, QByteArray> roleNames() const override;
 
+
+
     void updateApplicationMenu(const QString &serviceName, const QString &menuObjectPath);
     void updateSearch();
     bool filterByActive() const;
     void setFilterByActive(bool active);
-    void execute(QString actionName);
+    // void execute(QString actionName);
     bool filterChildren() const;
     void setFilterChildren(bool hideChildren);
-
     bool menuAvailable() const;
     void setMenuAvailable(bool set);
-
+ bool filterMenu(QMenu *searchMenu, QString searchString, bool includeDisabled);
     bool visible() const;
 
     QRect screenGeometry() const;
@@ -82,12 +83,15 @@ public:
     void setWinId(const QVariant &id);
     void readMenuActions(QMenu* menu,QStringList names);
     QMenu *menu() { return m_menu; }
-
+QList<QAction*> mPath;
 signals:
     void requestActivateIndex(int index);
 
+
 protected:
     bool nativeEventFilter(const QByteArray &eventType, void *message, long int *result) override;
+public Q_SLOTS:
+
 
 private Q_SLOTS:
     void onActiveWindowChanged(WId id);
@@ -121,6 +125,7 @@ private:
     bool m_visible = true;
     QList<QMenu*> m_awaitsUpdate;
     QRect m_screenGeometry;
+    bool    hasVisible =false;
 
     QVariant m_winId{-1};
 
@@ -129,7 +134,6 @@ private:
     WId m_initialApplicationFromWindowId = -1;
     //! window that its menu initialization may be delayed
     WId m_delayedMenuWindowId = 0;
-
     QPointer<QMenu> m_menu;
     QDBusServiceWatcher *m_serviceWatcher;
     QString m_serviceName;

@@ -299,18 +299,18 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
     searchLineEdit = new QLineEdit(this);
     searchLineEdit->setObjectName("actionSearch"); // probono: This name can be used in qss to style it specifically
     searchLineEdit->setPlaceholderText(tr("Search"));
-    auto* pLineEditEvtFilter = new MyLineEditEventFilter(searchLineEdit);
-    searchLineEdit->installEventFilter(pLineEditEvtFilter);
+    //auto* pLineEditEvtFilter = new MyLineEditEventFilter(searchLineEdit);
+    //searchLineEdit->installEventFilter(pLineEditEvtFilter);
     // searchLineEdit->setMinimumWidth(150);
-    searchLineEdit->setFixedWidth(75);
+    searchLineEdit->setFixedHeight(20);
     // searchLineEdit->setStyleSheet("border-radius: 9px"); // We do this in the stylesheet.qss instead
     searchLineEdit->setWindowFlag(Qt::WindowDoesNotAcceptFocus, false);
     // searchLineEdit->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
     // Try to get the focus so that one can start typing immediately whenever the Menu is invoked
     // https://stackoverflow.com/questions/526761/set-qlineedit-focus-in-qt
-    searchLineEdit->setFocusPolicy(Qt::StrongFocus); // searchLineEdit->setFocus(); alone does not always succeed
+     // searchLineEdit->setFocus(); alone does not always succeed
     searchLineEdit->setFocus();
-    searchLineEdit->setFocus(Qt::OtherFocusReason); // searchLineEdit->setFocus(); alone does not always succeed
+
     searchLineEdit->setToolTip("Alt+Space"); // This is actually a feature not of this application, but some other application that merely launches this application upon Alt+Space
     // layout->addSpacing(10); // Space to the left before the searchLineWidget
     //searchLineWidget = new QWidget(this);
@@ -326,18 +326,14 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
     m_searchMenu = new QMenu("Search",nullptr);
     connect(m_searchMenu,&QMenu::aboutToShow
             ,[this]() {
-        searchLineEdit->clear();
 
-        m_appMenuModel->updateSearch();
-        updateActionSearch();
 
        // searchLineEdit->setFocus();
        // qobject_cast<QWidgetAction*>(m_searchMenu->actions().at(0))->defaultWidget()->show();
         //qobject_cast<QWidgetAction*>(m_searchMenu->actions().at(0))->defaultWidget()->setFocus();
     });
     connect(m_searchMenu,&QMenu::aboutToHide,this,[this]{
-        searchLineEdit->clear();
-         searchLineEdit->clearFocus();
+
     });
     // Prepare System menu
     m_systemMenu = new QMenu("System");
@@ -426,13 +422,14 @@ void AppMenuWidget::integrateSystemMenu(QMenuBar *menuBar) {
     menuBar->addMenu(m_searchMenu);
 
     menuBar->addMenu(m_systemMenu);
+    m_searchMenu->addActions(m_systemMenu->actions());
 }
-
+/*
 void AppMenuWidget::handleActivated(const QString &name) {
     m_appMenuModel->execute(name);
     searchLineEdit->clear();
     m_searchMenu->close();
-}
+}*/
 
 void AppMenuWidget::updateActionSearch() {
 
@@ -441,7 +438,7 @@ void AppMenuWidget::updateActionSearch() {
     /// Update the action search.
     actionSearch->clear();
     actionSearch->update(menuBar);
-*/
+
     /// Update completer
     if(actionCompleter) {
         actionCompleter->deleteLater();
@@ -470,23 +467,23 @@ void AppMenuWidget::updateActionSearch() {
 
     // Empty search field on selection of an item, https://stackoverflow.com/a/11905995
  
-    /*QObject::connect(actionCompleter, SIGNAL(activated(const QString&)),
-                     searchLineEdit, SLOT(clear()),
-                     Qt::QueuedConnection);
+    //QObject::connect(actionCompleter, SIGNAL(activated(const QString&)),
+      //               searchLineEdit, SLOT(clear()),
+        //             Qt::QueuedConnection);
 */
     // Make more than 7 items visible at once
-    actionCompleter->setMaxVisibleItems(35);
+   // actionCompleter->setMaxVisibleItems(35);
 
     // compute needed width
     // const QAbstractItemView * popup = actionCompleter->popup();
-    actionCompleter->popup()->setMinimumWidth(350);
+    //actionCompleter->popup()->setMinimumWidth(350);
     //actionCompleter->popup()->setMinimumWidth(600);
 
     //actionCompleter->popup()->setContentsMargins(100,100,100,100);
 
     // Make the completer match search terms in the middle rather than just those at the beginning of the menu
-    actionCompleter->setCaseSensitivity(Qt::CaseInsensitive);
-    actionCompleter->setFilterMode(Qt::MatchContains);
+    //actionCompleter->setCaseSensitivity(Qt::CaseInsensitive);
+    //actionCompleter->setFilterMode(Qt::MatchContains);
 
     // Set first result active; https://stackoverflow.com/q/17782277. FIXME: This does not work yet. Why?
     //QItemSelectionModel* sm = new QItemSelectionModel(actionCompleter->completionModel());
@@ -498,12 +495,22 @@ void AppMenuWidget::updateActionSearch() {
 
     //actionCompleter->popup()->setAlternatingRowColors(false);
     // actionCompleter->popup()->setStyleSheet("QListView::item { color: green; }"); // FIXME: Does not work. Why?
-    searchLineEdit->setCompleter(actionCompleter);
-
+    //searchLineEdit->setCompleter(actionCompleter);
+    connect(searchLineEdit,&QLineEdit::returnPressed,this,&AppMenuWidget::searchMenu);
     // Sort results of the Action Search
-    actionCompleter->completionModel()->sort(0,Qt::SortOrder::AscendingOrder);
+    //actionCompleter->completionModel()->sort(0,Qt::SortOrder::AscendingOrder);
 
 
+}
+void AppMenuWidget::searchMenu() {
+    QList<QMenu*> menus;
+    menus << m_systemMenu <<m_appMenuModel->menu();
+    QString searchString = searchLineEdit->text();
+
+    for(QMenu * menu : menus) {
+           m_appMenuModel->filterMenu(menu,searchString,true);
+
+    }
 }
 
 
@@ -528,7 +535,9 @@ void AppMenuWidget::updateMenu()
 
     QMenu *menu = m_appMenuModel->menu();
     if (menu) {
+        m_searchMenu->addActions(menu->actions());
         for (QAction *a : menu->actions()) {
+
             if (!a->isEnabled())
                 continue;
 

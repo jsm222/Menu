@@ -52,6 +52,7 @@ protected:
     bool eventFilter(QObject *watched, QEvent *event) override; // Make it possible to click on the menu entry for a submenu
 
 private:
+
     bool isAcceptWindow(WId id);
     void delayUpdateActiveWindow();
     void onActiveWindowChanged();
@@ -75,8 +76,8 @@ public slots:
     bool which(QString command);
 
 private slots:
-    void handleActivated(const QString&);
-
+    //   void handleActivated(const QString&);
+    void searchMenu();
 /// For Action Search
 private:
     void updateActionSearch();

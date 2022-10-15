@@ -33,7 +33,9 @@
 #include <QDBusServiceWatcher>
 #include <QGuiApplication>
 #include <QTimer>
+#include <QWidgetAction>
 #include <QDebug>
+
 
 #include "dbusmenuimporter.h"
 
@@ -484,8 +486,93 @@ QHash<int, QByteArray> AppMenuModel::roleNames() const
     roleNames[ActionRole] = QByteArrayLiteral("activeActions");
     return roleNames;
 }
-void AppMenuModel::readMenuActions(QMenu* menu,QStringList names)
-{
+bool AppMenuModel::filterMenu(QMenu* searchMenu,QString searchString,bool includeDisabled) {
+
+    if(!searchMenu) {
+        return false;
+    }
+
+    for(QAction *action : searchMenu->actions()) {
+        if(action->menu()) {
+               action->setVisible(false);
+
+            if(searchString != "" && action->text().contains(searchString,Qt::CaseInsensitive)) {
+            action->setVisible(true);
+
+            QAction*  parent = qobject_cast<QMenu*>(action->parent())->menuAction();
+
+            while(parent) {
+                if(parent->menu() && parent->menu()->parent()) {
+                    parent->setVisible(true);
+
+                    parent = qobject_cast<QMenu*>(parent->menu()->parent())->menuAction();
+                } else {
+                    break;
+                }
+            }
+
+
+            } else {
+            action->setVisible(searchString == "");
+            filterMenu(action->menu(),searchString,searchString==""); //include  disabled on empty string
+            }
+    } else {
+        if(searchString == "") {
+            hasVisible = true;
+            action->setVisible(true);
+            if(!includeDisabled)
+                action->setVisible(action->isEnabled());
+        } else if(!searchString.isEmpty() && action->text().contains(searchString,Qt::CaseInsensitive))
+            {
+
+            action->setVisible(true);
+            hasVisible = !action->isSeparator() && action->isEnabled();
+            action->setVisible(!action->isSeparator());
+            action->setVisible(action->isEnabled());
+            QAction*  parent = qobject_cast<QMenu*>(action->parent())->menuAction();
+            while(parent) {
+                parent->setVisible(true);
+
+                if(parent->menu() && parent->menu()->parent()) {
+                parent = qobject_cast<QMenu*>(parent->menu()->parent())->menuAction();
+
+
+                } else {
+                    break;
+                }
+            }
+
+
+
+
+
+
+
+
+
+
+        } else if(qobject_cast<QWidgetAction*>(action) != nullptr && action->text()==QString("")) {
+
+            action->setVisible(true);
+
+        }else if (!searchString.isEmpty()) {
+            action->setVisible(false);
+            hasVisible = false;
+
+        }
+
+}
+
+
+
+
+}
+
+return hasVisible;
+
+    }
+
+void AppMenuModel::readMenuActions(QMenu* menu,QStringList names) {
     // See https://doc.qt.io/qt-5/qaction.html#menu
     // If a QAction does not have menu in it, then
     // the pointer returned by QAction::menu will be
@@ -558,12 +645,13 @@ QVariant AppMenuModel::data(const QModelIndex &index, int role) const
 
     return QVariant();
 }
+/*
 void AppMenuModel::execute(QString actionName)
 {
     if (m_names.keys().contains(actionName)) {
         m_names[actionName]->trigger();
     }
-}
+}*/
 void AppMenuModel::updateApplicationMenu(const QString &serviceName, const QString &menuObjectPath)
 {
     m_awaitsUpdate.clear();
@@ -626,9 +714,7 @@ void AppMenuModel::updateApplicationMenu(const QString &serviceName, const QStri
     if(m_awaitsUpdate.isEmpty()) {
     //if(m_menu && ! m_menu->actions().isEmpty() && m_menu->actions().last() == menu->menuAction()) {
             setMenuAvailable(true);
-            QStringList names;
-            m_names.clear();
-            readMenuActions(m_menu,names);
+
             emit menuParsed();
 
           }
@@ -649,9 +735,7 @@ void AppMenuModel::updateApplicationMenu(const QString &serviceName, const QStri
     });
 }
 void AppMenuModel::updateSearch() {
-    m_names.clear();
-    QStringList names;
-    readMenuActions(m_menu,names);
+
     }
 bool AppMenuModel::nativeEventFilter(const QByteArray &eventType, void *message, long *result)
 {
