@@ -337,7 +337,8 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
         //qobject_cast<QWidgetAction*>(m_searchMenu->actions().at(0))->defaultWidget()->setFocus();
     });
     connect(m_searchMenu,&QMenu::aboutToHide,this,[this]{
-
+          searchLineEdit->clear();
+          searchLineEdit->textChanged("");
     });
     // Prepare System menu
     m_systemMenu = new QMenu("System");
