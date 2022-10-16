@@ -110,7 +110,7 @@ public:
         {
             // When the focus goes not of the QLineEdit, empty the QLineEdit and restore the placeholder text
             // reinterpret_cast<QLineEdit *>(parent())->setPlaceholderText("Alt+Space");
-            reinterpret_cast<QLineEdit *>(parent())->setPlaceholderText(tr("Search"));
+            // reinterpret_cast<QLineEdit *>(parent())->setPlaceholderText(tr("Search"));
             // Note that we write Alt-Space here but in fact this is not a feature of this application
             // but is a feature of lxqt-config-globalkeyshortcuts in our case, where we set up a shortcut
             // that simply launches this application (again). Since we are using
@@ -123,7 +123,7 @@ public:
         case QEvent::FocusIn:
         {
             // When the focus goes into the QLineEdit, empty the QLineEdit
-            reinterpret_cast<QLineEdit *>(parent())->setPlaceholderText("");
+            // reinterpret_cast<QLineEdit *>(parent())->setPlaceholderText("");
             // reinterpret_cast<QLineEdit *>(parent())->setAlignment(Qt::AlignmentFlag::AlignLeft);
             break;
         }
@@ -302,7 +302,7 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
     // Add search box to menu
     searchLineEdit = new SearchLineEdit(this);
     searchLineEdit->setObjectName("actionSearch"); // probono: This name can be used in qss to style it specifically
-    searchLineEdit->setPlaceholderText(tr("Search"));
+    //searchLineEdit->setPlaceholderText(tr("Search"));
     //auto* pLineEditEvtFilter = new MyLineEditEventFilter(searchLineEdit);
     //searchLineEdit->installEventFilter(pLineEditEvtFilter);
     // searchLineEdit->setMinimumWidth(150);
