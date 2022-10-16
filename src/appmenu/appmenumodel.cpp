@@ -218,6 +218,7 @@ void AppMenuModel::onActiveWindowChanged(WId id)
 {
     if(id == 0)
         return;
+
     qApp->removeNativeEventFilter(this);
 
     auto pw = qobject_cast<QWidget*>(parent());
@@ -478,7 +479,6 @@ void AppMenuModel::filterWindow(KWindowInfo &info)
         setVisible(isActive && !info.isMinimized() && contained);
     }
 }
-
 QHash<int, QByteArray> AppMenuModel::roleNames() const
 {
     QHash<int, QByteArray> roleNames;
@@ -486,24 +486,33 @@ QHash<int, QByteArray> AppMenuModel::roleNames() const
     roleNames[ActionRole] = QByteArrayLiteral("activeActions");
     return roleNames;
 }
-bool AppMenuModel::filterMenu(QMenu* searchMenu,QString searchString,bool includeDisabled) {
+
+bool AppMenuModel::filterMenu(QMenu* searchMenu,QString searchString,bool includeDisabled,QStringList names) {
 
     if(!searchMenu) {
         return false;
     }
+    searchMenu->menuAction()->setVisible(searchString=="");
+
+        if(!searchMenu->title().isEmpty())
+            names << searchMenu->title();
+
 
     for(QAction *action : searchMenu->actions()) {
-        if(action->menu()) {
-               action->setVisible(false);
+        action->setVisible(searchString=="");
 
+        if(action->menu()) {
             if(searchString != "" && action->text().contains(searchString,Qt::CaseInsensitive)) {
             action->setVisible(true);
 
-            QAction*  parent = qobject_cast<QMenu*>(action->parent())->menuAction();
+
+          QAction*  parent = qobject_cast<QMenu*>(action->parent())->menuAction();
 
             while(parent) {
+                parent->setVisible(true);
+                parent->setVisible(!parent->isSeparator());
                 if(parent->menu() && parent->menu()->parent()) {
-                    parent->setVisible(true);
+
 
                     parent = qobject_cast<QMenu*>(parent->menu()->parent())->menuAction();
                 } else {
@@ -511,47 +520,47 @@ bool AppMenuModel::filterMenu(QMenu* searchMenu,QString searchString,bool includ
                 }
             }
 
+     } else {
+            filterMenu(action->menu(),searchString,searchString=="",names);
+        }
 
-            } else {
-            action->setVisible(searchString == "");
-            filterMenu(action->menu(),searchString,searchString==""); //include  disabled on empty string
-            }
+
+
+
     } else {
         if(searchString == "") {
             hasVisible = true;
             action->setVisible(true);
-            if(!includeDisabled)
+            if(!includeDisabled) {
                 action->setVisible(action->isEnabled());
-        } else if(!searchString.isEmpty() && action->text().contains(searchString,Qt::CaseInsensitive))
+;               hasVisible= action->isEnabled();
+            }
+        } if(!searchString.isEmpty() && action->text().contains(searchString,Qt::CaseInsensitive))
             {
 
             action->setVisible(true);
             hasVisible = !action->isSeparator() && action->isEnabled();
-            action->setVisible(!action->isSeparator());
-            action->setVisible(action->isEnabled());
-            QAction*  parent = qobject_cast<QMenu*>(action->parent())->menuAction();
-            while(parent) {
-                parent->setVisible(true);
 
-                if(parent->menu() && parent->menu()->parent()) {
-                parent = qobject_cast<QMenu*>(parent->menu()->parent())->menuAction();
+            action->setVisible(hasVisible);
 
 
-                } else {
-                    break;
-                }
+            if(hasVisible) {
+                QAction*  parent = qobject_cast<QMenu*>(action->parent())->menuAction();
+                while(parent) {
+                    parent->setVisible(!parent->isSeparator());
+                    if(parent->menu() && parent->menu()->parent()) {
+
+
+                        parent = qobject_cast<QMenu*>(parent->menu()->parent())->menuAction();
+
+                    } else {
+                        break;
+                    }
+                        }
+
+            m_visibleActions[names.join(" → ") + " → " + action->text()]=action;
             }
-
-
-
-
-
-
-
-
-
-
-        } else if(qobject_cast<QWidgetAction*>(action) != nullptr && action->text()==QString("")) {
+      } else if(qobject_cast<QWidgetAction*>(action) != nullptr && action->text()==QString("")) {
 
             action->setVisible(true);
 
@@ -559,18 +568,23 @@ bool AppMenuModel::filterMenu(QMenu* searchMenu,QString searchString,bool includ
             action->setVisible(false);
             hasVisible = false;
 
+
         }
 
-}
-
-
-
 
 }
 
+
+
+
+    //for(QAction * action : m_visibleActions.values()) {
+
+
+}
+
+names.clear();
 return hasVisible;
-
-    }
+}
 
 void AppMenuModel::readMenuActions(QMenu* menu,QStringList names) {
     // See https://doc.qt.io/qt-5/qaction.html#menu
@@ -674,7 +688,7 @@ void AppMenuModel::updateApplicationMenu(const QString &serviceName, const QStri
 
     m_importer = new KDBusMenuImporter(serviceName, menuObjectPath, this);
     if(serviceName =="org.kde.plasma.gmenu_dbusmenu_proxy") {
-        QTimer::singleShot(200,this, [=](){m_importer->updateMenu();});
+        QTimer::singleShot(800,this, [=](){m_importer->updateMenu();});
     } else {
     QMetaObject::invokeMethod(m_importer, "updateMenu", Qt::QueuedConnection);
     }
@@ -689,7 +703,7 @@ void AppMenuModel::updateApplicationMenu(const QString &serviceName, const QStri
                    m_awaitsUpdate << a->menu();
             }
             // signal dataChanged when the action changes
-            connect(a, &QAction::changed, this, [this, a] {
+            /*connect(a, &QAction::changed, this, [this, a] {
                 if (m_menuAvailable && m_menu)
                 {
                     const int actionIdx = m_menu->actions().indexOf(a);
@@ -699,24 +713,21 @@ void AppMenuModel::updateApplicationMenu(const QString &serviceName, const QStri
                     }
 
                 }
-            });
+            });*/
 
             connect(a, &QAction::destroyed, this, &AppMenuModel::modelNeedsUpdate);
 
 
         }
 
-
     if(m_awaitsUpdate.contains(menu)) {
         m_awaitsUpdate.removeAt(m_awaitsUpdate.indexOf(menu));
     }
-
     if(m_awaitsUpdate.isEmpty()) {
     //if(m_menu && ! m_menu->actions().isEmpty() && m_menu->actions().last() == menu->menuAction()) {
             setMenuAvailable(true);
 
             emit menuParsed();
-
           }
     });
 

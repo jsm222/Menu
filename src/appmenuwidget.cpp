@@ -328,7 +328,7 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
             ,[this]() {
 
 
-       // searchLineEdit->setFocus();
+          searchLineEdit->setFocus();
        // qobject_cast<QWidgetAction*>(m_searchMenu->actions().at(0))->defaultWidget()->show();
         //qobject_cast<QWidgetAction*>(m_searchMenu->actions().at(0))->defaultWidget()->setFocus();
     });
@@ -342,6 +342,7 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
     widgetAction->setDefaultWidget(searchLineEdit);
     m_searchMenu->addAction(widgetAction);
 
+    connect(searchLineEdit,&QLineEdit::textChanged,this,&AppMenuWidget::searchMenu);
 
 
     m_systemMenu->setToolTipsVisible(true); // Works; shows the full path
@@ -422,7 +423,7 @@ void AppMenuWidget::integrateSystemMenu(QMenuBar *menuBar) {
     menuBar->addMenu(m_searchMenu);
 
     menuBar->addMenu(m_systemMenu);
-    m_searchMenu->addActions(m_systemMenu->actions());
+
 }
 /*
 void AppMenuWidget::handleActivated(const QString &name) {
@@ -496,21 +497,39 @@ void AppMenuWidget::updateActionSearch() {
     //actionCompleter->popup()->setAlternatingRowColors(false);
     // actionCompleter->popup()->setStyleSheet("QListView::item { color: green; }"); // FIXME: Does not work. Why?
     //searchLineEdit->setCompleter(actionCompleter);
-    connect(searchLineEdit,&QLineEdit::returnPressed,this,&AppMenuWidget::searchMenu);
     // Sort results of the Action Search
     //actionCompleter->completionModel()->sort(0,Qt::SortOrder::AscendingOrder);
 
 
 }
+
 void AppMenuWidget::searchMenu() {
+for(QAction *sr: searchResults) {
+if(m_searchMenu->actions().contains(sr))
+    m_searchMenu->removeAction(sr);
+}
     QList<QMenu*> menus;
-    menus << m_systemMenu <<m_appMenuModel->menu();
+    menus << m_systemMenu << m_appMenuModel->menu();
     QString searchString = searchLineEdit->text();
+    QStringList names;
 
     for(QMenu * menu : menus) {
-           m_appMenuModel->filterMenu(menu,searchString,true);
+
+    m_appMenuModel->filterMenu(menu,searchString,searchString=="",names);
+
 
     }
+for(QString v : m_appMenuModel->filteredActions().keys()) {
+
+    QAction *orig = m_appMenuModel->filteredActions()[v];
+    CloneAction *cpy = new CloneAction(orig);
+    cpy->setText(v);
+    cpy->updateMe();
+    searchResults << cpy;
+    m_searchMenu->addAction(cpy);
+
+}
+m_appMenuModel->clearFilteredActions();
 }
 
 
@@ -524,26 +543,28 @@ void AppMenuWidget::rebuildMenu()
 //what does this even do??
 void AppMenuWidget::updateMenu()
 {
-    // qDebug() << "AppMenuWidget::updateMenu() called";
+    //qDebug() << "AppMenuWidget::updateMenu() called" << m_appMenuModel->menuAvailable();
+
     m_menuBar->clear();
     integrateSystemMenu(m_menuBar); // Insert the 'System' menu first
 
     if (!m_appMenuModel->menuAvailable()) {
+
         updateActionSearch();
         return;
     }
-
     QMenu *menu = m_appMenuModel->menu();
     if (menu) {
-        m_searchMenu->addActions(menu->actions());
-        for (QAction *a : menu->actions()) {
+        /*for (QAction *a : menu->actions()) {
 
             if (!a->isEnabled())
                 continue;
 
             m_menuBar->addAction(a);
-        }
+        }*/
+m_menuBar->addActions(menu->actions());
     }
+
 
     updateActionSearch();
 }
@@ -632,14 +653,21 @@ void AppMenuWidget::delayUpdateActiveWindow()
 void AppMenuWidget::onActiveWindowChanged()
 {
     KWindowInfo info(m_windowID, NET::WMState | NET::WMWindowType | NET::WMGeometry, NET::WM2TransientFor);
+    if(m_currentWindowID >0 && m_currentWindowID != m_windowID && m_windowID !=0) {
+    searchLineEdit->clear();
+    searchLineEdit->textChanged("");
     // bool isMax = info.hasState(NET::Max);
+
+    }
+
+    m_currentWindowID = m_windowID;
 }
 
 void AppMenuWidget::onWindowChanged(WId /*id*/, NET::Properties /*properties*/, NET::Properties2 /*properties2*/)
 {
     if (m_windowID == KWindowSystem::activeWindow())
         onActiveWindowChanged();
-    //actionSearch->clear();
+
     //actionSearch->update(m_menuBar);
 }
 

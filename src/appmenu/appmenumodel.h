@@ -63,7 +63,7 @@ public:
     QHash<int, QByteArray> roleNames() const override;
 
 
-
+    QMap<QString,QAction*> filteredActions() { return m_visibleActions; }
     void updateApplicationMenu(const QString &serviceName, const QString &menuObjectPath);
     void updateSearch();
     bool filterByActive() const;
@@ -73,7 +73,8 @@ public:
     void setFilterChildren(bool hideChildren);
     bool menuAvailable() const;
     void setMenuAvailable(bool set);
- bool filterMenu(QMenu *searchMenu, QString searchString, bool includeDisabled);
+    void clearFilteredActions() { m_visibleActions.clear();}
+    bool filterMenu(QMenu *searchMenu, QString searchString, bool includeDisabled, QStringList names);
     bool visible() const;
 
     QRect screenGeometry() const;
@@ -83,7 +84,6 @@ public:
     void setWinId(const QVariant &id);
     void readMenuActions(QMenu* menu,QStringList names);
     QMenu *menu() { return m_menu; }
-QList<QAction*> mPath;
 signals:
     void requestActivateIndex(int index);
 
@@ -94,6 +94,7 @@ public Q_SLOTS:
 
 
 private Q_SLOTS:
+
     void onActiveWindowChanged(WId id);
     void onWindowChanged(WId id);
     //! there are apps that are not releasing their menu properly after closing
@@ -126,9 +127,8 @@ private:
     QList<QMenu*> m_awaitsUpdate;
     QRect m_screenGeometry;
     bool    hasVisible =false;
-
+    QMap<QString,QAction*> m_visibleActions;
     QVariant m_winId{-1};
-
     //! current active window used
     WId m_currentWindowId = 0;
     WId m_initialApplicationFromWindowId = -1;

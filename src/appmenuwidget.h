@@ -31,9 +31,35 @@
 #include <QWidgetAction>
 #include <QFileSystemWatcher>
 #include <QTimer>
+#include <QDebug>
 #include "appmenu/appmenumodel.h"
 #include "appmenu/menuimporter.h"
+class CloneAction : public QAction {
+    Q_OBJECT
+  public:
+    CloneAction(QAction *original, QObject *parent = 0) : QAction(parent){
+      m_orig = original;
+        connect(m_orig, &QAction::changed, this, &CloneAction::updateMe);  // update on change
+      connect(m_orig, &QAction::destroyed, this, &QAction::deleteLater); // delete on destroyed
+      connect(this, &QAction::triggered, m_orig, &QAction::triggered); // trigger on triggered
 
+    }
+  public slots:
+    void updateMe(){
+        const QStringList props = QStringList() << "autoRepeat" << "checkable" << "checked" <<"enabled"
+                                                << "icon"  << "iconText"
+                                                << "iconVisibleInMenu"
+                                                << "statusTip"
+                                                << "toolTip"
+                                                << "whatsThis";
+      foreach(const QString prop, props) {
+          setProperty(qPrintable(prop), m_orig->property(qPrintable(prop)));
+      }
+    }
+
+  private:
+    QAction *m_orig;
+  };
 class AppMenuWidget : public QWidget
 {
     Q_OBJECT
@@ -86,6 +112,7 @@ private:
 private:
     QMenu *m_systemMenu;
      QMenu *m_searchMenu;
+     QList<QAction *> searchResults;
     void integrateSystemMenu(QMenuBar*);
 
 private:
@@ -95,6 +122,7 @@ private:
     AppMenuModel *m_appMenuModel;
     MenuImporter *m_menuImporter;
     QWidget *m_buttonsWidget;
+    WId m_currentWindowID=0;
     // QToolButton *m_minButton;
     // QToolButton *m_restoreButton;
     // QToolButton *m_closeButton;
