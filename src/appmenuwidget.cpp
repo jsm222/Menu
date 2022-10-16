@@ -315,7 +315,7 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
      // searchLineEdit->setFocus(); alone does not always succeed
     searchLineEdit->setFocus();
 
-    searchLineEdit->setToolTip("Alt+Space"); // This is actually a feature not of this application, but some other application that merely launches this application upon Alt+Space
+    // searchLineEdit->setToolTip("Alt+Space"); // This is actually a feature not of this application, but some other application that merely launches this application upon Alt+Space
     // layout->addSpacing(10); // Space to the left before the searchLineWidget
     //searchLineWidget = new QWidget(this);
     // searchLineWidget->setWindowFlag(Qt::WindowDoesNotAcceptFocus, true); // Does not seem to do anything
@@ -408,7 +408,6 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
 void AppMenuWidget::searchEditingDone() {
     if(m_searchMenu && m_searchMenu->actions().count()>1) {
         searchLineEdit->clearFocus();
-
         m_searchMenu->setActiveAction(m_searchMenu->actions().at(1));
     }
 }
@@ -421,10 +420,8 @@ void AppMenuWidget::focusMenu() {
     searchLineEdit->setFocus();
 
 
-
 }
 AppMenuWidget::~AppMenuWidget() {
-
 }
 
 void AppMenuWidget::integrateSystemMenu(QMenuBar *menuBar) {
