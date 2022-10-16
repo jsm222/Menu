@@ -59,7 +59,11 @@
 #endif
 
 #include "thumbnails.h"
-
+void SearchLineEdit::keyPressEvent(QKeyEvent * event) {
+    if(event->key() == Qt::Key_Down)
+        emit editingFinished();
+    QLineEdit::keyPressEvent(event);
+}
 class MyLineEditEventFilter : public QObject
 {
 public:
@@ -296,7 +300,7 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
     // setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     // Add search box to menu
-    searchLineEdit = new QLineEdit(this);
+    searchLineEdit = new SearchLineEdit(this);
     searchLineEdit->setObjectName("actionSearch"); // probono: This name can be used in qss to style it specifically
     searchLineEdit->setPlaceholderText(tr("Search"));
     //auto* pLineEditEvtFilter = new MyLineEditEventFilter(searchLineEdit);
@@ -343,6 +347,7 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
     m_searchMenu->addAction(widgetAction);
 
     connect(searchLineEdit,&QLineEdit::textChanged,this,&AppMenuWidget::searchMenu);
+    connect(searchLineEdit,&QLineEdit::editingFinished,this,&AppMenuWidget::searchEditingDone);
 
 
     m_systemMenu->setToolTipsVisible(true); // Works; shows the full path
@@ -400,7 +405,13 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
     updateActionSearch();
 }
 
+void AppMenuWidget::searchEditingDone() {
+    if(m_searchMenu && m_searchMenu->actions().count()>1) {
+        searchLineEdit->clearFocus();
 
+        m_searchMenu->setActiveAction(m_searchMenu->actions().at(1));
+    }
+}
 void AppMenuWidget::focusMenu() {
 
 
@@ -529,6 +540,8 @@ for(QString v : m_appMenuModel->filteredActions().keys()) {
     m_searchMenu->addAction(cpy);
 
 }
+
+
 m_appMenuModel->clearFilteredActions();
 }
 

@@ -32,8 +32,19 @@
 #include <QFileSystemWatcher>
 #include <QTimer>
 #include <QDebug>
+#include <QLineEdit>
 #include "appmenu/appmenumodel.h"
 #include "appmenu/menuimporter.h"
+class SearchLineEdit: public QLineEdit {
+    Q_OBJECT
+public:
+    SearchLineEdit(QWidget *parent=0) : QLineEdit(parent) {
+
+    }
+void keyPressEvent(QKeyEvent * event) override;
+
+};
+
 class CloneAction : public QAction {
     Q_OBJECT
   public:
@@ -114,10 +125,11 @@ private:
      QMenu *m_searchMenu;
      QList<QAction *> searchResults;
     void integrateSystemMenu(QMenuBar*);
-
+    void searchEditingDone();
 private:
+
     QWidget *searchLineWidget;
-    QLineEdit *searchLineEdit;
+    SearchLineEdit *searchLineEdit;
     QCompleter *actionCompleter;
     AppMenuModel *m_appMenuModel;
     MenuImporter *m_menuImporter;
