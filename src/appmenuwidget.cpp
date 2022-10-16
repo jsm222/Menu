@@ -306,7 +306,7 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
     //auto* pLineEditEvtFilter = new MyLineEditEventFilter(searchLineEdit);
     //searchLineEdit->installEventFilter(pLineEditEvtFilter);
     // searchLineEdit->setMinimumWidth(150);
-    searchLineEdit->setFixedHeight(20);
+    searchLineEdit->setFixedHeight(22); // FIXME: Dynamically get the height of a QMenuItem and use that
     // searchLineEdit->setStyleSheet("border-radius: 9px"); // We do this in the stylesheet.qss instead
     searchLineEdit->setWindowFlag(Qt::WindowDoesNotAcceptFocus, false);
     // searchLineEdit->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
