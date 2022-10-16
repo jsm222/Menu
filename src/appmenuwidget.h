@@ -110,6 +110,7 @@ public slots:
     void actionMinimizeAll();
     void actionMaximizeAll();
     void actionLogout();
+    void actionForceQuit();
     bool which(QString command);
 
 private slots:

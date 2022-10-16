@@ -306,7 +306,7 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
     //auto* pLineEditEvtFilter = new MyLineEditEventFilter(searchLineEdit);
     //searchLineEdit->installEventFilter(pLineEditEvtFilter);
     // searchLineEdit->setMinimumWidth(150);
-    searchLineEdit->setFixedHeight(22); // FIXME: Dynamically get the height of a QMenuItem and use that
+    searchLineEdit->setFixedHeight(20);
     // searchLineEdit->setStyleSheet("border-radius: 9px"); // We do this in the stylesheet.qss instead
     searchLineEdit->setWindowFlag(Qt::WindowDoesNotAcceptFocus, false);
     // searchLineEdit->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
@@ -315,7 +315,7 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
      // searchLineEdit->setFocus(); alone does not always succeed
     searchLineEdit->setFocus();
 
-    // searchLineEdit->setToolTip("Alt+Space"); // This is actually a feature not of this application, but some other application that merely launches this application upon Alt+Space
+    searchLineEdit->setToolTip("Alt+Space"); // This is actually a feature not of this application, but some other application that merely launches this application upon Alt+Space
     // layout->addSpacing(10); // Space to the left before the searchLineWidget
     //searchLineWidget = new QWidget(this);
     // searchLineWidget->setWindowFlag(Qt::WindowDoesNotAcceptFocus, true); // Does not seem to do anything
@@ -337,8 +337,7 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
         //qobject_cast<QWidgetAction*>(m_searchMenu->actions().at(0))->defaultWidget()->setFocus();
     });
     connect(m_searchMenu,&QMenu::aboutToHide,this,[this]{
-          searchLineEdit->clear();
-          searchLineEdit->textChanged("");
+
     });
     // Prepare System menu
     m_systemMenu = new QMenu("System");
@@ -371,9 +370,6 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
     locationsContainingApps.append("/Applications");
     locationsContainingApps.removeDuplicates(); // Make unique
     findAppsInside(locationsContainingApps, m_systemMenu, watcher);
-    m_systemMenu->addSeparator();
-    QAction *forceQuitAction = m_systemMenu->addAction(tr("Force Quit Application"));
-    connect(forceQuitAction, SIGNAL(triggered()), this, SLOT(actionForceQuit()));
     m_systemMenu->addSeparator();
     QAction *restartAction = m_systemMenu->addAction(tr("Restart"));
     connect(restartAction, SIGNAL(triggered()), this, SLOT(actionLogout()));
@@ -959,12 +955,6 @@ void AppMenuWidget::actionLogout()
         qDebug() << "Shutdown executable not available next to Menubar executable, exiting";
         QApplication::exit(); // In case we are lacking the Shutdown executable
     }
-}
-
-void AppMenuWidget::actionForceQuit()
-{
-    qDebug() << "actionForceQuit() called";
-    QProcess::execute(QString("xkill"));
 }
 
 bool AppMenuWidget::which(QString command)
