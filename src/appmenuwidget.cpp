@@ -432,6 +432,7 @@ void AppMenuWidget::integrateSystemMenu(QMenuBar *menuBar) {
     if(!menuBar || !m_systemMenu)
         return;
 
+    m_searchMenu->setToolTipsVisible(true);
     menuBar->addMenu(m_searchMenu);
 
     menuBar->addMenu(m_systemMenu);
@@ -536,6 +537,8 @@ for(QString v : m_appMenuModel->filteredActions().keys()) {
     QAction *orig = m_appMenuModel->filteredActions()[v];
     CloneAction *cpy = new CloneAction(orig);
     cpy->setText(v);
+    cpy->setShortcut(orig->shortcut());
+    cpy->setToolTip(orig->toolTip());
     cpy->updateMe();
     searchResults << cpy;
     m_searchMenu->addAction(cpy);
