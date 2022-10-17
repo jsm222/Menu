@@ -539,7 +539,8 @@ bool AppMenuModel::filterMenu(QMenu* searchMenu,QString searchString,bool includ
             {
 
             action->setVisible(true);
-            hasVisible = !action->isSeparator() && action->isEnabled();
+            // hasVisible = !action->isSeparator() && action->isEnabled();
+            hasVisible = !action->isSeparator(); // FIXME: https://github.com/helloSystem/Menu/issues/99#issuecomment-1281166629
 
             action->setVisible(hasVisible);
 
