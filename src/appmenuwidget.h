@@ -127,6 +127,8 @@ private:
      QList<QAction *> searchResults;
     void integrateSystemMenu(QMenuBar*);
     void searchEditingDone();
+    void refreshTimer();
+
 private:
 
     QWidget *searchLineWidget;
@@ -141,6 +143,7 @@ private:
     // QToolButton *m_closeButton;
     //QPropertyAnimation *m_buttonsAnimation;
     WId m_windowID;
+    QTimer *m_typingTimer;
     
     //int m_buttonsWidth;
 };

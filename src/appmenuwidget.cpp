@@ -49,6 +49,7 @@
 #include <QListView>
 #include <QCryptographicHash>
 #include <QWindow>
+#include <QTimer>
 
 #include <KF5/KWindowSystem/KWindowSystem>
 #include <KF5/KWindowSystem/KWindowInfo>
@@ -287,7 +288,8 @@ void AppMenuWidget::findAppsInside(QStringList locationsContainingApps, QMenu *m
 }
 
 AppMenuWidget::AppMenuWidget(QWidget *parent)
-    : QWidget(parent)
+    : QWidget(parent),
+      m_typingTimer(new QTimer(this))
 {
     // probono: Reload menu when something changed in a watched directory; FIXME: This is not functional yet
     // https://github.com/helloSystem/Menu/issues/15
@@ -361,9 +363,14 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
     widgetAction->setDefaultWidget(searchLineEdit);
     m_searchMenu->addAction(widgetAction);
 
-    connect(searchLineEdit,&QLineEdit::textChanged,this,&AppMenuWidget::searchMenu);
     connect(searchLineEdit,&QLineEdit::editingFinished,this,&AppMenuWidget::searchEditingDone);
 
+    // connect(searchLineEdit,&QLineEdit::textChanged,this,&AppMenuWidget::searchMenu);
+    // Do not do this immediately, but rather delayed
+    // https://wiki.qt.io/Delay_action_to_wait_for_user_interaction
+    m_typingTimer->setSingleShot(true); // Ensure the timer will fire only once after it was started
+    connect(m_typingTimer, &QTimer::timeout, this, &AppMenuWidget::searchMenu);
+    connect(searchLineEdit,&QLineEdit::textChanged,this,&AppMenuWidget::refreshTimer);
 
     m_systemMenu->setToolTipsVisible(true); // Works; shows the full path
     QAction *aboutAction = m_systemMenu->addAction(tr("About This Computer"));
@@ -429,6 +436,11 @@ void AppMenuWidget::searchEditingDone() {
         m_searchMenu->setActiveAction(m_searchMenu->actions().at(1));
     }
 }
+
+void AppMenuWidget::refreshTimer() {
+    m_typingTimer->start(300); // https://wiki.qt.io/Delay_action_to_wait_for_user_interaction
+}
+
 void AppMenuWidget::focusMenu() {
 
 
