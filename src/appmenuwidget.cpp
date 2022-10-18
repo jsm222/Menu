@@ -48,6 +48,7 @@
 #include <QAbstractItemModel>
 #include <QListView>
 #include <QCryptographicHash>
+#include <QWindow>
 
 #include <KF5/KWindowSystem/KWindowSystem>
 #include <KF5/KWindowSystem/KWindowInfo>
@@ -336,10 +337,23 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
        // qobject_cast<QWidgetAction*>(m_searchMenu->actions().at(0))->defaultWidget()->show();
         //qobject_cast<QWidgetAction*>(m_searchMenu->actions().at(0))->defaultWidget()->setFocus();
     });
+
+    /*
     connect(m_searchMenu,&QMenu::aboutToHide,this,[this]{
-          searchLineEdit->clear();
-          searchLineEdit->textChanged("");
+            searchLineEdit->clear();
+            searchLineEdit->textChanged("");
     });
+    */
+
+    // https://github.com/helloSystem/Menu/issues/95
+    connect(qApp, &QApplication::focusWindowChanged, this, [this](QWindow *w) {
+        if (!w) {
+            // Clean the search box if the user has left the Menu application altogether
+            searchLineEdit->clear();
+            searchLineEdit->textChanged("");
+        }
+    });
+
     // Prepare System menu
     m_systemMenu = new QMenu("System");
 
