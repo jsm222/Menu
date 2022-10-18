@@ -454,11 +454,17 @@ void DBusMenuImporter::slotGetLayoutFinished(QDBusPendingCallWatcher *watcher)
                 sendClickedEvent(id);
             });
 
+            /*
+             * This leads to DBus activity, high CPU usage, and visual stutter
+             * when the user moves the mouse across the menu bar
+             * while menus are open. Why was this there in the first place?
+             * https://github.com/helloSystem/Menu/issues/93#issuecomment-1282718239
             if (QMenu *menuAction = action->menu()) {
                 connect(menuAction, &QMenu::aboutToShow, this, &DBusMenuImporter::slotMenuAboutToShow, Qt::UniqueConnection);
             }
 
             connect(menu, &QMenu::aboutToHide, this, &DBusMenuImporter::slotMenuAboutToHide, Qt::UniqueConnection);
+            */
 
             menu->addAction(action);
         } else {
