@@ -64,7 +64,8 @@
 void SearchLineEdit::keyPressEvent(QKeyEvent * event) {
     if(event->key() == Qt::Key_Down)
         emit editingFinished();
-    QLineEdit::keyPressEvent(event);
+   QCoreApplication::sendEvent(parent(),event);
+   QLineEdit::keyPressEvent(event);
 }
 class MyLineEditEventFilter : public QObject
 {
@@ -348,13 +349,13 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
     */
 
     // https://github.com/helloSystem/Menu/issues/95
-    connect(qApp, &QApplication::focusWindowChanged, this, [this](QWindow *w) {
+    /*connect(qApp, &QApplication::focusWindowChanged, this, [this](QWindow *w) {
         if (!w) {
             // Clean the search box if the user has left the Menu application altogether
             searchLineEdit->clear();
             searchLineEdit->textChanged("");
         }
-    });
+    });*/ //Above is already implemented in onActiveWindowChanged();
 
     // Prepare System menu
     m_systemMenu = new QMenu("System");
@@ -543,9 +544,11 @@ void AppMenuWidget::updateActionSearch() {
 }
 
 void AppMenuWidget::searchMenu() {
-for(QAction *sr: searchResults) {
-if(m_searchMenu->actions().contains(sr))
+for(CloneAction *sr: searchResults) {
+if(m_searchMenu->actions().contains(sr)) {
+    sr->resetOrigShortcutContext();
     m_searchMenu->removeAction(sr);
+    }
 }
     QList<QMenu*> menus;
     menus << m_systemMenu << m_appMenuModel->menu();
@@ -559,17 +562,26 @@ if(m_searchMenu->actions().contains(sr))
 
     }
 for(QString v : m_appMenuModel->filteredActions().keys()) {
-
     QAction *orig = m_appMenuModel->filteredActions()[v];
     CloneAction *cpy = new CloneAction(orig);
     cpy->setText(v);
     cpy->setShortcut(orig->shortcut());
     cpy->setToolTip(orig->toolTip());
     cpy->updateMe();
+    cpy->setShortcutContext(Qt::ApplicationShortcut);
+    orig->setShortcutContext(Qt::WindowShortcut);
     searchResults << cpy;
+    connect(cpy,&QAction::triggered,this,[this]{
+        m_searchMenu->blockSignals(true); //do not trigger aboutToHide, matter of taste if a shortcut
+        // in the search menu should clear the searchField
+        m_searchMenu->close();
+        m_searchMenu->blockSignals(false);
+    });
     m_searchMenu->addAction(cpy);
 
 }
+
+
 
 
 m_appMenuModel->clearFilteredActions();

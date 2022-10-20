@@ -53,7 +53,6 @@ class CloneAction : public QAction {
         connect(m_orig, &QAction::changed, this, &CloneAction::updateMe);  // update on change
       connect(m_orig, &QAction::destroyed, this, &QAction::deleteLater); // delete on destroyed
       connect(this, &QAction::triggered, m_orig, &QAction::triggered); // trigger on triggered
-
     }
   public slots:
     void updateMe(){
@@ -67,7 +66,9 @@ class CloneAction : public QAction {
           setProperty(qPrintable(prop), m_orig->property(qPrintable(prop)));
       }
     }
-
+    void resetOrigShortcutContext() {
+        m_orig->setShortcutContext(Qt::ApplicationShortcut);
+    }
   private:
     QAction *m_orig;
   };
@@ -78,7 +79,6 @@ class AppMenuWidget : public QWidget
 public:
     explicit AppMenuWidget(QWidget *parent = nullptr);
     ~AppMenuWidget();
-
     void updateMenu();
     void toggleMaximizeWindow();
     QMenuBar *m_menuBar;
@@ -124,7 +124,7 @@ private:
 private:
     QMenu *m_systemMenu;
      QMenu *m_searchMenu;
-     QList<QAction *> searchResults;
+     QList<CloneAction *> searchResults;
     void integrateSystemMenu(QMenuBar*);
     void searchEditingDone();
     void refreshTimer();
