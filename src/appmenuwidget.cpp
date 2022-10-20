@@ -62,9 +62,12 @@
 
 #include "thumbnails.h"
 void SearchLineEdit::keyPressEvent(QKeyEvent * event) {
-    if(event->key() == Qt::Key_Down)
+    if(event->key() == Qt::Key_Down) {
+
         emit editingFinished();
-   QCoreApplication::sendEvent(parent(),event);
+   } else {
+    QCoreApplication::sendEvent(parent(),event);
+   }
    QLineEdit::keyPressEvent(event);
 }
 class MyLineEditEventFilter : public QObject
@@ -340,7 +343,6 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
        // qobject_cast<QWidgetAction*>(m_searchMenu->actions().at(0))->defaultWidget()->show();
         //qobject_cast<QWidgetAction*>(m_searchMenu->actions().at(0))->defaultWidget()->setFocus();
     });
-
     /*
     connect(m_searchMenu,&QMenu::aboutToHide,this,[this]{
             searchLineEdit->clear();
@@ -547,6 +549,7 @@ void AppMenuWidget::searchMenu() {
 for(CloneAction *sr: searchResults) {
 if(m_searchMenu->actions().contains(sr)) {
     sr->resetOrigShortcutContext();
+    sr->disconnectOnClear();
     m_searchMenu->removeAction(sr);
     }
 }
@@ -572,18 +575,26 @@ for(QString v : m_appMenuModel->filteredActions().keys()) {
     orig->setShortcutContext(Qt::WindowShortcut);
     searchResults << cpy;
     connect(cpy,&QAction::triggered,this,[this]{
-        m_searchMenu->blockSignals(true); //do not trigger aboutToHide, matter of taste if a shortcut
-        // in the search menu should clear the searchField
+        searchLineEdit->setText("");
+        searchLineEdit->textChanged("");
         m_searchMenu->close();
-        m_searchMenu->blockSignals(false);
+
     });
+    cpy->setDisconnectOnClear(connect(orig,&QAction::triggered,this,[this]{
+        searchLineEdit->setText("");
+        searchLineEdit->textChanged("");
+        m_searchMenu->close();
+
+    }));
     m_searchMenu->addAction(cpy);
 
 }
 
 
 
-
+if(m_appMenuModel->filteredActions().count()==1) {
+    searchEditingDone();
+}
 m_appMenuModel->clearFilteredActions();
 }
 

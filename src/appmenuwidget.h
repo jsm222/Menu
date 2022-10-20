@@ -66,11 +66,14 @@ class CloneAction : public QAction {
           setProperty(qPrintable(prop), m_orig->property(qPrintable(prop)));
       }
     }
+    void setDisconnectOnClear(QMetaObject::Connection con) { m_con = con; }
+    void disconnectOnClear() { QObject::disconnect(m_con);}
     void resetOrigShortcutContext() {
         m_orig->setShortcutContext(Qt::ApplicationShortcut);
     }
   private:
     QAction *m_orig;
+    QMetaObject::Connection m_con;
   };
 class AppMenuWidget : public QWidget
 {
