@@ -415,13 +415,13 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
     */
 
     // https://github.com/helloSystem/Menu/issues/95
-    /*connect(qApp, &QApplication::focusWindowChanged, this, [this](QWindow *w) {
+    connect(qApp, &QApplication::focusWindowChanged, this, [this](QWindow *w) {
         if (!w) {
             // Clean the search box if the user has left the Menu application altogether
             searchLineEdit->clear();
             searchLineEdit->textChanged("");
-        }
-    });*/ //Above is already implemented in onActiveWindowChanged();
+            }
+        });
 
     // Prepare System menu
     m_systemMenu = new SystemMenu(); // Using our SystemMenu subclass instead of a QMenu to be able to toggle "About..." when modifier key is pressed
@@ -615,6 +615,7 @@ void AppMenuWidget::updateActionSearch() {
 }
 
 void AppMenuWidget::searchMenu() {
+
 for(CloneAction *sr: searchResults) {
     if(m_searchMenu->actions().contains(sr)) {
         sr->resetOrigShortcutContext();
@@ -665,8 +666,12 @@ for(QString v : m_appMenuModel->filteredActions().keys()) {
 
 if(m_appMenuModel->filteredActions().count()==1) {
     searchEditingDone();
+} else {
+    auto evt = new QMouseEvent(QEvent::MouseMove, m_menuBar->actionGeometry(m_menuBar->actions().at(0)).center(), Qt::NoButton, Qt::NoButton, Qt::NoModifier);
+    QApplication::postEvent(m_menuBar, evt);
 }
 m_appMenuModel->clearFilteredActions();
+
 }
 
 

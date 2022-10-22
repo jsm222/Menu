@@ -546,7 +546,11 @@ bool AppMenuModel::filterMenu(QMenu* searchMenu,QString searchString,bool includ
 
 
             if(hasVisible) {
-                QAction*  parent = qobject_cast<QMenu*>(action->parent())->menuAction();
+                QAction * parent = nullptr;
+                QMenu*  parentMenu = qobject_cast<QMenu*>(action->parent());
+                if(parentMenu) {
+                  parent = parentMenu->menuAction();
+                }
                 while(parent) {
                     parent->setVisible(!parent->isSeparator());
                     if(parent->menu() && parent->menu()->parent()) {
