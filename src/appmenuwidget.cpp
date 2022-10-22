@@ -61,6 +61,62 @@
 #endif
 
 #include "thumbnails.h"
+
+// SystemMenu is like QMenu but has a first menu item
+// that changes depending on whether modifier keys are pressed
+// https://stackoverflow.com/a/52756601
+class SystemMenu: public QMenu {
+private:
+    QAction qCmdAbout;
+    bool alt;
+
+public:
+    SystemMenu(): QMenu(),
+        qCmdAbout(tr("About This Computer")),
+        alt(false)
+    {
+        connect(&qCmdAbout, SIGNAL(triggered()), this, SLOT(AppMenuWidget::actionAbout()));
+        addAction(&qCmdAbout);
+    }
+protected:
+    virtual void showEvent(QShowEvent *pQEvent) override
+    {
+        qDebug() << "SystemMenu::showEvent";
+        update();
+        QMenu::showEvent(pQEvent);
+    }
+
+    virtual void keyPressEvent(QKeyEvent *pQEvent) override
+    {
+        qDebug() << "SystemMenu::keyPressEvent";
+        update(pQEvent->modifiers());
+        QMenu::keyPressEvent(pQEvent);
+    }
+    virtual void keyReleaseEvent(QKeyEvent *pQEvent) override
+    {
+        qDebug() << "SystemMenu::keyReleaseEvent";
+        update(pQEvent->modifiers());
+        QMenu::keyReleaseEvent(pQEvent);
+    }
+
+private:
+    void update()
+    {
+        update(
+                    (QApplication::keyboardModifiers()
+                     )
+                    != 0);
+    }
+    void update(bool alt)
+    {
+        qDebug() << "alt:" << alt;
+        if (!alt != !this->alt) {
+            qCmdAbout.setText(alt ? tr("About helloDesktop") : tr("About This Computer"));
+        }
+        this->alt = alt;
+    }
+};
+
 void SearchLineEdit::keyPressEvent(QKeyEvent * event) {
     if(event->key() == Qt::Key_Down)
         emit editingFinished();
@@ -180,7 +236,7 @@ void AppMenuWidget::findAppsInside(QStringList locationsContainingApps, QMenu *m
             QStringList locationsToBeChecked = {directory};
             QFileInfo fi(directory);
             QString base = fi.completeBaseName(); // baseName() gets it wrong e.g., when there are dots in version numbers
-            // submenu = m_systemMenu->addMenu(base); // TODO: Use this once we have nested submenus rather than flat ones with '→'            
+            // submenu = m_systemMenu->addMenu(base); // TODO: Use this once we have nested submenus rather than flat ones with '→'
             submenu = m_systemMenu->addMenu(directory);
             submenu->setProperty("path", directory);
 
@@ -206,7 +262,7 @@ void AppMenuWidget::findAppsInside(QStringList locationsContainingApps, QMenu *m
             candidate = dir.path() + "/" + candidate;
             // Do not show Autostart directories (or should we?)
             if (candidate.endsWith("/Autostart") == true) {
-                    continue;
+                continue;
             }
             // qDebug() << "probono: Processing" << candidate;
             QString nameWithoutSuffix = QFileInfo(QDir(candidate).canonicalPath()).completeBaseName(); // baseName() gets it wrong e.g., when there are dots in version numbers; dereference symlink to candidate
@@ -315,7 +371,7 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
     // searchLineEdit->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
     // Try to get the focus so that one can start typing immediately whenever the Menu is invoked
     // https://stackoverflow.com/questions/526761/set-qlineedit-focus-in-qt
-     // searchLineEdit->setFocus(); alone does not always succeed
+    // searchLineEdit->setFocus(); alone does not always succeed
     searchLineEdit->setFocus();
 
     // searchLineEdit->setToolTip("Alt+Space"); // This is actually a feature not of this application, but some other application that merely launches this application upon Alt+Space
@@ -324,19 +380,19 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
     // searchLineWidget->setWindowFlag(Qt::WindowDoesNotAcceptFocus, true); // Does not seem to do anything
     //auto searchLineLayout = new QHBoxLayout(searchLineWidget);
     //searchLineLayout->setContentsMargins(0, 0, 0, 0);
-  // searchLineLayout->setSpacing(3);
+    // searchLineLayout->setSpacing(3);
     //searchLineLayout->addWidget(searchLineEdit, 0, Qt::AlignLeft);
     // searchLineWidget->setLayout(searchLineLayout);fffffff
     //searchLineWidget->setObjectName("SearchLineWidget");
     // layout->addWidget(searchLineWidget, 0, Qt::AlignRight);
-   // layout->addWidget(searchLineWidget, 0, Qt::AlignLeft);
+    // layout->addWidget(searchLineWidget, 0, Qt::AlignLeft);
     m_searchMenu = new QMenu("Search",nullptr);
     connect(m_searchMenu,&QMenu::aboutToShow
             ,[this]() {
 
 
-          searchLineEdit->setFocus();
-       // qobject_cast<QWidgetAction*>(m_searchMenu->actions().at(0))->defaultWidget()->show();
+        searchLineEdit->setFocus();
+        // qobject_cast<QWidgetAction*>(m_searchMenu->actions().at(0))->defaultWidget()->show();
         //qobject_cast<QWidgetAction*>(m_searchMenu->actions().at(0))->defaultWidget()->setFocus();
     });
 
@@ -357,8 +413,8 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
     });
 
     // Prepare System menu
-    m_systemMenu = new QMenu("System");
-
+    m_systemMenu = new SystemMenu(); // Using our SystemMenu subclass instead of a QMenu to be able to toggle "About..." when modifier key is pressed
+    m_systemMenu->setTitle(tr("System"));
     QWidgetAction *widgetAction = new QWidgetAction(this);
     widgetAction->setDefaultWidget(searchLineEdit);
     m_searchMenu->addAction(widgetAction);
@@ -373,8 +429,13 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
     connect(searchLineEdit,&QLineEdit::textChanged,this,&AppMenuWidget::refreshTimer);
 
     m_systemMenu->setToolTipsVisible(true); // Works; shows the full path
-    QAction *aboutAction = m_systemMenu->addAction(tr("About This Computer"));
-    connect(aboutAction, SIGNAL(triggered()), this, SLOT(actionAbout()));
+
+    // If we were using a QMenu, we would do:
+    // QAction *aboutAction = m_systemMenu->addAction(tr("About This Computer"));
+    // connect(aboutAction, SIGNAL(triggered()), this, SLOT(actionAbout()));
+    // Since we are using our SystemMenu subclass instead which already contains the first menu item, we do:
+    connect(m_systemMenu->actions().first(), SIGNAL(triggered()), this, SLOT(actionAbout()));
+
     m_systemMenu->addSeparator();
     // TODO: Move to a separate "Windows" (sub-)menu?
     QAction *minimizeAllAction = m_systemMenu->addAction(tr("Hide all"));
@@ -421,8 +482,8 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
     connect(m_appMenuModel, &AppMenuModel::menuParsed, this, &AppMenuWidget::updateMenu);
 
     connect(KWindowSystem::self(), &KWindowSystem::activeWindowChanged, this, &AppMenuWidget::delayUpdateActiveWindow);
-   connect(KWindowSystem::self(), static_cast<void (KWindowSystem::*)(WId, NET::Properties, NET::Properties2)>(&KWindowSystem::windowChanged),
-           this, &AppMenuWidget::onWindowChanged);
+    connect(KWindowSystem::self(), static_cast<void (KWindowSystem::*)(WId, NET::Properties, NET::Properties2)>(&KWindowSystem::windowChanged),
+            this, &AppMenuWidget::onWindowChanged);
 
     // Load action search
 
@@ -445,7 +506,7 @@ void AppMenuWidget::focusMenu() {
 
 
     QMouseEvent event(QEvent::MouseButtonPress,QPoint(0,0),
-    m_menuBar->mapToGlobal(QPoint(0,0)),Qt::LeftButton,0,0);
+                      m_menuBar->mapToGlobal(QPoint(0,0)),Qt::LeftButton,0,0);
     QApplication::sendEvent(m_menuBar,&event);
     searchLineEdit->setFocus();
 
@@ -474,7 +535,7 @@ void AppMenuWidget::handleActivated(const QString &name) {
 void AppMenuWidget::updateActionSearch() {
 
 
-/*
+    /*
     /// Update the action search.
     actionSearch->clear();
     actionSearch->update(menuBar);
@@ -506,13 +567,13 @@ void AppMenuWidget::updateActionSearch() {
     // static_cast<QListView *>(actionCompleter->popup())->setContentsMargins(10,10,0,10); // FIXME: Does not seem to work, why?
 
     // Empty search field on selection of an item, https://stackoverflow.com/a/11905995
- 
+
     //QObject::connect(actionCompleter, SIGNAL(activated(const QString&)),
       //               searchLineEdit, SLOT(clear()),
         //             Qt::QueuedConnection);
 */
     // Make more than 7 items visible at once
-   // actionCompleter->setMaxVisibleItems(35);
+    // actionCompleter->setMaxVisibleItems(35);
 
     // compute needed width
     // const QAbstractItemView * popup = actionCompleter->popup();
@@ -543,10 +604,10 @@ void AppMenuWidget::updateActionSearch() {
 }
 
 void AppMenuWidget::searchMenu() {
-for(QAction *sr: searchResults) {
-if(m_searchMenu->actions().contains(sr))
-    m_searchMenu->removeAction(sr);
-}
+    for(QAction *sr: searchResults) {
+        if(m_searchMenu->actions().contains(sr))
+            m_searchMenu->removeAction(sr);
+    }
     QList<QMenu*> menus;
     menus << m_systemMenu << m_appMenuModel->menu();
     QString searchString = searchLineEdit->text();
@@ -554,25 +615,25 @@ if(m_searchMenu->actions().contains(sr))
 
     for(QMenu * menu : menus) {
 
-    m_appMenuModel->filterMenu(menu,searchString,searchString=="",names);
+        m_appMenuModel->filterMenu(menu,searchString,searchString=="",names);
 
 
     }
-for(QString v : m_appMenuModel->filteredActions().keys()) {
+    for(QString v : m_appMenuModel->filteredActions().keys()) {
 
-    QAction *orig = m_appMenuModel->filteredActions()[v];
-    CloneAction *cpy = new CloneAction(orig);
-    cpy->setText(v);
-    cpy->setShortcut(orig->shortcut());
-    cpy->setToolTip(orig->toolTip());
-    cpy->updateMe();
-    searchResults << cpy;
-    m_searchMenu->addAction(cpy);
+        QAction *orig = m_appMenuModel->filteredActions()[v];
+        CloneAction *cpy = new CloneAction(orig);
+        cpy->setText(v);
+        cpy->setShortcut(orig->shortcut());
+        cpy->setToolTip(orig->toolTip());
+        cpy->updateMe();
+        searchResults << cpy;
+        m_searchMenu->addAction(cpy);
 
-}
+    }
 
 
-m_appMenuModel->clearFilteredActions();
+    m_appMenuModel->clearFilteredActions();
 }
 
 
@@ -605,7 +666,7 @@ void AppMenuWidget::updateMenu()
 
             m_menuBar->addAction(a);
         }*/
-m_menuBar->addActions(menu->actions());
+        m_menuBar->addActions(menu->actions());
     }
 
 
@@ -697,9 +758,9 @@ void AppMenuWidget::onActiveWindowChanged()
 {
     KWindowInfo info(m_windowID, NET::WMState | NET::WMWindowType | NET::WMGeometry, NET::WM2TransientFor);
     if(m_currentWindowID >0 && m_currentWindowID != m_windowID && m_windowID !=0) {
-    searchLineEdit->clear();
-    searchLineEdit->textChanged("");
-    // bool isMax = info.hasState(NET::Max);
+        searchLineEdit->clear();
+        searchLineEdit->textChanged("");
+        // bool isMax = info.hasState(NET::Max);
 
     }
 
@@ -740,180 +801,216 @@ void AppMenuWidget::actionAbout()
 
     QMessageBox *msgBox = new QMessageBox(this);
     msgBox->setAttribute(Qt::WA_DeleteOnClose);
-    msgBox->setWindowTitle(tr("About This Computer"));
 
-    QString url;
-    QString sha;
-    QString build;
-    
-#if defined(Q_OS_FREEBSD)
-    // Try to get extended attributes on the /.url file
-    if (QFile::exists("/.url")) {
-        url = nullptr;
-        char buf[256] = "";
-        if (extattr_get_file("/.url", EXTATTR_NAMESPACE_USER, "url", buf, 256) > 0) {
-            url = QString(buf);
-        }
-        char buf2[128] = "";
-        qDebug() << "extattr 'url' from '/.url':" << url;
-        sha = nullptr;
-        if (extattr_get_file("/.url", EXTATTR_NAMESPACE_USER, "sha", buf2, 128) > 0) {
-            sha = QString(buf2);
-        }
-        qDebug() << "extattr 'sha' from '/.url':" << sha;
+    if (QApplication::keyboardModifiers()){
 
-        char buf3[128] = "";
-        build = nullptr;
-        if (extattr_get_file("/.url", EXTATTR_NAMESPACE_USER, "build", buf3, 128) > 0) {
-            build = QString(buf3);
-        }
-        qDebug() << "extattr 'build' from '/.url':" << build;
-    }
-#endif
-
-    // On FreeBSD, get information about the machine
-    if(which("kenv")){
-        QProcess p;
-        QString program = "kenv";
-        QStringList arguments;
-        arguments << "-q" << "smbios.system.maker";
-        p.start(program, arguments);
-        p.waitForFinished();
-        QString vendorname(p.readAllStandardOutput());
-        vendorname.replace("\n", "");
-        vendorname = vendorname.trimmed();
-        qDebug() << "vendorname:" << vendorname;
-
-        QStringList arguments2;
-        arguments2 << "-q" << "smbios.system.product";
-        p.start(program, arguments2);
-        p.waitForFinished();
-        QString productname(p.readAllStandardOutput());
-        productname.replace("\n", "");
-        productname = productname.trimmed();
-        qDebug() << "systemname:" << productname;
-        msgBox->setText("<b>" + vendorname + " " + productname + "</b>");
-
-        QString program2 = "pkg";
-        QStringList arguments3;
-        arguments3 << "info" << "hello";
-        p.start(program2, arguments3);
-        p.waitForFinished();
-        QString operatingsystem(p.readAllStandardOutput());
-        operatingsystem = operatingsystem.split("\n")[0].trimmed();
-        if(operatingsystem != "") {
-            // We are running on helloSystem
-            operatingsystem = operatingsystem.replace("hello-", "helloSystem ").replace("_", " (Build ") + ")";
-        } else {
-            // We are not running on helloSystem (e.g., on FreeBSD + helloDesktop)
-            operatingsystem = "helloDesktop (not running on helloSystem)";
-        }
-
-        QString program3 = "sysctl";
-        QStringList arguments5;
-        arguments5 << "-n" << "hw.model";
-        p.start(program3, arguments5);
-        p.waitForFinished();
-        QString cpu(p.readAllStandardOutput());
-        cpu = cpu.trimmed();
-        cpu = cpu.replace("(R)", "®");
-        cpu = cpu.replace("(TM)", "™");
-        qDebug() << "cpu:" << cpu;
-
-        QStringList arguments6;
-        arguments6 << "-n" << "hw.realmem";
-        p.start(program3, arguments6);
-        p.waitForFinished();
-        QString memory(p.readAllStandardOutput());
-        memory = memory.trimmed();
-        qDebug() << "memory:" << memory;
-        double m = memory.toDouble();
-        m = m/1024/1024/1024;
-        qDebug() << "m:" << m;
-
-        QStringList arguments7;
-        arguments7 << "-n" << "kern.disks";
-        p.start(program3, arguments7);
-        p.waitForFinished();
-        QString disks(p.readAllStandardOutput());
-        disks = disks.replace("\n", "");
-        QString disk = disks.split(" ")[0];
-        qDebug() << "disk:" << disk;
-
-        QString program4 = "lsblk";
-        QStringList arguments8;
-        arguments8 << disk;
-        p.start(program4, arguments8);
-        p.waitForFinished();
-        QString diskinfo(p.readAllStandardOutput());
-        QStringList di;
-        di = diskinfo.split("\n");
-        QString disksize ="Unknown";
-
-        QString program5 = "freebsd-version";
-        QStringList arguments9;
-        arguments9 << "-k";
-        p.start(program5, arguments9);
-        p.waitForFinished();
-        QString kernelVersion(p.readAllStandardOutput());
-
-
-        QStringList arguments10;
-        arguments9 << "-u";
-        p.start(program5, arguments10);
-        p.waitForFinished();
-        QString userlandVersion(p.readAllStandardOutput());
-
-        foreach (QString ds, di) {
-            if(ds.startsWith(disk)) {
-                // qDebug() << "ds:" << ds ;
-                disksize = ds.simplified().split(" ")[2].trimmed().replace("G", " GiB"); // .simplified() replaces multiple spaces with one
-                qDebug() << "disksize:" << disksize ;
-            }
-        }
+        msgBox->setWindowTitle(tr("About helloDesktop"));
 
         QString icon = "/usr/local/share/icons/elementary-xfce/devices/128/computer-hello.png";
 
         // If we found a way to read dmi without needing to be root, we could show a notebook icon for notebooks...
         // icon = "/usr/local/share/icons/elementary-xfce/devices/128/computer-laptop.png";
 
-        // See https://github.com/openwebos/qt/blob/92fde5feca3d792dfd775348ca59127204ab4ac0/tools/qdbus/qdbusviewer/qdbusviewer.cpp#L477 for loading icon from resources
-        QString helloSystemInfo;
-        if(sha != "" && url != "" && build != "") {
-            qDebug() << " xxxxxxxxxxxxxxxxxx  " ;
-            helloSystemInfo = "</p>helloSystem build: "+ build +" for commit: <a href='" + url + "'>" + sha + "</a></p>";
-        } else if(sha != "" && url != "") {
-            helloSystemInfo = "</p>helloSystem commit: <a href='" + url + "'>" + sha + "</a></p>";
-        }
         msgBox->setStandardButtons(QMessageBox::Close);
-        // msgBox->setStandardButtons(0); // Remove button. FIXME: This makes it impossible to close the window; why?
-        msgBox->setText("<center><img src=\"file://" + icon + "\"><h3>" + vendorname + " " + productname  + "</h3>" + \
-                        "<p>" + operatingsystem +"</p><small>" + \
-                        "<p>FreeBSD kernel version: " + kernelVersion +"<br>" + \
-                        "FreeBSD userland version: " + userlandVersion + "</p>" + \
-                        "<p>Processor: " + cpu +"<br>" + \
-                        "Memory: " + QString::number(m) +" GiB<br>" + \
-                        "Startup Disk: " + disksize +"</p>" + \
-                        helloSystemInfo + \
-                        "<p><a href='file:///COPYRIGHT'>FreeBSD copyright information</a><br>" + \
-                        "Other components are subject to<br>their respective license terms</p>" + \
+
+        msgBox->setText("<center><img src=\"file://" + icon + "\"><h3>helloDesktop</h3>" + \
+                        "<p>Lovingly crafted by true connoisseurs<br>of the desktop metaphor</p>" + \
+                        "<p>Inspired by the timeless vision<br>of Bill Atkinson and Andy Hertzfeld</p>" + \
+                        "<small>" + \
+                        "<p>Recommended reading: <a href='https://dl.acm.org/doi/book/10.5555/573097'>ISBN 978-0-201-62216-4</a><br>" + \
                         "</small></center>");
+
+        // Center window on screen
+        msgBox->setFixedWidth(350); // FIXME: Remove hardcoding; but need to be able to center on screen
+        msgBox->setFixedHeight(500); // FIXME: Same
+        QRect screenGeometry = QGuiApplication::screens()[0]->geometry();
+        int x = (screenGeometry.width()-msgBox->geometry().width()) / 2;
+        int y = (screenGeometry.height()-msgBox->geometry().height()) / 2;
+        msgBox->move(x, y);
+
+        msgBox->setStyleSheet("QWidget { padding-right: 20px }"); // FIXME: Desperate attempt to get the text really centered
+
+        msgBox->setModal(false);
+
+        msgBox->show();
+        return;
+
+    } else {
+
+        msgBox->setWindowTitle(tr("About This Computer"));
+
+        QString url;
+        QString sha;
+        QString build;
+
+#if defined(Q_OS_FREEBSD)
+        // Try to get extended attributes on the /.url file
+        if (QFile::exists("/.url")) {
+            url = nullptr;
+            char buf[256] = "";
+            if (extattr_get_file("/.url", EXTATTR_NAMESPACE_USER, "url", buf, 256) > 0) {
+                url = QString(buf);
+            }
+            char buf2[128] = "";
+            qDebug() << "extattr 'url' from '/.url':" << url;
+            sha = nullptr;
+            if (extattr_get_file("/.url", EXTATTR_NAMESPACE_USER, "sha", buf2, 128) > 0) {
+                sha = QString(buf2);
+            }
+            qDebug() << "extattr 'sha' from '/.url':" << sha;
+
+            char buf3[128] = "";
+            build = nullptr;
+            if (extattr_get_file("/.url", EXTATTR_NAMESPACE_USER, "build", buf3, 128) > 0) {
+                build = QString(buf3);
+            }
+            qDebug() << "extattr 'build' from '/.url':" << build;
+        }
+#endif
+
+        // On FreeBSD, get information about the machine
+        if(which("kenv")){
+            QProcess p;
+            QString program = "kenv";
+            QStringList arguments;
+            arguments << "-q" << "smbios.system.maker";
+            p.start(program, arguments);
+            p.waitForFinished();
+            QString vendorname(p.readAllStandardOutput());
+            vendorname.replace("\n", "");
+            vendorname = vendorname.trimmed();
+            qDebug() << "vendorname:" << vendorname;
+
+            QStringList arguments2;
+            arguments2 << "-q" << "smbios.system.product";
+            p.start(program, arguments2);
+            p.waitForFinished();
+            QString productname(p.readAllStandardOutput());
+            productname.replace("\n", "");
+            productname = productname.trimmed();
+            qDebug() << "systemname:" << productname;
+            msgBox->setText("<b>" + vendorname + " " + productname + "</b>");
+
+            QString program2 = "pkg";
+            QStringList arguments3;
+            arguments3 << "info" << "hello";
+            p.start(program2, arguments3);
+            p.waitForFinished();
+            QString operatingsystem(p.readAllStandardOutput());
+            operatingsystem = operatingsystem.split("\n")[0].trimmed();
+            if(operatingsystem != "") {
+                // We are running on helloSystem
+                operatingsystem = operatingsystem.replace("hello-", "helloSystem ").replace("_", " (Build ") + ")";
+            } else {
+                // We are not running on helloSystem (e.g., on FreeBSD + helloDesktop)
+                operatingsystem = "helloDesktop (not running on helloSystem)";
+            }
+
+            QString program3 = "sysctl";
+            QStringList arguments5;
+            arguments5 << "-n" << "hw.model";
+            p.start(program3, arguments5);
+            p.waitForFinished();
+            QString cpu(p.readAllStandardOutput());
+            cpu = cpu.trimmed();
+            cpu = cpu.replace("(R)", "®");
+            cpu = cpu.replace("(TM)", "™");
+            qDebug() << "cpu:" << cpu;
+
+            QStringList arguments6;
+            arguments6 << "-n" << "hw.realmem";
+            p.start(program3, arguments6);
+            p.waitForFinished();
+            QString memory(p.readAllStandardOutput());
+            memory = memory.trimmed();
+            qDebug() << "memory:" << memory;
+            double m = memory.toDouble();
+            m = m/1024/1024/1024;
+            qDebug() << "m:" << m;
+
+            QStringList arguments7;
+            arguments7 << "-n" << "kern.disks";
+            p.start(program3, arguments7);
+            p.waitForFinished();
+            QString disks(p.readAllStandardOutput());
+            disks = disks.replace("\n", "");
+            QString disk = disks.split(" ")[0];
+            qDebug() << "disk:" << disk;
+
+            QString program4 = "lsblk";
+            QStringList arguments8;
+            arguments8 << disk;
+            p.start(program4, arguments8);
+            p.waitForFinished();
+            QString diskinfo(p.readAllStandardOutput());
+            QStringList di;
+            di = diskinfo.split("\n");
+            QString disksize ="Unknown";
+
+            QString program5 = "freebsd-version";
+            QStringList arguments9;
+            arguments9 << "-k";
+            p.start(program5, arguments9);
+            p.waitForFinished();
+            QString kernelVersion(p.readAllStandardOutput());
+
+
+            QStringList arguments10;
+            arguments9 << "-u";
+            p.start(program5, arguments10);
+            p.waitForFinished();
+            QString userlandVersion(p.readAllStandardOutput());
+
+            foreach (QString ds, di) {
+                if(ds.startsWith(disk)) {
+                    // qDebug() << "ds:" << ds ;
+                    disksize = ds.simplified().split(" ")[2].trimmed().replace("G", " GiB"); // .simplified() replaces multiple spaces with one
+                    qDebug() << "disksize:" << disksize ;
+                }
+            }
+
+            QString icon = "/usr/local/share/icons/elementary-xfce/devices/128/computer-hello.png";
+
+            // If we found a way to read dmi without needing to be root, we could show a notebook icon for notebooks...
+            // icon = "/usr/local/share/icons/elementary-xfce/devices/128/computer-laptop.png";
+
+            // See https://github.com/openwebos/qt/blob/92fde5feca3d792dfd775348ca59127204ab4ac0/tools/qdbus/qdbusviewer/qdbusviewer.cpp#L477 for loading icon from resources
+            QString helloSystemInfo;
+            if(sha != "" && url != "" && build != "") {
+                qDebug() << " xxxxxxxxxxxxxxxxxx  " ;
+                helloSystemInfo = "</p>helloSystem build: "+ build +" for commit: <a href='" + url + "'>" + sha + "</a></p>";
+            } else if(sha != "" && url != "") {
+                helloSystemInfo = "</p>helloSystem commit: <a href='" + url + "'>" + sha + "</a></p>";
+            }
+            msgBox->setStandardButtons(QMessageBox::Close);
+            // msgBox->setStandardButtons(0); // Remove button. FIXME: This makes it impossible to close the window; why?
+            msgBox->setText("<center><img src=\"file://" + icon + "\"><h3>" + vendorname + " " + productname  + "</h3>" + \
+                            "<p>" + operatingsystem +"</p><small>" + \
+                            "<p>FreeBSD kernel version: " + kernelVersion +"<br>" + \
+                            "FreeBSD userland version: " + userlandVersion + "</p>" + \
+                            "<p>Processor: " + cpu +"<br>" + \
+                            "Memory: " + QString::number(m) +" GiB<br>" + \
+                            "Startup Disk: " + disksize +"</p>" + \
+                            helloSystemInfo + \
+                            "<p><a href='file:///COPYRIGHT'>FreeBSD copyright information</a><br>" + \
+                            "Other components are subject to<br>their respective license terms</p>" + \
+                            "</small></center>");
+        }
+
+        // Center window on screen
+        msgBox->setFixedWidth(350); // FIXME: Remove hardcoding; but need to be able to center on screen
+        msgBox->setFixedHeight(500); // FIXME: Same
+        QRect screenGeometry = QGuiApplication::screens()[0]->geometry();
+        int x = (screenGeometry.width()-msgBox->geometry().width()) / 2;
+        int y = (screenGeometry.height()-msgBox->geometry().height()) / 2;
+        msgBox->move(x, y);
+
+        msgBox->setStyleSheet("QWidget { padding-right: 20px }"); // FIXME: Desperate attempt to get the text really centered
+
+        msgBox->setModal(false);
+
+        msgBox->show();
     }
-
-    // Center window on screen
-    msgBox->setFixedWidth(350); // FIXME: Remove hardcoding; but need to be able to center on screen
-    msgBox->setFixedHeight(500); // FIXME: Same
-    QRect screenGeometry = QGuiApplication::screens()[0]->geometry();
-    int x = (screenGeometry.width()-msgBox->geometry().width()) / 2;
-    int y = (screenGeometry.height()-msgBox->geometry().height()) / 2;
-    msgBox->move(x, y);
-
-    msgBox->setStyleSheet("QWidget { padding-right: 20px }"); // FIXME: Desperate attempt to get the text really centered
-
-    msgBox->setModal(false);
-
-    msgBox->show();
-
 }
 
 void AppMenuWidget::actionLaunch(QAction *action)
