@@ -666,8 +666,59 @@ if(m_appMenuModel->filteredActions().count()==1) {
     auto evt = new QMouseEvent(QEvent::MouseMove, m_menuBar->actionGeometry(m_menuBar->actions().at(0)).center(), Qt::NoButton, Qt::NoButton, Qt::NoModifier);
     QApplication::postEvent(m_menuBar, evt);
 }
-m_appMenuModel->clearFilteredActions();
 
+// probono: query baloosearch and add baloo search results to the Search menu
+// This is a minimal viable implementation
+// TODO: Show correct icons
+if(searchString != ""){
+    QProcess p;
+    QString program = "baloosearch";
+    QStringList arguments;
+    arguments << "-l" << "20" << searchString;
+    p.start(program, arguments);
+    p.waitForFinished();
+    QStringList balooSearchResults;
+    QString result(p.readAllStandardOutput());
+    if(result != ""){
+        // m_searchMenu->addSeparator(); // FIXME: Would be nicer but breaks autoselection when only one search result is left
+        balooSearchResults = result.split('\n');
+        for(QString searchResult: balooSearchResults){
+            if(! searchResult.startsWith("/")) {
+                continue;
+            }
+            qDebug() << "probono: searchResult:" << searchResult;
+            QAction *orig = new QAction();
+            CloneAction *a = new CloneAction(orig); // Using a CloneAction so that these search results get removed like menu search results; FIXME: Do more efficiently
+            a->setToolTip(searchResult);
+            a->setText(searchResult.split("/").last());
+            searchResults << a; // The items in searchResults get removed when search results change
+            connect(a,&QAction::triggered,this,[this, a]{
+                openBalooSearchResult(a);
+                searchLineEdit->setText("");
+                searchLineEdit->textChanged("");
+                m_searchMenu->close();
+            });
+            a->setDisconnectOnClear(connect(orig,&QAction::triggered,this,[this]{
+                searchLineEdit->setText("");
+                searchLineEdit->textChanged("");
+                m_searchMenu->close();
+            }));
+            a->setIcon(QIcon::fromTheme("document").pixmap(24, 24));
+            a->setIconVisibleInMenu(true); // So that an icon is shown even though the theme sets Qt::AA_DontShowIconsInMenus
+            a->setProperty("path", searchResult);
+            m_searchMenu->addAction(a);
+        }
+        if(balooSearchResults.length()>20) {
+            CloneAction *a = new CloneAction(new QAction()); // Using a CloneAction so that these search results get removed like menu search results; FIXME: Do more efficiently
+            searchResults << a; // The items in searchResults get removed when search results change
+            a->setText("...");
+            a->setDisabled(true);
+            m_searchMenu->addAction(a);
+        }
+    }
+}
+
+m_appMenuModel->clearFilteredActions();
 
 }
 
@@ -1056,6 +1107,18 @@ void AppMenuWidget::actionLaunch(QAction *action)
     // QApplication::setOverrideCursor(Qt::WaitCursor);
     QStringList pathToBeLaunched = {action->property("path").toString()};
     QProcess::startDetached("launch", pathToBeLaunched);
+}
+
+void AppMenuWidget::openBalooSearchResult(CloneAction *action)
+{
+    qDebug() << "openBalooSearchResult(CloneAction *action) called";
+    QStringList pathToBeLaunched = {action->property("path").toString()};
+    // TODO: Maybe just show the file in the file manager when a modifier key is pressed?
+    if(pathToBeLaunched.endsWith(".app") == true || pathToBeLaunched.endsWith(".AppDir") == true) {
+        QProcess::startDetached("launch", pathToBeLaunched);
+    } else {
+        QProcess::startDetached("open", pathToBeLaunched);
+    }
 }
 
 /*
