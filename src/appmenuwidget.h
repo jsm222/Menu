@@ -128,7 +128,7 @@ private:
 private:
     QMenu *m_systemMenu;
      QMenu *m_searchMenu;
-     QList<CloneAction *> searchResults;
+     QList<QAction *> searchResults;
     void integrateSystemMenu(QMenuBar*);
     void searchEditingDone();
     void refreshTimer();

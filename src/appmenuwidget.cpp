@@ -50,7 +50,8 @@
 #include <QCryptographicHash>
 #include <QWindow>
 #include <QTimer>
-
+#include <Baloo/Query>
+#include <magic.h>
 #include <KF5/KWindowSystem/KWindowSystem>
 #include <KF5/KWindowSystem/KWindowInfo>
 #include <KF5/KWindowSystem/NETWM>
@@ -612,11 +613,14 @@ void AppMenuWidget::updateActionSearch() {
 
 void AppMenuWidget::searchMenu() {
 
-for(CloneAction *sr: searchResults) {
+for(QAction *sr: searchResults) {
     if(m_searchMenu->actions().contains(sr)) {
-        sr->resetOrigShortcutContext();
-        sr->disconnectOnClear();
         m_searchMenu->removeAction(sr);
+        CloneAction * ca = qobject_cast<CloneAction*>(sr);
+        if(ca) {
+        ca->resetOrigShortcutContext();
+        ca->disconnectOnClear();
+        }
     }
 }
 
@@ -671,7 +675,30 @@ if(m_appMenuModel->filteredActions().count()==1) {
 // probono: query baloosearch and add baloo search results to the Search menu
 // This is a minimal viable implementation
 // TODO: Show correct icons
-if(searchString != ""){
+QMimeDatabase mimeDatabase;
+if(searchString != "") {
+    searchResults << m_searchMenu->addSeparator();
+    Baloo::Query query;
+    query.setSearchString(searchString);
+    query.setLimit(20);
+    Baloo::ResultIterator iter = query.exec();
+    while (iter.next()) {
+
+        QMimeType mimeType;
+        mimeType = mimeDatabase.mimeTypeForFile(QFileInfo(iter.filePath()));
+        QAction *res = new QAction();
+        res->setText(iter.filePath());
+        QIcon icon = QIcon::fromTheme(mimeType.iconName());
+        res->setIcon(icon);
+        res->setIconVisibleInMenu(true);
+        m_searchMenu->addAction(res);
+        searchResults << res;
+    }
+
+}
+
+
+#if 0
     QProcess p;
     QString program = "baloosearch";
     QStringList arguments;
@@ -718,7 +745,7 @@ if(searchString != ""){
         }
     }
 }
-
+#endif
 m_appMenuModel->clearFilteredActions();
 
 }

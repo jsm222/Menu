@@ -75,6 +75,7 @@ target_link_libraries(${TARGET}
     Qt5::Network # probono: For qtsingleapplication
     KF5::DBusAddons
     KF5::WindowSystem
+    KF5::Baloo
     ${X11_LIBRARIES}
     ${XCOMPOSITE_LDFLAGS}
     ${XDAMAGE_LIBRARIES}
