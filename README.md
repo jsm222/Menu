@@ -76,59 +76,12 @@ user@FreeBSD$ sudo pkg which /usr/local/bin/gmenudbusmenuproxy
 /usr/local/bin/gmenudbusmenuproxy was installed by package plasma5-plasma-workspace-5.19.2
 ```
 
-Can we get it "standalone", without KDE Plasma?
-
-> This application finds windows using GTK GMenu DBus interfaces [1] and forwards them through DBusMenu. (...) 
-> LibreOffice with appmenu-gtk-module (...)
-> Works with Gimp or Inkscape if you have appmenu-gtk-module (there's GTK2 and GTK3 variants) installed and GTK_MODULES=appmenu-gtk-module environment variable set.
-
-More information regarding it: https://blog.broulik.de/2018/03/gtk-global-menu/
-
-```
-user@FreeBSD$ export GTK_MODULES=appmenu-gtk-module # Not needed!
-user@FreeBSD$ ls /usr/local/lib/gtk-3.0/modules/libappmenu-gtk-module.so
-# /usr/local/lib/gtk-3.0/modules/libappmenu-gtk-module.so = Needed!
-user@FreeBSD$ gmenudbusmenuproxy &
-# Now launch inkscape
-user@FreeBSD$ inkscape
-```
-
-__Initially__ the menu is empty, but when I bring a Qt application to the front and __then__ switch back to the Inkscape window, then the menus __work__.
-
-```
-user@FreeBSD$ export GTK_MODULES=appmenu-gtk-module # Not needed!
-user@FreeBSD$ ls /usr/local/lib/gtk-3.0/modules/libappmenu-gtk-module.so
-# /usr/local/lib/gtk-3.0/modules/libappmenu-gtk-module.so = Needed!
-user@FreeBSD$ gmenudbusmenuproxy &
-# Now launch gimp
-user@FreeBSD$ gimp
-```
-
-Same: __Initially__ the menu is empty, but when I bring a Qt applciation to the front and __then__ switch back to the Inkscape window, then the menus __work__.
-
-Seeing lots of
-
-```
-QDBusSignature: invalid signature ""
-QDBusSignature: invalid signature ""
-QDBusSignature: invalid signature ""
-```
-
-in `gmenudbusmenuproxy`.
+Would be nice if it was packaged "standalone", without KDE Plasma.
 
 
-Same for __Audacity__.
+## Baloo file system search
 
-TODO: Can we get it to work for Firefox and Thunderbird? Are they missing this functionality lately?
-
-```
-user@FreeBSD$ export GTK_MODULES=appmenu-gtk-module
-user@FreeBSD$ gmenudbusmenuproxy &
-# Now launch firefox
-kde.dbusmenuproxy: Got an empty menu for 0 on ":1.103" at "/org/appmenu/gtk/window/0"
-```
-
-Same for Thunderbird. `kde.dbusmenuproxy: Got an empty menu for 0 on ":1.152" at "/org/appmenu/gtk/window/1".
+If `baloosearch` returns results, then they are shown in Menu.
 
 
 ## License
