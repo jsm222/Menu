@@ -62,6 +62,8 @@
 
 #include "thumbnails.h"
 
+#include <QKeySequence>
+
 // SystemMenu is like QMenu but has a first menu item
 // that changes depending on whether modifier keys are pressed
 // https://stackoverflow.com/a/52756601
@@ -456,6 +458,7 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
     m_systemMenu->addSeparator();
     QAction *forceQuitAction = m_systemMenu->addAction(tr("Force Quit Application"));
     connect(forceQuitAction, SIGNAL(triggered()), this, SLOT(actionForceQuit()));
+    forceQuitAction->setShortcut(QKeySequence(Qt::CTRL | Qt::ALT | Qt::Key_Escape));
     m_systemMenu->addSeparator();
     QAction *restartAction = m_systemMenu->addAction(tr("Restart"));
     connect(restartAction, SIGNAL(triggered()), this, SLOT(actionLogout()));
