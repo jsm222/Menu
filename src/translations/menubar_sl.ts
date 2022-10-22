@@ -4,40 +4,53 @@
 <context>
     <name>AppMenuWidget</name>
     <message>
-        <location filename="../appmenuwidget.cpp" line="282"/>
         <source>Search</source>
-        <translation>Išči</translation>
+        <translation type="vanished">Išči</translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="312"/>
-        <location filename="../appmenuwidget.cpp" line="609"/>
+        <location filename="../appmenuwidget.cpp" line="843"/>
         <source>About This Computer</source>
         <translation>O tem računalniku</translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="316"/>
+        <location filename="../appmenuwidget.cpp" line="443"/>
         <source>Hide all</source>
         <translation>Skrij vse</translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="318"/>
+        <location filename="../appmenuwidget.cpp" line="419"/>
+        <source>System</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../appmenuwidget.cpp" line="445"/>
         <source>Unhide all</source>
         <translation>Prikaži vse</translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="332"/>
+        <location filename="../appmenuwidget.cpp" line="459"/>
+        <source>Force Quit Application</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../appmenuwidget.cpp" line="463"/>
         <source>Restart</source>
         <translation>Znova zaženi</translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="334"/>
+        <location filename="../appmenuwidget.cpp" line="465"/>
         <source>Log Out</source>
         <translation>Odjavi se</translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="336"/>
+        <location filename="../appmenuwidget.cpp" line="467"/>
         <source>Shut Down</source>
         <translation>Izklopi</translation>
+    </message>
+    <message>
+        <location filename="../appmenuwidget.cpp" line="810"/>
+        <source>About helloDesktop</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -74,47 +87,38 @@
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../../Shutdown/mainwindow.ui" line="23"/>
         <location filename="../../Shutdown/mainwindow.ui" line="72"/>
-        <location filename="../../Shutdown/build/Shutdown_autogen/include/ui_mainwindow.h" line="100"/>
-        <location filename="../../Shutdown/build/Shutdown_autogen/include/ui_mainwindow.h" line="108"/>
         <source>Shut Down</source>
         <translation>Izklopi</translation>
     </message>
     <message>
         <location filename="../../Shutdown/mainwindow.ui" line="42"/>
-        <location filename="../../Shutdown/build/Shutdown_autogen/include/ui_mainwindow.h" line="102"/>
         <source>Restart</source>
         <translation>Ponovno zaženi</translation>
     </message>
     <message>
         <location filename="../../Shutdown/mainwindow.ui" line="49"/>
-        <location filename="../../Shutdown/build/Shutdown_autogen/include/ui_mainwindow.h" line="103"/>
         <location filename="../mainwindow.cpp" line="44"/>
         <source>Log Out</source>
         <translation>Odjavi se</translation>
     </message>
     <message>
         <location filename="../../Shutdown/mainwindow.ui" line="56"/>
-        <location filename="../../Shutdown/build/Shutdown_autogen/include/ui_mainwindow.h" line="104"/>
         <source>Cancel</source>
         <translation>Prekliči</translation>
     </message>
     <message>
         <location filename="../../Shutdown/mainwindow.ui" line="59"/>
-        <location filename="../../Shutdown/build/Shutdown_autogen/include/ui_mainwindow.h" line="106"/>
         <source>Esc</source>
         <translation>Esc</translation>
     </message>
     <message>
         <location filename="../../Shutdown/mainwindow.ui" line="91"/>
-        <location filename="../../Shutdown/build/Shutdown_autogen/include/ui_mainwindow.h" line="109"/>
         <source>Are you sure you want to shut down your computer now?</source>
         <translation>Ali si prepričan, da želiš izklopiti računalnik?</translation>
     </message>
     <message>
         <location filename="../../Shutdown/mainwindow.ui" line="110"/>
-        <location filename="../../Shutdown/build/Shutdown_autogen/include/ui_mainwindow.h" line="101"/>
         <source>Log out</source>
         <translation>Odjavi se</translation>
     </message>
@@ -127,9 +131,22 @@
 <context>
     <name>MyLineEditEventFilter</name>
     <message>
-        <location filename="../appmenuwidget.cpp" line="108"/>
         <source>Search</source>
-        <translation>Iskanje s filtrom</translation>
+        <translation type="vanished">Iskanje s filtrom</translation>
+    </message>
+</context>
+<context>
+    <name>SystemMenu</name>
+    <message>
+        <location filename="../appmenuwidget.cpp" line="77"/>
+        <location filename="../appmenuwidget.cpp" line="116"/>
+        <source>About This Computer</source>
+        <translation type="unfinished">O tem računalniku</translation>
+    </message>
+    <message>
+        <location filename="../appmenuwidget.cpp" line="116"/>
+        <source>About helloDesktop</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 </TS>

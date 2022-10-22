@@ -461,6 +461,7 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
     m_systemMenu->addSeparator();
     QAction *forceQuitAction = m_systemMenu->addAction(tr("Force Quit Application"));
     connect(forceQuitAction, SIGNAL(triggered()), this, SLOT(actionForceQuit()));
+    forceQuitAction->setShortcut(QKeySequence(Qt::CTRL | Qt::ALT | Qt::Key_Escape));
     m_systemMenu->addSeparator();
     QAction *restartAction = m_systemMenu->addAction(tr("Restart"));
     connect(restartAction, SIGNAL(triggered()), this, SLOT(actionLogout()));
@@ -618,6 +619,7 @@ for(CloneAction *sr: searchResults) {
     }
 }
 
+
     QList<QMenu*> menus;
     menus << m_systemMenu << m_appMenuModel->menu();
     QString searchString = searchLineEdit->text();
@@ -665,6 +667,7 @@ if(m_appMenuModel->filteredActions().count()==1) {
     QApplication::postEvent(m_menuBar, evt);
 }
 m_appMenuModel->clearFilteredActions();
+
 
 }
 
