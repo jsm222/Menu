@@ -308,6 +308,14 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
 
     // Add search box to menu
     searchLineEdit = new SearchLineEdit(this);
+
+    // Make sure the search box gets cleared when this application loses focus
+    connect(qApp,&QApplication::applicationStateChanged,[this](Qt::ApplicationState state)
+            {
+                searchLineEdit->clear();
+                searchLineEdit->textChanged("");
+            });
+
     searchLineEdit->setObjectName("actionSearch"); // probono: This name can be used in qss to style it specifically
     //searchLineEdit->setPlaceholderText(tr("Search"));
     //auto* pLineEditEvtFilter = new MyLineEditEventFilter(searchLineEdit);
