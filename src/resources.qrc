@@ -1,8 +1,4 @@
 <RCC>
     <qresource prefix="/">
-        <file>resources/logo.svg</file>
-        <file>resources/min.svg</file>
-        <file>resources/close.svg</file>
-        <file>resources/restore.svg</file>
     </qresource>
 </RCC>
