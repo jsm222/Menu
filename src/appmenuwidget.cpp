@@ -392,7 +392,8 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
     //searchLineWidget->setObjectName("SearchLineWidget");
     // layout->addWidget(searchLineWidget, 0, Qt::AlignRight);
     // layout->addWidget(searchLineWidget, 0, Qt::AlignLeft);
-    m_searchMenu = new QMenu("Search",nullptr);
+    m_searchMenu = new QMenu();
+    m_searchMenu->setIcon(QIcon::fromTheme("search-symbolic"));
     connect(m_searchMenu,&QMenu::aboutToShow
             ,[this]() {
 
