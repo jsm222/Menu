@@ -62,8 +62,6 @@
 
 #include "thumbnails.h"
 
-#include <QKeySequence>
-
 // SystemMenu is like QMenu but has a first menu item
 // that changes depending on whether modifier keys are pressed
 // https://stackoverflow.com/a/52756601
@@ -120,9 +118,13 @@ private:
 };
 
 void SearchLineEdit::keyPressEvent(QKeyEvent * event) {
-    if(event->key() == Qt::Key_Down)
+    if(event->key() == Qt::Key_Down) {
+
         emit editingFinished();
-    QLineEdit::keyPressEvent(event);
+   } else {
+    QCoreApplication::sendEvent(parent(),event);
+   }
+   QLineEdit::keyPressEvent(event);
 }
 class MyLineEditEventFilter : public QObject
 {
@@ -362,6 +364,8 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
 
     // Add search box to menu
     searchLineEdit = new SearchLineEdit(this);
+
+    // Make sure the search box gets cleared when this application loses focus
     searchLineEdit->setObjectName("actionSearch"); // probono: This name can be used in qss to style it specifically
     //searchLineEdit->setPlaceholderText(tr("Search"));
     //auto* pLineEditEvtFilter = new MyLineEditEventFilter(searchLineEdit);
@@ -397,7 +401,6 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
         // qobject_cast<QWidgetAction*>(m_searchMenu->actions().at(0))->defaultWidget()->show();
         //qobject_cast<QWidgetAction*>(m_searchMenu->actions().at(0))->defaultWidget()->setFocus();
     });
-
     /*
     connect(m_searchMenu,&QMenu::aboutToHide,this,[this]{
             searchLineEdit->clear();
@@ -411,8 +414,8 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
             // Clean the search box if the user has left the Menu application altogether
             searchLineEdit->clear();
             searchLineEdit->textChanged("");
-        }
-    });
+            }
+        });
 
     // Prepare System menu
     m_systemMenu = new SystemMenu(); // Using our SystemMenu subclass instead of a QMenu to be able to toggle "About..." when modifier key is pressed
@@ -607,10 +610,16 @@ void AppMenuWidget::updateActionSearch() {
 }
 
 void AppMenuWidget::searchMenu() {
-    for(QAction *sr: searchResults) {
-        if(m_searchMenu->actions().contains(sr))
-            m_searchMenu->removeAction(sr);
+
+for(CloneAction *sr: searchResults) {
+    if(m_searchMenu->actions().contains(sr)) {
+        sr->resetOrigShortcutContext();
+        sr->disconnectOnClear();
+        m_searchMenu->removeAction(sr);
     }
+}
+
+
     QList<QMenu*> menus;
     menus << m_systemMenu << m_appMenuModel->menu();
     QString searchString = searchLineEdit->text();
@@ -622,21 +631,44 @@ void AppMenuWidget::searchMenu() {
 
 
     }
-    for(QString v : m_appMenuModel->filteredActions().keys()) {
 
-        QAction *orig = m_appMenuModel->filteredActions()[v];
-        CloneAction *cpy = new CloneAction(orig);
-        cpy->setText(v);
-        cpy->setShortcut(orig->shortcut());
-        cpy->setToolTip(orig->toolTip());
-        cpy->updateMe();
-        searchResults << cpy;
-        m_searchMenu->addAction(cpy);
+for(QString v : m_appMenuModel->filteredActions().keys()) {
+    QAction *orig = m_appMenuModel->filteredActions()[v];
+    CloneAction *cpy = new CloneAction(orig);
+    cpy->setText(v);
+    cpy->setShortcut(orig->shortcut());
+    cpy->setToolTip(orig->toolTip());
+    cpy->updateMe();
+    cpy->setShortcutContext(Qt::ApplicationShortcut);
+    orig->setShortcutContext(Qt::WindowShortcut);
+    searchResults << cpy;
+    connect(cpy,&QAction::triggered,this,[this]{
+        searchLineEdit->setText("");
+        searchLineEdit->textChanged("");
+        m_searchMenu->close();
 
+    });
+    cpy->setDisconnectOnClear(connect(orig,&QAction::triggered,this,[this]{
+        searchLineEdit->setText("");
+        searchLineEdit->textChanged("");
+        m_searchMenu->close();
+
+    }));
+    m_searchMenu->addAction(cpy);
     }
 
 
-    m_appMenuModel->clearFilteredActions();
+
+
+if(m_appMenuModel->filteredActions().count()==1) {
+    searchEditingDone();
+} else {
+    auto evt = new QMouseEvent(QEvent::MouseMove, m_menuBar->actionGeometry(m_menuBar->actions().at(0)).center(), Qt::NoButton, Qt::NoButton, Qt::NoModifier);
+    QApplication::postEvent(m_menuBar, evt);
+}
+m_appMenuModel->clearFilteredActions();
+
+
 }
 
 

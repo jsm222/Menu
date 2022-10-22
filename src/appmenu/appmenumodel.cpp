@@ -546,7 +546,11 @@ bool AppMenuModel::filterMenu(QMenu* searchMenu,QString searchString,bool includ
 
 
             if(hasVisible) {
-                QAction*  parent = qobject_cast<QMenu*>(action->parent())->menuAction();
+                QAction * parent = nullptr;
+                QMenu*  parentMenu = qobject_cast<QMenu*>(action->parent());
+                if(parentMenu) {
+                  parent = parentMenu->menuAction();
+                }
                 while(parent) {
                     parent->setVisible(!parent->isSeparator());
                     if(parent->menu() && parent->menu()->parent()) {
@@ -698,10 +702,22 @@ void AppMenuModel::updateApplicationMenu(const QString &serviceName, const QStri
 
     connect(m_importer.data(), &DBusMenuImporter::menuUpdated, this, [=](QMenu *menu) {
         for (QAction *a : menu->actions()) {
+            a->setShortcutContext(Qt::ApplicationShortcut);
+            connect(a,&QAction::triggered,this,[a,menu] {
+                menu->close();
+                QMenu * parentMenu = qobject_cast<QMenu*>(menu->parent());
+                while(parentMenu) {
+                    parentMenu->close();
+                    parentMenu=qobject_cast<QMenu*>(parentMenu->parent());
+                }
 
+            });
             if(a->menu()) {
 		           m_importer->updateMenu(a->menu());
                    m_awaitsUpdate << a->menu();
+
+
+
             }
             // signal dataChanged when the action changes
             /*connect(a, &QAction::changed, this, [this, a] {
