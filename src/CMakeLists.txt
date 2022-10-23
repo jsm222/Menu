@@ -62,11 +62,6 @@ add_dependencies(${CMAKE_PROJECT_NAME} resources)
 
 find_package(Qt5 COMPONENTS Network REQUIRED)  # probono: For qtsingleapplication
 
-# Do not put qDebug() into Release builds
-if(NOT CMAKE_BUILD_TYPE STREQUAL Debug)
-    add_definitions(-DQT_NO_DEBUG_OUTPUT)
-endif()
-
 target_link_libraries(${TARGET}
     Qt5::DBus
     Qt5::Widgets
@@ -75,6 +70,7 @@ target_link_libraries(${TARGET}
     Qt5::Network # probono: For qtsingleapplication
     KF5::DBusAddons
     KF5::WindowSystem
+    KF5::Baloo
     ${X11_LIBRARIES}
     ${XCOMPOSITE_LDFLAGS}
     ${XDAMAGE_LIBRARIES}

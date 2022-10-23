@@ -107,7 +107,7 @@ public slots:
     void findAppsInside(QStringList locationsContainingApps, QMenu *m_systemMenu,  QFileSystemWatcher *watcher);
     void actionAbout();
     void actionLaunch(QAction *action);
-    void openBalooSearchResult(CloneAction *action);
+    void openBalooSearchResult(QAction *action);
     // void actionDisplays();
     // void actionShortcuts();
     // void actionSound();
@@ -128,7 +128,7 @@ private:
 private:
     QMenu *m_systemMenu;
      QMenu *m_searchMenu;
-     QList<CloneAction *> searchResults;
+     QList<QAction *> searchResults;
     void integrateSystemMenu(QMenuBar*);
     void searchEditingDone();
     void refreshTimer();

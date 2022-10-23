@@ -50,7 +50,8 @@
 #include <QCryptographicHash>
 #include <QWindow>
 #include <QTimer>
-
+#include <Baloo/Query>
+#include <magic.h>
 #include <KF5/KWindowSystem/KWindowSystem>
 #include <KF5/KWindowSystem/KWindowInfo>
 #include <KF5/KWindowSystem/NETWM>
@@ -612,11 +613,14 @@ void AppMenuWidget::updateActionSearch() {
 
 void AppMenuWidget::searchMenu() {
 
-for(CloneAction *sr: searchResults) {
+for(QAction *sr: searchResults) {
     if(m_searchMenu->actions().contains(sr)) {
-        sr->resetOrigShortcutContext();
-        sr->disconnectOnClear();
         m_searchMenu->removeAction(sr);
+        CloneAction * ca = qobject_cast<CloneAction*>(sr);
+        if(ca) {
+        ca->resetOrigShortcutContext();
+        ca->disconnectOnClear();
+        }
     }
 }
 
@@ -668,10 +672,47 @@ if(m_appMenuModel->filteredActions().count()==1) {
     QApplication::postEvent(m_menuBar, evt);
 }
 
-// probono: query baloosearch and add baloo search results to the Search menu
-// This is a minimal viable implementation
-// TODO: Show correct icons
-if(searchString != ""){
+// probono: Use Baloo API and add baloo search results to the Search menu; see below for a rudimentary non-API version
+QMimeDatabase mimeDatabase;
+if(searchString != "") {
+    searchResults << m_searchMenu->addSeparator(); // The items in searchResults get removed when search results change
+    Baloo::Query query;
+    query.setSearchString(searchString);
+    query.setLimit(21);
+    Baloo::ResultIterator iter = query.exec();
+    int i=0;
+    while (iter.next()) {
+        i = i+1;
+        QMimeType mimeType;
+        mimeType = mimeDatabase.mimeTypeForFile(QFileInfo(iter.filePath()));
+        QAction *res = new QAction();
+        res->setText(iter.filePath().split("/").last());
+        res->setToolTip(iter.filePath());
+        QIcon icon = QIcon::fromTheme(mimeType.iconName());
+        res->setIcon(icon);
+        res->setIconVisibleInMenu(true);
+        res->setProperty("path", iter.filePath());
+        connect(res,&QAction::triggered,this,[this, res]{
+            openBalooSearchResult(res);
+            searchLineEdit->setText("");
+            searchLineEdit->textChanged("");
+            m_searchMenu->close();
+        });
+
+        m_searchMenu->addAction(res);
+        searchResults << res; // The items in searchResults get removed when search results change
+     }
+    if(i>20) {
+        QAction *a = new QAction();
+        searchResults << a; // The items in searchResults get removed when search results change
+        a->setText("...");
+        a->setDisabled(true);
+        m_searchMenu->addAction(a);
+    }
+}
+
+// probono: query baloosearch and add baloo search results to the Search menu; see above for an API version
+#if 0
     QProcess p;
     QString program = "baloosearch";
     QStringList arguments;
@@ -718,11 +759,9 @@ if(searchString != ""){
         }
     }
 }
-
+#endif
 m_appMenuModel->clearFilteredActions();
-
 }
-
 
 void AppMenuWidget::rebuildMenu()
 {
@@ -1110,15 +1149,27 @@ void AppMenuWidget::actionLaunch(QAction *action)
     QProcess::startDetached("launch", pathToBeLaunched);
 }
 
-void AppMenuWidget::openBalooSearchResult(CloneAction *action)
+// probono: When a modifier key is held down, then just show the item in Filer;
+// otherwise launch it if it is an application bundle, or open it if it is not
+void AppMenuWidget::openBalooSearchResult(QAction *action)
 {
-    qDebug() << "openBalooSearchResult(CloneAction *action) called";
-    QStringList pathToBeLaunched = {action->property("path").toString()};
+    QString pathToBeLaunched = action->property("path").toString();
     // TODO: Maybe just show the file in the file manager when a modifier key is pressed?
-    if(pathToBeLaunched.endsWith(".app") == true || pathToBeLaunched.endsWith(".AppDir") == true) {
-        QProcess::startDetached("launch", pathToBeLaunched);
+    QProcess *p = new QProcess;
+    if (QApplication::keyboardModifiers()){
+        p->setProgram("gdbus");
+        // probono: Am I the only one who finds the next line utterly overcomplicated to "tell Filer to show pathToBeLaunched"?
+        p->setArguments({ "call", "--session", "--dest", "org.freedesktop.FileManager1", "--object-path", "/org/freedesktop/FileManager1", "--method", "org.freedesktop.FileManager1.ShowItems", "[\"file:///" + pathToBeLaunched + "\"]", "\"\"" });
+        p->startDetached();
     } else {
-        QProcess::startDetached("open", pathToBeLaunched);
+        p->setArguments({pathToBeLaunched});
+        if(pathToBeLaunched.endsWith(".app") || pathToBeLaunched.endsWith(".AppDir") || pathToBeLaunched.endsWith(".AppImage")) {
+            p->setProgram("launch");
+            p->startDetached();
+        } else {
+            p->setProgram("open");
+            p->startDetached();
+        }
     }
 }
 

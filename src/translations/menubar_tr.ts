@@ -31,47 +31,47 @@
         <translation type="vanished">Ara</translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="927"/>
+        <location filename="../appmenuwidget.cpp" line="966"/>
         <source>About This Computer</source>
         <translation>Bu bilgisayar hakkında</translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="447"/>
+        <location filename="../appmenuwidget.cpp" line="448"/>
         <source>Hide all</source>
         <translation>Tümünü gizle</translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="423"/>
+        <location filename="../appmenuwidget.cpp" line="424"/>
         <source>System</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="449"/>
+        <location filename="../appmenuwidget.cpp" line="450"/>
         <source>Unhide all</source>
         <translation>Tümünü göster</translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="463"/>
+        <location filename="../appmenuwidget.cpp" line="464"/>
         <source>Force Quit Application</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="467"/>
+        <location filename="../appmenuwidget.cpp" line="468"/>
         <source>Restart</source>
         <translation>Yeniden başlat</translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="469"/>
+        <location filename="../appmenuwidget.cpp" line="470"/>
         <source>Log Out</source>
         <translation>Çıkış yap</translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="471"/>
+        <location filename="../appmenuwidget.cpp" line="472"/>
         <source>Shut Down</source>
         <translation>Kapat</translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="894"/>
+        <location filename="../appmenuwidget.cpp" line="933"/>
         <source>About helloDesktop</source>
         <translation type="unfinished"></translation>
     </message>
@@ -161,13 +161,13 @@
 <context>
     <name>SystemMenu</name>
     <message>
-        <location filename="../appmenuwidget.cpp" line="75"/>
-        <location filename="../appmenuwidget.cpp" line="114"/>
+        <location filename="../appmenuwidget.cpp" line="76"/>
+        <location filename="../appmenuwidget.cpp" line="115"/>
         <source>About This Computer</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="114"/>
+        <location filename="../appmenuwidget.cpp" line="115"/>
         <source>About helloDesktop</source>
         <translation type="unfinished"></translation>
     </message>
