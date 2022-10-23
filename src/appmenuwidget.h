@@ -150,6 +150,8 @@ private:
     QTimer *m_typingTimer;
     
     //int m_buttonsWidth;
+
+    void keyPressEvent(QKeyEvent * event) override;
 };
 
 #endif // APPMENUWIDGET_H

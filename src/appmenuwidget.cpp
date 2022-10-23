@@ -118,6 +118,15 @@ private:
     }
 };
 
+// Put cursor back in search box if user presses backspace while a menu item is highlighted
+void AppMenuWidget::keyPressEvent(QKeyEvent * event) {
+    if(event->key() == Qt::Key_Backspace) {
+        searchLineEdit->setFocus();
+        // FIXME: Wait until searchLineEdit has focus before continuing
+   }
+   QCoreApplication::sendEvent(parent(),event);
+}
+
 void SearchLineEdit::keyPressEvent(QKeyEvent * event) {
     if(event->key() == Qt::Key_Down) {
 
@@ -127,6 +136,7 @@ void SearchLineEdit::keyPressEvent(QKeyEvent * event) {
    }
    QLineEdit::keyPressEvent(event);
 }
+
 class MyLineEditEventFilter : public QObject
 {
 public:
@@ -613,16 +623,16 @@ void AppMenuWidget::updateActionSearch() {
 
 void AppMenuWidget::searchMenu() {
 
-for(QAction *sr: searchResults) {
-    if(m_searchMenu->actions().contains(sr)) {
-        m_searchMenu->removeAction(sr);
-        CloneAction * ca = qobject_cast<CloneAction*>(sr);
-        if(ca) {
-        ca->resetOrigShortcutContext();
-        ca->disconnectOnClear();
+    for(QAction *sr: searchResults) {
+        if(m_searchMenu->actions().contains(sr)) {
+            m_searchMenu->removeAction(sr);
+            CloneAction * ca = qobject_cast<CloneAction*>(sr);
+            if(ca) {
+                ca->resetOrigShortcutContext();
+                ca->disconnectOnClear();
+            }
         }
     }
-}
 
 
     QList<QMenu*> menus;
@@ -676,17 +686,20 @@ if(m_appMenuModel->filteredActions().count()==1) {
 QMimeDatabase mimeDatabase;
 if(searchString != "") {
     // Prevent separator from ever being directly underneath the search box, because this breaks arrow key nagivation
-    if(searchResults.length()>3)
+    if(m_appMenuModel->filteredActions().count()>0)
         searchResults << m_searchMenu->addSeparator(); // The items in searchResults get removed when search results change
     Baloo::Query query;
     query.setSearchString(searchString);
     query.setLimit(21);
     Baloo::ResultIterator iter = query.exec();
     int i=0;
+    bool showMore = false;
     while (iter.next()) {
         i = i+1;
-        if(i==query.limit()-1)
+        if(i == query.limit()) {
+            showMore = true;
             break;
+        }
         QMimeType mimeType;
         mimeType = mimeDatabase.mimeTypeForFile(QFileInfo(iter.filePath()));
         QAction *res = new QAction();
@@ -706,7 +719,8 @@ if(searchString != "") {
         m_searchMenu->addAction(res);
         searchResults << res; // The items in searchResults get removed when search results change
      }
-    if(i>query.limit()) {
+
+    if(showMore) {
         QAction *a = new QAction();
         searchResults << a; // The items in searchResults get removed when search results change
         a->setText("...");

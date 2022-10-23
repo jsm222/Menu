@@ -31,47 +31,47 @@
         <translation type="vanished">搜尋</translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="969"/>
+        <location filename="../appmenuwidget.cpp" line="984"/>
         <source>About This Computer</source>
         <translation>關於這台電腦</translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="448"/>
+        <location filename="../appmenuwidget.cpp" line="458"/>
         <source>Hide all</source>
         <translation>全部隱藏</translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="424"/>
+        <location filename="../appmenuwidget.cpp" line="434"/>
         <source>System</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="450"/>
+        <location filename="../appmenuwidget.cpp" line="460"/>
         <source>Unhide all</source>
         <translation>取消全部隱藏</translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="464"/>
+        <location filename="../appmenuwidget.cpp" line="474"/>
         <source>Force Quit Application</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="468"/>
+        <location filename="../appmenuwidget.cpp" line="478"/>
         <source>Restart</source>
         <translation>重新開機</translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="470"/>
+        <location filename="../appmenuwidget.cpp" line="480"/>
         <source>Log Out</source>
         <translation>登出</translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="472"/>
+        <location filename="../appmenuwidget.cpp" line="482"/>
         <source>Shut Down</source>
         <translation>關機</translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="936"/>
+        <location filename="../appmenuwidget.cpp" line="951"/>
         <source>About helloDesktop</source>
         <translation type="unfinished"></translation>
     </message>
