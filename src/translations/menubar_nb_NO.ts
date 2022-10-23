@@ -31,7 +31,7 @@
         <translation type="vanished">Søk</translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="990"/>
+        <location filename="../appmenuwidget.cpp" line="986"/>
         <source>About This Computer</source>
         <translation>Om denne datamaskinen</translation>
     </message>
@@ -71,7 +71,7 @@
         <translation>Slå av</translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="957"/>
+        <location filename="../appmenuwidget.cpp" line="953"/>
         <source>About helloDesktop</source>
         <translation type="unfinished"></translation>
     </message>

@@ -8,7 +8,7 @@
         <translation type="vanished">חיפוש</translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="990"/>
+        <location filename="../appmenuwidget.cpp" line="986"/>
         <source>About This Computer</source>
         <translation>על המחשב הזה</translation>
     </message>
@@ -48,7 +48,7 @@
         <translation>כיבוי</translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="957"/>
+        <location filename="../appmenuwidget.cpp" line="953"/>
         <source>About helloDesktop</source>
         <translation type="unfinished"></translation>
     </message>

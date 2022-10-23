@@ -521,14 +521,10 @@ void AppMenuWidget::refreshTimer() {
 }
 
 void AppMenuWidget::focusMenu() {
-
-
     QMouseEvent event(QEvent::MouseButtonPress,QPoint(0,0),
                       m_menuBar->mapToGlobal(QPoint(0,0)),Qt::LeftButton,0,0);
     QApplication::sendEvent(m_menuBar,&event);
     searchLineEdit->setFocus();
-
-
 }
 AppMenuWidget::~AppMenuWidget() {
 }
@@ -1254,7 +1250,9 @@ void AppMenuWidget::actionLogout()
     qDebug() << "actionLogout() called";
     // Check if we have the Shutdown binary at hand
     if(QFileInfo(QCoreApplication::applicationDirPath() + QString("/Shutdown")).isExecutable()) {
-        QProcess::execute(QCoreApplication::applicationDirPath() + QString("/Shutdown"));
+        QProcess *p = new QProcess();
+        p->setProgram(QCoreApplication::applicationDirPath() + QString("/Shutdown"));
+        p->startDetached();
     } else {
         qDebug() << "Shutdown executable not available next to Menubar executable, exiting";
         QApplication::exit(); // In case we are lacking the Shutdown executable
@@ -1264,7 +1262,9 @@ void AppMenuWidget::actionLogout()
 void AppMenuWidget::actionForceQuit()
 {
     qDebug() << "actionForceQuit() called";
-    QProcess::execute(QString("xkill"));
+    QProcess *p = new QProcess();
+    p->setProgram("xkill");
+    p->startDetached();
 }
 
 bool AppMenuWidget::which(QString command)

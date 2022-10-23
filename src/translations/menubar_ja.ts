@@ -31,7 +31,7 @@
         <translation type="vanished">検索</translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="990"/>
+        <location filename="../appmenuwidget.cpp" line="986"/>
         <source>About This Computer</source>
         <translation>このコンピューターについて</translation>
     </message>
@@ -71,7 +71,7 @@
         <translation>シャットダウン</translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="957"/>
+        <location filename="../appmenuwidget.cpp" line="953"/>
         <source>About helloDesktop</source>
         <translation type="unfinished"></translation>
     </message>
