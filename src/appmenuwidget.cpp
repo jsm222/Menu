@@ -675,7 +675,9 @@ if(m_appMenuModel->filteredActions().count()==1) {
 // probono: Use Baloo API and add baloo search results to the Search menu; see below for a rudimentary non-API version
 QMimeDatabase mimeDatabase;
 if(searchString != "") {
-    searchResults << m_searchMenu->addSeparator(); // The items in searchResults get removed when search results change
+    // Prevent separator from ever being directly underneath the search box, because this breaks arrow key nagivation
+    if(searchResults.length()>3)
+        searchResults << m_searchMenu->addSeparator(); // The items in searchResults get removed when search results change
     Baloo::Query query;
     query.setSearchString(searchString);
     query.setLimit(21);
@@ -683,6 +685,8 @@ if(searchString != "") {
     int i=0;
     while (iter.next()) {
         i = i+1;
+        if(i==query.limit()-1)
+            break;
         QMimeType mimeType;
         mimeType = mimeDatabase.mimeTypeForFile(QFileInfo(iter.filePath()));
         QAction *res = new QAction();
@@ -702,7 +706,7 @@ if(searchString != "") {
         m_searchMenu->addAction(res);
         searchResults << res; // The items in searchResults get removed when search results change
      }
-    if(i>20) {
+    if(i>query.limit()) {
         QAction *a = new QAction();
         searchResults << a; // The items in searchResults get removed when search results change
         a->setText("...");

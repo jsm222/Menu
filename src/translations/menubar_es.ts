@@ -8,7 +8,7 @@
         <translation type="vanished">Buscar</translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="966"/>
+        <location filename="../appmenuwidget.cpp" line="969"/>
         <source>About This Computer</source>
         <translation>Sobre este Equipo</translation>
     </message>
@@ -48,7 +48,7 @@
         <translation>Apagar</translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="933"/>
+        <location filename="../appmenuwidget.cpp" line="936"/>
         <source>About helloDesktop</source>
         <translation type="unfinished"></translation>
     </message>

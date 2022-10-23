@@ -8,7 +8,7 @@
         <translation type="vanished">Αναζήτηση</translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="966"/>
+        <location filename="../appmenuwidget.cpp" line="969"/>
         <source>About This Computer</source>
         <translation>Σχετικά με αυτόν τον υπολογιστή</translation>
     </message>
@@ -48,7 +48,7 @@
         <translation>Τερματισμός λειτουργίας</translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="933"/>
+        <location filename="../appmenuwidget.cpp" line="936"/>
         <source>About helloDesktop</source>
         <translation type="unfinished"></translation>
     </message>
