@@ -8,7 +8,7 @@
         <translation type="vanished">Vyhledávání</translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="984"/>
+        <location filename="../appmenuwidget.cpp" line="990"/>
         <source>About This Computer</source>
         <translation>O tomto počítači</translation>
     </message>
@@ -48,7 +48,7 @@
         <translation>Vypnutí</translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="951"/>
+        <location filename="../appmenuwidget.cpp" line="957"/>
         <source>About helloDesktop</source>
         <translation type="unfinished"></translation>
     </message>

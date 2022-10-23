@@ -11,7 +11,7 @@
 <context>
     <name>AppMenuWidget</name>
     <message>
-        <location filename="../appmenuwidget.cpp" line="984"/>
+        <location filename="../appmenuwidget.cpp" line="990"/>
         <source>About This Computer</source>
         <translation>Om denne computer</translation>
     </message>
@@ -51,7 +51,7 @@
         <translation>Luk ned</translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="951"/>
+        <location filename="../appmenuwidget.cpp" line="957"/>
         <source>About helloDesktop</source>
         <translation type="unfinished"></translation>
     </message>
