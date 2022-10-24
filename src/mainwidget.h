@@ -17,8 +17,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MAINPANEL_H
-#define MAINPANEL_H
+#ifndef MainWidget_H
+#define MainWidget_H
 
 #include <QWidget>
 #include <QHBoxLayout>
@@ -26,12 +26,12 @@
 #include "pluginmanager.h"
 #include "appmenuwidget.h"
 
-class MainPanel : public QWidget
+class MainWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit MainPanel(QWidget *parent = nullptr);
+    explicit MainWidget(QWidget *parent = nullptr);
 
     void loadModules();
     void loadModule(const QString &pluginName, QHBoxLayout *layout);
@@ -50,4 +50,4 @@ private:
     PluginManager *m_pluginManager;
 };
 
-#endif // MAINPANEL_H
+#endif // MainWidget_H

@@ -21,7 +21,7 @@
 #define MAINWINDOW_H
 
 #include <QFrame>
-#include "mainpanel.h"
+#include "mainwidget.h"
 #include <QTranslator>
 
 class MainWindow : public QFrame
@@ -30,8 +30,12 @@ class MainWindow : public QFrame
 
 public:
     MainWindow(QWidget *parent = 0);
-    MainPanel *m_mainPanel;
+    MainWidget *m_MainWidget;
     ~MainWindow();
+
+public slots:
+    QString showApplicationName(const QString &arg);
+    void hideApplicationName();
 
 protected:
     void paintEvent(QPaintEvent *e) override;
@@ -42,6 +46,7 @@ private:
 
 private:
     QWidget *m_fakeWidget;
+    QLabel *applicationStartingLabel;
 };
 
 #endif // MAINWINDOW_H

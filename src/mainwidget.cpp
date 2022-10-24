@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "mainpanel.h"
+#include "mainwidget.h"
 #include "extensionwidget.h"
 
 #include <QMouseEvent>
@@ -35,7 +35,7 @@
 //store our layout for rebuilding the menu
 QHBoxLayout* m_layout;
 
-MainPanel::MainPanel(QWidget *parent)
+MainWidget::MainWidget(QWidget *parent)
     : QWidget(parent),
       m_globalMenuLayout(new QHBoxLayout),
       m_statusnotifierLayout(new QHBoxLayout),
@@ -85,7 +85,7 @@ MainPanel::MainPanel(QWidget *parent)
     m_layout = layout;
 }
 
-void MainPanel::rebuildSystemMenu()
+void MainWidget::rebuildSystemMenu()
 {
     qDebug() << "SIGSUR1 recived, rebuild the system menu";
 
@@ -97,10 +97,10 @@ void MainPanel::rebuildSystemMenu()
         m_layout->insertWidget(0, m_appMenuWidget);
     }
 }
-void MainPanel::triggerFocusMenu() {
+void MainWidget::triggerFocusMenu() {
     m_appMenuWidget->focusMenu();
 }
-void MainPanel::loadModules()
+void MainWidget::loadModules()
 {
     loadModule("datetime", m_dateTimeLayout);
     loadModule("statusnotifier", m_statusnotifierLayout);
@@ -108,7 +108,7 @@ void MainPanel::loadModules()
     loadModule("battery", m_controlCenterLayout);
 }
 
-void MainPanel::loadModule(const QString &pluginName, QHBoxLayout *layout)
+void MainWidget::loadModule(const QString &pluginName, QHBoxLayout *layout)
 {
     ExtensionWidget *extensionWidget = m_pluginManager->plugin(pluginName);
     if (extensionWidget) {
@@ -117,7 +117,7 @@ void MainPanel::loadModule(const QString &pluginName, QHBoxLayout *layout)
     }
 }
 
-void MainPanel::mouseDoubleClickEvent(QMouseEvent *e)
+void MainWidget::mouseDoubleClickEvent(QMouseEvent *e)
 {
     QWidget::mouseDoubleClickEvent(e);
 

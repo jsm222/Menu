@@ -20,6 +20,7 @@
 #include "mainwindow.h"
 #include <QApplication>
 #include <QDebug>
+#include <QtDBus/QtDBus>
 #include <csignal>
 
 #include <qtsingleapplication/qtsingleapplication.h>
@@ -48,7 +49,7 @@ public:
 //Rebuild the system menu on SIGUSR1 
 //https://github.com/helloSystem/Menu/issues/16
 void rebuildSystemMenuSignalHandler(int sig){
-    window->m_mainPanel->rebuildSystemMenu();
+    window->m_MainWidget->rebuildSystemMenu();
 }
 
 
@@ -106,12 +107,37 @@ QTimer delayedSearchFocus;
 delayedSearchFocus.setSingleShot(true);
 delayedSearchFocus.setInterval(200);
 QObject::connect(&delayedSearchFocus,&QTimer::timeout,&w,[&w]() {
-w.m_mainPanel->triggerFocusMenu();
+w.m_MainWidget->triggerFocusMenu();
 });
     QObject::connect(&instance, &QtSingleApplication::messageReceived,
              [&delayedSearchFocus]() {
                 delayedSearchFocus.start();
 });
+
+
+    if (!QDBusConnection::sessionBus().isConnected()) {
+        fprintf(stderr, "Cannot connect to the D-Bus session bus.\n"
+                "To start it, run:\n"
+                "\teval `dbus-launch --auto-syntax`\n");
+        return 1;
+    }
+
+    if (!QDBusConnection::sessionBus().registerService("local.Menu")) {
+        fprintf(stderr, "%s\n",
+                qPrintable(QDBusConnection::sessionBus().lastError().message()));
+        exit(1);
+    }
+
+    QDBusConnection::sessionBus().registerObject("/", &w, QDBusConnection::ExportAllSlots);
+
+    // probono: QUESTION: Why do we have to call this with
+    // gdbus call --session --dest local.Menu --object-path / --method local.Menu.MainWindow.showApplicationName "AppName"
+    // when the binary is named "Menu" but
+    // gdbus call --session --dest local.Menu --object-path / --method local.AppRun.MainWindow.showApplicationName "AppName"
+    // when the binary was launched through a symlink called "AppRun"?
+    //
+    // probono: QUESTION: How can we avoid the string "MainWindow" from being part of the '--method' argument?
+    // The name 'MainWindow' is a mere implementation detail and should not leak to the outside world
 
     return instance.exec();
 }

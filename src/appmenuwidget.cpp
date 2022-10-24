@@ -20,7 +20,7 @@
 
 #include "appmenuwidget.h"
 #include "appmenu/menuimporteradaptor.h"
-#include "mainpanel.h"
+#include "mainwidget.h"
 #include <QProcess>
 #include <QHBoxLayout>
 #include <QDebug>
@@ -61,6 +61,7 @@
 #include <sys/extattr.h>
 #endif
 
+#include "mainwindow.h"
 #include "thumbnails.h"
 
 // SystemMenu is like QMenu but has a first menu item
@@ -504,7 +505,6 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
             this, &AppMenuWidget::onWindowChanged);
 
     // Load action search
-
     actionCompleter = nullptr;
     updateActionSearch();
 }
@@ -785,7 +785,7 @@ m_appMenuModel->clearFilteredActions();
 
 void AppMenuWidget::rebuildMenu()
 {
-    qobject_cast<MainPanel*>(parent())->rebuildSystemMenu();
+    qobject_cast<MainWidget*>(parent())->rebuildSystemMenu();
     qDebug() << "AppMenuWidget::rebuildMenu() called";
 }
 
@@ -907,6 +907,8 @@ void AppMenuWidget::onActiveWindowChanged()
         searchLineEdit->clear();
         searchLineEdit->textChanged("");
         // bool isMax = info.hasState(NET::Max);
+
+        qobject_cast<MainWindow*>(this->parent()->parent())->hideApplicationName();
 
     }
 

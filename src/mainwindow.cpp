@@ -31,13 +31,16 @@
 
 #include <QX11Info>
 #include <QScreen>
+#include <QMenu>
+#include <QLabel>
 #include <xcb/xcb.h>
 #include <X11/Xlib.h>
 
 MainWindow::MainWindow(QWidget *parent)
     : QFrame(parent),
       //m_fakeWidget(new QWidget(nullptr)),
-      m_mainPanel(new MainPanel(parent))
+      applicationStartingLabel(new QLabel("", this)),
+      m_MainWidget(new MainWidget(parent))
 {
     this->setObjectName("menuBar");
     this->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
@@ -46,7 +49,16 @@ MainWindow::MainWindow(QWidget *parent)
 
     QHBoxLayout *layout = new QHBoxLayout;
     layout->addSpacing(7); // Left screen edge; if space is too small, blue box overlaps rounded corner
-    layout->addWidget(m_mainPanel);
+    layout->addWidget(m_MainWidget);
+
+    applicationStartingLabel->hide();
+    // TODO: Instead of having applicationStartingLabel here, we might want to make it a part of m_MainWidget
+    // to allow for it to be animated from the center to the side and morph into a menu with an animation...
+    applicationStartingLabel->setFixedHeight(22); // FIXME: Dynamically get the height of a QMenuItem and use that
+    applicationStartingLabel->setStyleSheet("align: center; font-weight: bold;");
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->addWidget(applicationStartingLabel, 0, Qt::AlignCenter);
+
     layout->addSpacing(7); // Right screen edge
     layout->setMargin(0);
     layout->setSpacing(10); // ?
@@ -57,7 +69,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Prevent menubar from becoming faded/translucent if we use a compositing manager
     // that fades/makes translucent inactive windows
-   // m_mainPanel->setWindowFlags(Qt::WindowDoesNotAcceptFocus);
+   // m_MainWidget->setWindowFlags(Qt::WindowDoesNotAcceptFocus);
 
     setAttribute(Qt::WA_NoSystemBackground, false);
     // setAttribute(Qt::WA_TranslucentBackground);
@@ -95,7 +107,7 @@ MainWindow::MainWindow(QWidget *parent)
     animation->setEasingCurve(QEasingCurve::OutCubic);
     animation->start(QPropertyAnimation::DeleteWhenStopped);
     //this->activateWindow(); // probono: Ensure that we have the focus when menu is launched so that one can enter text in the search box
-    //m_mainPanel->raise(); // probono: Trying to give typing focus to the search box that is in there. Needed? Does not seem tp hurt
+    //m_MainWidget->raise(); // probono: Trying to give typing focus to the search box that is in there. Needed? Does not seem tp hurt
 
 }
 
@@ -139,8 +151,8 @@ void MainWindow::initSize()
     QMenu *dummyMenu = new QMenu;
     dummyMenuBar->addMenu(dummyMenu);
     qDebug() << "probono: dummyMenu->sizeHint().height():" << dummyMenu->sizeHint().height();- */
-    //use m_mainPanel instead of dummyMenu
-    setFixedHeight(m_mainPanel->sizeHint().height());
+    //use m_MainWidget instead of dummyMenu
+    setFixedHeight(m_MainWidget->sizeHint().height());
 
     //move this to the active screen and xrandr position
     move(qApp->primaryScreen()->geometry().x(), qApp->primaryScreen()->geometry().y());
@@ -193,4 +205,26 @@ void MainWindow::setStrutPartial()
                                      strut.bottom_width,
                                      strut.bottom_start,
                                      strut.bottom_end);
+}
+
+QString MainWindow::showApplicationName(const QString &arg)
+{
+    QString message = QString("showApplicationName(\"%1\") got called").arg(arg);
+    qDebug() << "showApplicationName" << arg << "got called";
+
+    m_MainWidget->hide();
+    applicationStartingLabel->setText(arg);
+    applicationStartingLabel->show();
+    // applicationStartingLabel->setVisible(true);
+
+    QTimer::singleShot(30000, this, SLOT(hideApplicationName()));
+
+    return QString("showApplicationName(\"%1\") got executed").arg(arg); // Return to calling application via D-Bus
+}
+
+
+void MainWindow::hideApplicationName()
+{
+    applicationStartingLabel->hide();
+    m_MainWidget->show();
 }

@@ -4,8 +4,8 @@ set(SRCS
     main.cpp
     mainwindow.h
     mainwindow.cpp
-    mainpanel.h
-    mainpanel.cpp
+    mainwidget.h
+    mainwidget.cpp
     extensionwidget.h
     extensionwidget.cpp
     blurwindow.h
