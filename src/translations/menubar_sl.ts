@@ -8,7 +8,7 @@
         <translation type="vanished">Išči</translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="994"/>
+        <location filename="../appmenuwidget.cpp" line="992"/>
         <source>About This Computer</source>
         <translation>O tem računalniku</translation>
     </message>
@@ -43,7 +43,7 @@
         <translation>Izklopi</translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="961"/>
+        <location filename="../appmenuwidget.cpp" line="959"/>
         <source>About helloDesktop</source>
         <translation type="unfinished"></translation>
     </message>

@@ -8,7 +8,7 @@
         <translation type="vanished">搜索</translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="994"/>
+        <location filename="../appmenuwidget.cpp" line="992"/>
         <source>About This Computer</source>
         <translation>关于此计算机</translation>
     </message>
@@ -43,7 +43,7 @@
         <translation>关机</translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="961"/>
+        <location filename="../appmenuwidget.cpp" line="959"/>
         <source>About helloDesktop</source>
         <translation type="unfinished"></translation>
     </message>

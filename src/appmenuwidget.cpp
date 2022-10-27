@@ -905,13 +905,13 @@ void AppMenuWidget::delayUpdateActiveWindow()
 void AppMenuWidget::onActiveWindowChanged()
 {
 
-    KWindowInfo info(m_windowID, \
-                     NET::WMState | NET::WMWindowType | NET::WMPid | NET::WMGeometry, \
-                     NET::WM2TransientFor | NET::WM2WindowClass);
-    if(m_currentWindowID >0 && m_currentWindowID != m_windowID && m_windowID !=0) {
-
+    if (m_currentWindowID != KWindowSystem::activeWindow()) {
         qobject_cast<MainWindow*>(this->parent()->parent())->hideApplicationName();
         m_systemMenu->setTitle(applicationNiceNameForWId(m_windowID)); // TODO: Do not do this to the System menu
+        // TODO: Need to trigger updating the menu here? Sometimes it stays blank after an application has been closed
+    }
+
+    if(m_currentWindowID >0 && m_currentWindowID != m_windowID && m_windowID !=0) {
 
         searchLineEdit->clear();
         searchLineEdit->textChanged("");
@@ -925,8 +925,6 @@ void AppMenuWidget::onWindowChanged(WId /*id*/, NET::Properties /*properties*/, 
 {
     if (m_windowID == KWindowSystem::activeWindow())
         onActiveWindowChanged();
-
-    //actionSearch->update(m_menuBar);
 }
 
 void AppMenuWidget::minimizeWindow()

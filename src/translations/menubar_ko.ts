@@ -31,7 +31,7 @@
         <translation type="vanished">검색</translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="994"/>
+        <location filename="../appmenuwidget.cpp" line="992"/>
         <source>About This Computer</source>
         <translation>이 컴퓨터 정보</translation>
     </message>
@@ -66,7 +66,7 @@
         <translation>끄세요</translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="961"/>
+        <location filename="../appmenuwidget.cpp" line="959"/>
         <source>About helloDesktop</source>
         <translation type="unfinished"></translation>
     </message>
