@@ -63,6 +63,7 @@
 
 #include "mainwindow.h"
 #include "thumbnails.h"
+#include "applicationwindow.h"
 
 // SystemMenu is like QMenu but has a first menu item
 // that changes depending on whether modifier keys are pressed
@@ -432,7 +433,8 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
 
     // Prepare System menu
     m_systemMenu = new SystemMenu(); // Using our SystemMenu subclass instead of a QMenu to be able to toggle "About..." when modifier key is pressed
-    m_systemMenu->setTitle(tr("System"));
+    // m_systemMenu->setTitle(tr("System"));
+    m_systemMenu->setTitle(applicationNiceNameForWId(KWindowSystem::activeWindow())); // TODO: Do not do this to the System menu
     QWidgetAction *widgetAction = new QWidgetAction(this);
     widgetAction->setDefaultWidget(searchLineEdit);
     m_searchMenu->addAction(widgetAction);
@@ -771,7 +773,7 @@ for (QAction *a : m_searchMenu->actions()) {
     if(a->isEnabled())
             number_of_enabled_actions++;
 }
-qDebug() << "probono: number_of_enabled_actions" << number_of_enabled_actions;
+// qDebug() << "probono: number_of_enabled_actions" << number_of_enabled_actions;
 // QUESITON: Unclear whether it is 2 or 3, depending on whether one menu action or one Baloo search result is there...
 if(number_of_enabled_actions == 2 || ( number_of_enabled_actions == 3 && m_appMenuModel->filteredActions().count()==1)) {
     searchEditingDone();
@@ -902,14 +904,18 @@ void AppMenuWidget::delayUpdateActiveWindow()
 
 void AppMenuWidget::onActiveWindowChanged()
 {
-    KWindowInfo info(m_windowID, NET::WMState | NET::WMWindowType | NET::WMGeometry, NET::WM2TransientFor);
+
+    KWindowInfo info(m_windowID, \
+                     NET::WMState | NET::WMWindowType | NET::WMPid | NET::WMGeometry, \
+                     NET::WM2TransientFor | NET::WM2WindowClass);
     if(m_currentWindowID >0 && m_currentWindowID != m_windowID && m_windowID !=0) {
+
+        qobject_cast<MainWindow*>(this->parent()->parent())->hideApplicationName();
+        m_systemMenu->setTitle(applicationNiceNameForWId(m_windowID)); // TODO: Do not do this to the System menu
+
         searchLineEdit->clear();
         searchLineEdit->textChanged("");
         // bool isMax = info.hasState(NET::Max);
-
-        qobject_cast<MainWindow*>(this->parent()->parent())->hideApplicationName();
-
     }
 
     m_currentWindowID = m_windowID;
@@ -1177,20 +1183,20 @@ void AppMenuWidget::openBalooSearchResult(QAction *action)
 {
     QString pathToBeLaunched = action->property("path").toString();
     // TODO: Maybe just show the file in the file manager when a modifier key is pressed?
-    QProcess *p = new QProcess;
+    QProcess p;
     if (QApplication::keyboardModifiers()){
-        p->setProgram("gdbus");
+        p.setProgram("gdbus");
         // probono: Am I the only one who finds the next line utterly overcomplicated to "tell Filer to show pathToBeLaunched"?
-        p->setArguments({ "call", "--session", "--dest", "org.freedesktop.FileManager1", "--object-path", "/org/freedesktop/FileManager1", "--method", "org.freedesktop.FileManager1.ShowItems", "[\"file:///" + pathToBeLaunched + "\"]", "\"\"" });
-        p->startDetached();
+        p.setArguments({ "call", "--session", "--dest", "org.freedesktop.FileManager1", "--object-path", "/org/freedesktop/FileManager1", "--method", "org.freedesktop.FileManager1.ShowItems", "[\"file:///" + pathToBeLaunched + "\"]", "\"\"" });
+        p.startDetached();
     } else {
-        p->setArguments({pathToBeLaunched});
+        p.setArguments({pathToBeLaunched});
         if(pathToBeLaunched.endsWith(".app") || pathToBeLaunched.endsWith(".AppDir") || pathToBeLaunched.endsWith(".AppImage")) {
-            p->setProgram("launch");
-            p->startDetached();
+            p.setProgram("launch");
+            p.startDetached();
         } else {
-            p->setProgram("open");
-            p->startDetached();
+            p.setProgram("open");
+            p.startDetached();
         }
     }
 }

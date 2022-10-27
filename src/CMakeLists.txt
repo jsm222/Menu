@@ -14,6 +14,8 @@ set(SRCS
     popupwindow.cpp
     pluginmanager.h
     pluginmanager.cpp
+    applicationwindow.h
+    applicationwindow.cpp
     appmenuwidget.cpp
     appmenuwidget.h
     appmenu/appmenumodel.h
@@ -77,8 +79,14 @@ target_link_libraries(${TARGET}
     ${XRENDER_LIBRARIES}
     ${XCB_LIBRARIES}
     ${XCB_EWMH_LIBRARIES}
-
+    ${XCB_EWMH_LIBRARIES}
+    procstat
 )
+
+if("${CMAKE_SYSTEM_NAME}" MATCHES "FreeBSD")
+        list(APPEND target_link_libraries
+                procstat)
+endif()
 
 install(TARGETS ${TARGET} DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
 install(FILES ${QM_FILES} DESTINATION "${CMAKE_INSTALL_DATADIR}/menubar/translations")

@@ -36,6 +36,8 @@
 #include <xcb/xcb.h>
 #include <X11/Xlib.h>
 
+#include "applicationwindow.h"
+
 MainWindow::MainWindow(QWidget *parent)
     : QFrame(parent),
       //m_fakeWidget(new QWidget(nullptr)),
@@ -109,6 +111,7 @@ MainWindow::MainWindow(QWidget *parent)
     //this->activateWindow(); // probono: Ensure that we have the focus when menu is launched so that one can enter text in the search box
     //m_MainWidget->raise(); // probono: Trying to give typing focus to the search box that is in there. Needed? Does not seem tp hurt
 
+    connect(KWindowSystem::self(), &KWindowSystem::activeWindowChanged, this, &MainWindow::hideApplicationName);
 }
 
 MainWindow::~MainWindow()
@@ -212,14 +215,50 @@ QString MainWindow::showApplicationName(const QString &arg)
     QString message = QString("showApplicationName(\"%1\") got called").arg(arg);
     qDebug() << "showApplicationName" << arg << "got called";
 
-    m_MainWidget->hide();
-    applicationStartingLabel->setText(arg);
-    applicationStartingLabel->show();
-    // applicationStartingLabel->setVisible(true);
+    // Find out whether we already have a window open from this application;
+    // in which case we don't show the application name
+    bool alreadyRunningApp = false;
 
-    QTimer::singleShot(30000, this, SLOT(hideApplicationName()));
+    /*
+     * probono: Doing this here is too slow.
+     * We need to set these things as properties on the window
+     * whenever a new window appears for the first time, so that we
+     * can query it here quickly.
+     * It is crucial that we show the name of the application being launched
+     * very quickly; otherwise the application launch may be over before we
+     * even start to show the name.
+     *
+    for (WId id : KWindowSystem::windows()){
+        qDebug() << "applicationNiceNameForWId:" << applicationNiceNameForWId(id);
+        qDebug() << "bundlePathForWId:" << bundlePathForWId(id);
+        qDebug() << "pathForWId:" << pathForWId(id);
+        if(bundlePathForWId(id) == arg || pathForWId(id) == arg){
+            alreadyRunningApp = true;
+            break;
+        }
+    }
+    */
 
-    return QString("showApplicationName(\"%1\") got executed").arg(arg); // Return to calling application via D-Bus
+    // This seeme to be a reasonable compromise in terms of speed,
+    // but we are not showing the second of two applications with the same name
+    // being launched from two different locations. Maybe this is good enough for now
+    for (WId id : KWindowSystem::windows()){
+        if(applicationNiceNameForWId(id) == arg){
+            alreadyRunningApp = true;
+            break;
+        }
+    }
+
+    if (! alreadyRunningApp) {
+        m_MainWidget->hide();
+        applicationStartingLabel->setText(arg.split("/").last());
+        applicationStartingLabel->show();
+        // applicationStartingLabel->setVisible(true);
+        QTimer::singleShot(30000, this, SLOT(hideApplicationName()));
+        return QString("showApplicationName(\"%1\") got executed").arg(arg); // Return to calling application via D-Bus
+    } else {
+        return QString("showApplicationName(\"%1\") ignored, an application at this path is already running").arg(arg); // Return to calling application via D-Bus
+    }
 }
 
 

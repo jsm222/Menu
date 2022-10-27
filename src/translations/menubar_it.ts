@@ -8,47 +8,42 @@
         <translation type="vanished">Cerca</translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="988"/>
+        <location filename="../appmenuwidget.cpp" line="994"/>
         <source>About This Computer</source>
         <translation>Informazioni su questo computer</translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="459"/>
+        <location filename="../appmenuwidget.cpp" line="461"/>
         <source>Hide all</source>
         <translation>Nascondi tutto</translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="435"/>
-        <source>System</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../appmenuwidget.cpp" line="461"/>
+        <location filename="../appmenuwidget.cpp" line="463"/>
         <source>Unhide all</source>
         <translation>Mostra tutto</translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="475"/>
+        <location filename="../appmenuwidget.cpp" line="477"/>
         <source>Force Quit Application</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="479"/>
+        <location filename="../appmenuwidget.cpp" line="481"/>
         <source>Restart</source>
         <translation>Riavvia</translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="481"/>
+        <location filename="../appmenuwidget.cpp" line="483"/>
         <source>Log Out</source>
         <translation>Esci</translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="483"/>
+        <location filename="../appmenuwidget.cpp" line="485"/>
         <source>Shut Down</source>
         <translation>Spegni</translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="955"/>
+        <location filename="../appmenuwidget.cpp" line="961"/>
         <source>About helloDesktop</source>
         <translation type="unfinished"></translation>
     </message>
@@ -98,7 +93,7 @@
     </message>
     <message>
         <location filename="../../Shutdown/mainwindow.ui" line="49"/>
-        <location filename="../mainwindow.cpp" line="47"/>
+        <location filename="../mainwindow.cpp" line="49"/>
         <source>Log Out</source>
         <translation>Esci</translation>
     </message>
@@ -123,7 +118,7 @@
         <translation>Esci</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="48"/>
+        <location filename="../mainwindow.cpp" line="50"/>
         <source>About This Computer</source>
         <translation>Informazioni su questo computer</translation>
     </message>
@@ -138,13 +133,13 @@
 <context>
     <name>SystemMenu</name>
     <message>
-        <location filename="../appmenuwidget.cpp" line="77"/>
-        <location filename="../appmenuwidget.cpp" line="116"/>
+        <location filename="../appmenuwidget.cpp" line="78"/>
+        <location filename="../appmenuwidget.cpp" line="117"/>
         <source>About This Computer</source>
         <translation type="unfinished">Informazioni su questo computer</translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="116"/>
+        <location filename="../appmenuwidget.cpp" line="117"/>
         <source>About helloDesktop</source>
         <translation type="unfinished"></translation>
     </message>
