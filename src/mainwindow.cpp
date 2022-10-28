@@ -261,9 +261,8 @@ QString MainWindow::showApplicationName(const QString &arg)
     }
 }
 
-
 void MainWindow::hideApplicationName()
 {
-    applicationStartingLabel->hide();
+    MainWindow::applicationStartingLabel->hide();
     m_MainWidget->show();
 }

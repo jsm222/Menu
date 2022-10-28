@@ -23,6 +23,7 @@
 #include <QFutureWatcher>
 #include <QtConcurrent>
 #include <QDBusConnectionInterface>
+#include "../src/mainwindow.h"
 
 StatusNotifierWidget::StatusNotifierWidget(QWidget *parent)
   : QWidget(parent),
@@ -77,6 +78,20 @@ void StatusNotifierWidget::itemAdded(QString serviceAndPath)
     m_services.insert(serviceAndPath, button);
     m_layout->insertWidget(0, button);
     button->show();
+
+    // FIXME: The follwoing can crash. Why? Likely because when this is fist called,
+    // the objects that this tries to manipulate are not there yet. Race condition?
+    // reinterpret_cast<MainWindow*>(parent()->parent())->hideApplicationName();
+    //
+    // Hence using D-Bus to do the same thing, which does not crash
+    if (QDBusConnection::sessionBus().isConnected()) {
+        QDBusInterface iface("local.Menu", "/", "", QDBusConnection::sessionBus());
+        if (! iface.isValid()) {
+            printf("D-Bus interface not valid\n");
+        } else {
+            iface.call("hideApplicationName");
+        }
+    }
 }
 
 void StatusNotifierWidget::itemRemoved(const QString &serviceAndPath)

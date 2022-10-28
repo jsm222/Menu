@@ -2,6 +2,7 @@ set(PLUGIN "statusnotifier")
 project(${PLUGIN})
 
 find_package(dbusmenu-qt5 REQUIRED)
+find_package(KF5WindowSystem REQUIRED)
 
 set(SRCS
     statusnotifier.h
@@ -18,6 +19,8 @@ set(SRCS
     statusnotifierwidget.cpp
     sniasync.h
     sniasync.cpp
+    ../../src/mainwindow.h
+    ../../src/mainwindow.cpp
 )
 
 #qt5_add_dbus_adaptor(DBUS_SOURCES
@@ -36,7 +39,7 @@ target_link_libraries(${PLUGIN} PRIVATE
     Qt5::Widgets
     Qt5::Concurrent
     Qt5::X11Extras
-
+    KF5::WindowSystem
     dbusmenu-qt5
 )
 target_include_directories(${PLUGIN} PUBLIC ../interfaces)
