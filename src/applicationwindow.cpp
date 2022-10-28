@@ -14,6 +14,7 @@
 #include <sys/param.h>
 #include <sys/queue.h>
 #include <sys/user.h>
+#include <QDir>
 #include <fcntl.h>
 #include <libprocstat.h>
 #endif
@@ -21,15 +22,24 @@
 // Returns the name of the most nested bundle a file is in,
 // or an empty string if the file is not in a bundle
 QString bundlePath(QString path) {
-    if (path.endsWith(".app") || path.endsWith(".app/") || path.contains(".app/")) {
+    QDir(path).cleanPath(path);
+    // Remove trailing slashes
+    while( path.endsWith("/") ){
+        path.remove(path.length()-1,1);
+    }
+    if (path.endsWith(".app")) {
+        return path;
+    } else if (path.contains(".app/")) {
         QStringList parts = path.split(".app");
         parts.removeLast();
         return parts.join(".app");
-    } else if (path.endsWith(".AppDir") || path.endsWith(".AppDir/") || path.contains(".AppDir/")) {
+    } else if (path.endsWith(".AppDir")) {
+        return path;
+    } else if ( path.contains(".AppDir/")) {
         QStringList parts = path.split(".AppDir");
         parts.removeLast();
         return parts.join(".AppDir");
-    } else if (path.endsWith(".AppImage") || path.endsWith(".AppImage/")) {
+    } else if (path.endsWith(".AppImage")) {
         return path;
     } else {
         return "";
