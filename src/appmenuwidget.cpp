@@ -359,7 +359,20 @@ void AppMenuWidget::findAppsInside(QStringList locationsContainingApps, QMenu *m
         }
     }
 }
-
+void iterate(const QModelIndex & index, const QAbstractItemModel * model,
+             const std::function<int(const QModelIndex&, int depth)>  & fun,
+             int depth=0)
+{
+    if (index.isValid())
+            if(fun(index, depth)>0)
+            return;
+    if ((index.flags() & Qt::ItemNeverHasChildren) || !model->hasChildren(index)) return;
+    auto rows = model->rowCount(index);
+    auto cols = model->columnCount(index);
+    for (int i = 0; i < rows; ++i)
+        for (int j = 0; j < cols; ++j)
+            iterate(model->index(i, j, index), model, fun, depth+1);
+}
 AppMenuWidget::AppMenuWidget(QWidget *parent)
     : QWidget(parent),
       m_typingTimer(new QTimer(this))
@@ -495,11 +508,27 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
     layout->addWidget(m_menuBar, 0, Qt::AlignLeft);
     layout->insertStretch(2); // Stretch after the main menu, which is the 2nd item in the layout
 
-    // Action Search
-    MenuImporter *menuImporter = new MenuImporter(this);
-    menuImporter->connectToBus();
-
+    m_lw= new QMenuView();
     m_appMenuModel = new AppMenuModel(this);
+
+    m_proxyModel = new MenuFilterProxy(this);
+    m_proxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
+    m_proxyModel->setSourceModel(m_appMenuModel);
+    m_proxyModel->setRecursiveFilteringEnabled(true);
+
+
+
+
+    m_proxyModel->setFilterRole(Qt::DisplayRole);
+    m_lw->setModel(m_appMenuModel);
+
+    connect(m_appMenuModel,&AppMenuModel::firstLevelParsed,this,[this] {
+
+   if(m_appMenuModel->menuAvailable()) {
+         emit m_lw->aboutToShow();
+       m_menuBar->addActions(m_lw->actions());
+    }
+    });
     connect(m_appMenuModel, &AppMenuModel::menuParsed, this, &AppMenuWidget::updateMenu);
 
     connect(KWindowSystem::self(), &KWindowSystem::activeWindowChanged, this, &AppMenuWidget::delayUpdateActiveWindow);
@@ -509,13 +538,19 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
     // Load action search
     actionCompleter = nullptr;
     updateActionSearch();
+    MenuImporter *menuImporter = new MenuImporter(this);
+    menuImporter->connectToBus();
 }
 
 void AppMenuWidget::searchEditingDone() {
     if(m_searchMenu && m_searchMenu->actions().count()>1) {
         searchLineEdit->clearFocus();
-        m_searchMenu->setActiveAction(m_searchMenu->actions().at(1));
-    }
+        for(QAction *findActivateeCanidcate : m_searchMenu->actions())
+            if(!findActivateeCanidcate->isSeparator()) {
+                m_searchMenu->setActiveAction(findActivateeCanidcate);
+                break;
+            }
+            }
 }
 
 void AppMenuWidget::refreshTimer() {
@@ -620,7 +655,7 @@ void AppMenuWidget::updateActionSearch() {
 }
 
 void AppMenuWidget::searchMenu() {
-
+    m_searchMenu->addSeparator();
     for(QAction *sr: searchResults) {
         if(m_searchMenu->actions().contains(sr)) {
             m_searchMenu->removeAction(sr);
@@ -634,7 +669,7 @@ void AppMenuWidget::searchMenu() {
 
 
     QList<QMenu*> menus;
-    menus << m_systemMenu << m_appMenuModel->menu();
+    menus << m_systemMenu;
     QString searchString = searchLineEdit->text();
     QStringList names;
 
@@ -644,7 +679,11 @@ void AppMenuWidget::searchMenu() {
 
 
     }
+    if(!m_isSearching) {
+        m_isSearching=true;
+        m_appMenuModel->refreshSearch();
 
+    }
 for(QString v : m_appMenuModel->filteredActions().keys()) {
     QAction *orig = m_appMenuModel->filteredActions()[v];
     CloneAction *cpy = new CloneAction(orig);
@@ -669,6 +708,7 @@ for(QString v : m_appMenuModel->filteredActions().keys()) {
     }));
     m_searchMenu->addAction(cpy);
     }
+
 
 // probono: Use Baloo API and add baloo search results to the Search menu; see below for a rudimentary non-API version
 QMimeDatabase mimeDatabase;
@@ -795,30 +835,77 @@ void AppMenuWidget::rebuildMenu()
 //what does this even do??
 void AppMenuWidget::updateMenu()
 {
-    //qDebug() << "AppMenuWidget::updateMenu() called" << m_appMenuModel->menuAvailable();
+    qDebug() << m_isSearching<< __LINE__ << searchLineEdit->text();
+        if(m_isSearching) {
+        m_proxyModel->setFilterRegExp(searchLineEdit->text().isEmpty() ? "" : searchLineEdit->text());
+        m_proxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
+        std::function<int(QModelIndex idx,int depth)> clearMbar =[this](QModelIndex idx,int depth) {
+            qDebug() << depth <<__LINE__;
 
-    m_menuBar->clear();
-    integrateSystemMenu(m_menuBar); // Insert the 'System' menu first
+            m_menuBar->removeAction(idx.data().value<QAction*>());
+            if(depth==1)
+                return 1;
+            return 0;
+        };
+                iterate(m_lw->rootIndex(), m_appMenuModel,clearMbar);
+                std::function<int(QModelIndex idx,int depth)> setResultVisbileMbar =[this](QModelIndex idx,int depth) {
 
-    if (!m_appMenuModel->menuAvailable()) {
+                if(idx.data().value<QAction*>()->text().contains(m_proxyModel->filterRegExp())) {
+                 idx.data().value<QAction*>()->setVisible(true);
+                 qDebug()<<idx.data().value<QAction*>()->text()  << __LINE__;
+                 if(!m_proxyModel->filterRegExp().pattern().isEmpty()) {
+                 QModelIndex p = idx.parent();
+                 QStringList names;
+                 while(p.isValid()) {
+                     qDebug()<< p << __LINE__;
+                        p.data().value<QAction*>()->setVisible(true);
 
-        updateActionSearch();
-        return;
-    }
-    QMenu *menu = m_appMenuModel->menu();
-    if (menu) {
-        /*for (QAction *a : menu->actions()) {
+                        names << p.data().value<QAction*>()->text();
+                  p= p.parent();
+                 }
+                    std::reverse(names.begin(),names.end());
+                    qDebug() << names << __LINE__ << idx.data().value<QAction*>()->text();
+                    QAction *orig= idx.data().value<QAction*>();
+                    if(!orig->menu()) {
+                    CloneAction *cpy = new CloneAction(orig);
+                    cpy->setText(names.join(" → ") + " → " + orig->text());
+                    cpy->setShortcut(orig->shortcut());
+                    cpy->setToolTip(orig->toolTip());
+                    cpy->updateMe();
+                    cpy->setShortcutContext(Qt::ApplicationShortcut);
+                    orig->setShortcutContext(Qt::WindowShortcut);
+                    searchResults << cpy;
+                    connect(cpy,&QAction::triggered,this,[this]{
+                        searchLineEdit->setText("");
+                        searchLineEdit->textChanged("");
+                        m_searchMenu->close();
 
-            if (!a->isEnabled())
-                continue;
+                    });
+                    cpy->setDisconnectOnClear(connect(orig,&QAction::triggered,this,[this]{
+                        searchLineEdit->setText("");
+                        searchLineEdit->textChanged("");
+                        m_searchMenu->close();
 
-            m_menuBar->addAction(a);
-        }*/
-        m_menuBar->addActions(menu->actions());
-    }
+                    }));
+                    m_searchMenu->addAction(cpy);
+                    }
+                    return 0;
+                 }
+                 return 0;
+                 } else {
+                 idx.data().value<QAction*>()->setVisible(false);
+                }
+                 return 0;
+                };
+        m_searchMenu->addSeparator();
+        emit m_lw->aboutToShow();
+        iterate(m_lw->rootIndex(),m_appMenuModel,setResultVisbileMbar);
+        m_menuBar->addActions(m_lw->actions());
 
+        m_isSearching=false;
 
-    updateActionSearch();
+        }
+qDebug() << __LINE__<<sender() << m_isSearching;
 }
 
 void AppMenuWidget::toggleMaximizeWindow()
@@ -915,6 +1002,7 @@ void AppMenuWidget::onActiveWindowChanged()
 
         searchLineEdit->clear();
         searchLineEdit->textChanged("");
+
         // bool isMax = info.hasState(NET::Max);
     }
 

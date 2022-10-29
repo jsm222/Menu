@@ -20,6 +20,10 @@ set(SRCS
     appmenuwidget.h
     appmenu/appmenumodel.h
     appmenu/appmenumodel.cpp
+    appmenu/qmenuview.h
+    appmenu/qmenuview.cpp
+    appmenu/menufilterproxy.h
+    appmenu/menufilterproxy.cpp
     appmenu/dbusmenuimporter.h
     appmenu/dbusmenuimporter.cpp
     appmenu/dbusmenu_interface.h

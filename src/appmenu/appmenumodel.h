@@ -35,7 +35,7 @@ class QModelIndex;
 class QDBusServiceWatcher;
 class DBusMenuImporter;
 
-class AppMenuModel : public QAbstractListModel, public QAbstractNativeEventFilter
+class AppMenuModel : public QAbstractItemModel, public QAbstractNativeEventFilter
 {
     Q_OBJECT
 
@@ -57,12 +57,16 @@ public:
         MenuRole = Qt::UserRole + 1, // TODO this should be Qt::DisplayRole
         ActionRole
     };
-
+    QAction *findParent(QAction * child,QAction *root) const ;
     QVariant data(const QModelIndex &index, int role) const override;
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QHash<int, QByteArray> roleNames() const override;
 
-
+    QModelIndex index(int row, int column,
+                      const QModelIndex &parent = QModelIndex()) const override;
+    QModelIndex parent(const QModelIndex &index) const override;
+    int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+    bool hasChildren(const QModelIndex &parent = QModelIndex()) const override;
     QMap<QString,QAction*> filteredActions() { return m_visibleActions; }
     void updateApplicationMenu(const QString &serviceName, const QString &menuObjectPath);
     void updateSearch();
@@ -84,6 +88,7 @@ public:
     void setWinId(const QVariant &id);
     void readMenuActions(QMenu* menu,QStringList names);
     QMenu *menu() { return m_menu; }
+    void refreshSearch();
 signals:
     void requestActivateIndex(int index);
 
@@ -110,7 +115,7 @@ signals:
     void menuAvailableChanged();
     void modelNeedsUpdate();
     void menuParsed();
-
+    void firstLevelParsed();
     void filterByActiveChanged();
     void filterChildrenChanged();
     void visibleChanged();
@@ -118,6 +123,7 @@ signals:
     void winIdChanged();
 
 private:
+    QWidget *w_parent;
     QMap<QString,QAction*> m_names;
     bool m_filterByActive = false;
     bool m_filterChildren = false;
@@ -134,11 +140,12 @@ private:
     WId m_initialApplicationFromWindowId = -1;
     //! window that its menu initialization may be delayed
     WId m_delayedMenuWindowId = 0;
-    QPointer<QMenu> m_menu;
+    QPointer<QMenu>  m_menu;
     QDBusServiceWatcher *m_serviceWatcher;
     QString m_serviceName;
     QString m_menuObjectPath;
-
+    bool m_newApplication;
+    bool m_refreshSearch;
     QPointer<DBusMenuImporter> m_importer;
 };
 

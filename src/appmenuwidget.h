@@ -33,7 +33,9 @@
 #include <QTimer>
 #include <QDebug>
 #include <QLineEdit>
+#include "appmenu/qmenuview.h"
 #include "appmenu/appmenumodel.h"
+#include "appmenu/menufilterproxy.h"
 #include "appmenu/menuimporter.h"
 class SearchLineEdit: public QLineEdit {
     Q_OBJECT
@@ -92,7 +94,9 @@ protected:
     bool eventFilter(QObject *watched, QEvent *event) override; // Make it possible to click on the menu entry for a submenu
 
 private:
-
+    MenuFilterProxy * m_proxyModel;
+    QMenuView* m_lw;
+    bool m_isSearching=false;
     bool isAcceptWindow(WId id);
     void delayUpdateActiveWindow();
     void onActiveWindowChanged();
@@ -129,6 +133,7 @@ private:
     QMenu *m_systemMenu;
      QMenu *m_searchMenu;
      QList<QAction *> searchResults;
+     QMap<QAction*,QString*> filteredActions;
     void integrateSystemMenu(QMenuBar*);
     void searchEditingDone();
     void refreshTimer();
