@@ -4,6 +4,7 @@
 #include <QProcess>
 #include <QDebug>
 #include <QApplication>
+#include <QPixmap>
 #include <KF5/KWindowSystem/KWindowSystem>
 
 #include "../src/applicationwindow.h"
@@ -117,15 +118,27 @@ void WindowsWidget::updateWindows()
                 windowsForThisPID++;
         }
 
+        // If there is only one window for this PID, then add a menu item (a QAction)
         if(windowsForThisPID <2) {
             QAction *appAction = m_menu->addAction(niceName);
+
+            // Call the Desktop the "Desktop"
+            KWindowInfo info(id, NET::WMPid | NET::WMWindowType);
+            if (info.windowType(NET::AllTypesMask) & (NET::Desktop)) {
+                appAction->setText(tr("Desktop"));
+            }
             appAction->setToolTip(QString("Window ID: %1\n"
                                           "Bundle: %2\n"
                                           "Launchee: %3").arg(id).arg(bundlePathForWId(id)).arg(pathForWId(id)));
             appAction->setCheckable(true);
-            // appAction->setIcon(QIcon(KWindowSystem::icon(id))); // Why does this not work? TODO: Get icon from bundle?
+
+            QPixmap pixmap;
+            pixmap = KWindowSystem::icon(id, 24, 24, false);
+            appAction->setIcon(QIcon(pixmap));
+            appAction->setIconVisibleInMenu(true); // So that an icon is shown even though the theme sets Qt::AA_DontShowIconsInMenus
+
             if(id == KWindowSystem::activeWindow()) {
-                    appAction->setChecked(true);
+                appAction->setChecked(true);
                     appAction->setEnabled(false);
             } else {
                 connect(appAction, &QAction::triggered, this, [appAction, id, this]() {
@@ -133,15 +146,24 @@ void WindowsWidget::updateWindows()
                 });
             }
         } else {
-
-            // If there are multiple windows for the same PID, then add multiple submenus
+            // If there are multiple windows for the same PID, then add a submenu (a QMenu with QActions)
             // So don't add an action here, but a submenu which contains all windows that beloong to that PID
             QMenu *subMenu = m_menu->addMenu(niceName);
             subMenu->setToolTipsVisible(true);
+
+            QPixmap pixmap;
+            pixmap = KWindowSystem::icon(id, 24, 24, false);
+            subMenu->menuAction()->setIcon(QIcon(pixmap));
+            subMenu->menuAction()->setIconVisibleInMenu(true); // So that an icon is shown even though the theme sets Qt::AA_DontShowIconsInMenus
+
             for (WId cand_id : KWindowSystem::windows()){
-                KWindowInfo cand_info(cand_id, NET::WMPid | NET::WMName);
+                KWindowInfo cand_info(cand_id, NET::WMPid | NET::WMName | NET::WMWindowType);
                 if(cand_info.pid() == info.pid()) {
                     QAction *appAction = subMenu->addAction(cand_info.name());
+                    // If more than one Filer window is open and one is the Desktop, call the Desktop the "Desktop"
+                    if (cand_info.windowType(NET::AllTypesMask) & (NET::Desktop)) {
+                        appAction->setText(tr("Desktop"));
+                    }
                     appAction->setToolTip(QString("Window ID: %1\n"
                                                   "Bundle: %2\n"
                                                   "Launchee: %3").arg(cand_id).arg(bundlePathForWId(cand_id)).arg(pathForWId(cand_id)));
@@ -190,8 +212,7 @@ void WindowsWidget::activateWindow(WId id) {
     // If Filer has no windows open but is selected, show the desktop = hide all windows
     // _NET_WM_WINDOW_TYPE(ATOM) = _NET_WM_WINDOW_TYPE_DESKTOP
     KWindowInfo info(id, NET::WMPid | NET::WMWindowType);
-    NET::WindowTypes mask = NET::AllTypesMask;
-    if (info.windowType(mask) & (NET::Desktop)) {
+    if (info.windowType(NET::AllTypesMask) & (NET::Desktop)) {
         qDebug() << "probono: Desktop selected, hence hiding all";
         for (WId cand_id : KWindowSystem::windows()) {
             KWindowSystem::minimizeWindow(cand_id);
