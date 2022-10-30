@@ -105,4 +105,14 @@ void WindowsWidget::updateWindows()
             KWindowSystem::activateWindow(id);
         });
     }
+
+    m_menu->addSeparator();
+
+    // Show all
+    QAction *fullscreenAction = m_menu->addAction(tr("Full Screen"));
+    // TODO: Need a way to undo this...
+    connect(fullscreenAction, &QAction::triggered, this, [fullscreenAction, id, this]() {
+        KWindowSystem::setState(id, KWindowSystem::FullScreen);
+    });
+
 }
