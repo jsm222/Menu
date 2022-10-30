@@ -18,6 +18,7 @@ WindowsWidget::WindowsWidget(QWidget *parent)
 {
 
     m_menu->setTitle(tr("Windows"));
+    m_menu->menuAction()->setIconVisibleInMenu(true); // So that an icon is shown even though the theme sets Qt::AA_DontShowIconsInMenus
 
     QFont f = m_menu->menuAction()->font();
     f.setBold(true);
@@ -139,7 +140,8 @@ void WindowsWidget::updateWindows()
 
             if(id == KWindowSystem::activeWindow()) {
                 appAction->setChecked(true);
-                    appAction->setEnabled(false);
+                appAction->setEnabled(false);
+                m_menu->menuAction()->setIcon(QIcon(pixmap)); // Also set the icon for the overall Windows menu
             } else {
                 connect(appAction, &QAction::triggered, this, [appAction, id, this]() {
                     WindowsWidget::activateWindow(id);
@@ -172,6 +174,7 @@ void WindowsWidget::updateWindows()
                     if(cand_id == KWindowSystem::activeWindow()) {
                             appAction->setChecked(true);
                             appAction->setEnabled(false);
+                            m_menu->menuAction()->setIcon(QIcon(pixmap)); // Also set the icon for the overall Windows menu
                     } else {
                         connect(appAction, &QAction::triggered, this, [appAction, cand_id, this]() {
                             WindowsWidget::activateWindow(cand_id);
@@ -215,6 +218,15 @@ void WindowsWidget::activateWindow(WId id) {
     if (info.windowType(NET::AllTypesMask) & (NET::Desktop)) {
         qDebug() << "probono: Desktop selected, hence hiding all";
         for (WId cand_id : KWindowSystem::windows()) {
+            KWindowSystem::minimizeWindow(cand_id);
+        }
+    }
+
+    // If a modifier key is pressed, close all other open windows
+    if (QApplication::keyboardModifiers()){
+        qDebug() << "probono: Modifier key pressed, hence hiding all others";
+        for (WId cand_id : KWindowSystem::windows()) {
+            if(id != cand_id)
             KWindowSystem::minimizeWindow(cand_id);
         }
     }
