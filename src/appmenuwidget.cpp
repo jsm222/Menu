@@ -63,7 +63,6 @@
 
 #include "mainwindow.h"
 #include "thumbnails.h"
-#include "applicationwindow.h"
 
 // SystemMenu is like QMenu but has a first menu item
 // that changes depending on whether modifier keys are pressed
@@ -433,8 +432,7 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
 
     // Prepare System menu
     m_systemMenu = new SystemMenu(); // Using our SystemMenu subclass instead of a QMenu to be able to toggle "About..." when modifier key is pressed
-    // m_systemMenu->setTitle(tr("System"));
-    m_systemMenu->setTitle(applicationNiceNameForWId(KWindowSystem::activeWindow())); // TODO: Do not do this to the System menu
+    m_systemMenu->setTitle(tr("System"));
     QWidgetAction *widgetAction = new QWidgetAction(this);
     widgetAction->setDefaultWidget(searchLineEdit);
     m_searchMenu->addAction(widgetAction);
@@ -907,7 +905,6 @@ void AppMenuWidget::onActiveWindowChanged()
 
     if (m_currentWindowID != KWindowSystem::activeWindow()) {
         qobject_cast<MainWindow*>(this->parent()->parent())->hideApplicationName();
-        m_systemMenu->setTitle(applicationNiceNameForWId(m_windowID)); // TODO: Do not do this to the System menu
         // TODO: Need to trigger updating the menu here? Sometimes it stays blank after an application has been closed
     }
 
