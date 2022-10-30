@@ -2,10 +2,14 @@
 #include <QHBoxLayout>
 #include <QDateTime>
 #include <QLocale>
+#include <QProcess>
+#include <QDebug>
 
 DateTimeWidget::DateTimeWidget(QWidget *parent)
     : QWidget(parent),
-      m_label(new QLabel),
+      m_menubar(new QMenuBar),
+      m_menu(new QMenu),
+      dateAction(new QAction),
       m_refreshTimer(new QTimer(this))
 {
     QHBoxLayout *layout = new QHBoxLayout;
@@ -14,8 +18,13 @@ DateTimeWidget::DateTimeWidget(QWidget *parent)
     // m_label->setStyleSheet("padding-top: 2px;"); // FIXME: Find a way to achieve vertically centered text without this crude workaround
     // m_label->setStyleSheet("color: grey;"); // Does not work; presumably due the QtPlugin theme overriding it
 
-    layout->addWidget(m_label);
+    layout->addWidget(m_menubar);
+    m_menubar->addMenu(m_menu);
     setLayout(layout);
+
+    // Add menu items
+    m_menu->addAction(dateAction);
+    connect(dateAction, &QAction::triggered, this, &DateTimeWidget::change);
 
     updateCurrentTimeString();
 
@@ -26,5 +35,16 @@ DateTimeWidget::DateTimeWidget(QWidget *parent)
 
 void DateTimeWidget::updateCurrentTimeString()
 {
-    m_label->setText(QLocale::system().toString(QDateTime::currentDateTime(), QLocale::ShortFormat));
+    // m_menu->menuAction()->setText(QLocale::system().toString(QTime::currentTime(), QLocale::ShortFormat)); // Only time
+    m_menu->menuAction()->setText(QLocale::system().toString(QDateTime::currentDateTime(), QLocale::ShortFormat)); // Date and time
+    dateAction->setText(QLocale::system().toString(QDateTime::currentDateTime(), QLocale::LongFormat)); // Weekday, date and time with seconds and timezone
+}
+
+void DateTimeWidget::change()
+{
+    qDebug() << "pronbono: To be implemented";
+    QProcess *p = new QProcess();
+    p->setArguments({"Date and Time"});
+    p->setProgram("launch");
+    p->startDetached();
 }
