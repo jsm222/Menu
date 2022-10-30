@@ -455,12 +455,7 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
     connect(m_systemMenu->actions().first(), SIGNAL(triggered()), this, SLOT(actionAbout()));
 
     m_systemMenu->addSeparator();
-    // TODO: Move to a separate "Windows" (sub-)menu?
-    QAction *minimizeAllAction = m_systemMenu->addAction(tr("Hide all"));
-    connect(minimizeAllAction, SIGNAL(triggered()), this, SLOT(actionMinimizeAll()));
-    QAction *maximizeAllAction = m_systemMenu->addAction(tr("Unhide all"));
-    connect(maximizeAllAction, SIGNAL(triggered()), this, SLOT(actionMaximizeAll()));
-    m_systemMenu->addSeparator();
+
     // Add submenus with applications to the System menu
     QStringList locationsContainingApps = {};
     locationsContainingApps.append(QDir::homePath());

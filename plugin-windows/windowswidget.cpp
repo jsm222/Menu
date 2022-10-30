@@ -59,6 +59,32 @@ void WindowsWidget::updateWindows()
         }
     }
 
+    // Hide frontmost app
+    WId id = KWindowSystem::activeWindow();
+    QAction *hideAction = m_menu->addAction(tr("Hide %1").arg(applicationNiceNameForWId(id)));
+    connect(hideAction, &QAction::triggered, this, [hideAction, id, this]() {
+        KWindowSystem::minimizeWindow(id);
+    });
+
+    // Hide others
+    QAction *hideAllAction = m_menu->addAction(tr("Hide Others"));
+    connect(hideAllAction, &QAction::triggered, this, [hideAllAction, id, this]() {
+        for (WId cand_id : KWindowSystem::windows()){
+            if(cand_id != id)
+                KWindowSystem::minimizeWindow(cand_id);
+        }
+    });
+
+    // Show all
+    QAction *showAllAction = m_menu->addAction(tr("Show All"));
+    connect(showAllAction, &QAction::triggered, this, [showAllAction, id, this]() {
+        for (WId cand_id : KWindowSystem::windows()){
+            KWindowSystem::unminimizeWindow(cand_id);
+        }
+    });
+
+    m_menu->addSeparator();
+
     // Add one menu item for each appliction
 
     for (WId id : distinctApps){
