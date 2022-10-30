@@ -112,7 +112,7 @@ QString bundlePathForPId(unsigned int pid) {
         path = "ThisIsOnlyImplementedForFreeBSDSoFar";
     }
 
-    qDebug() << "probono: bundlePathForPId returns:" << path;
+    // qDebug() << "probono: bundlePathForPId returns:" << path;
     return path;
 }
 
@@ -146,7 +146,7 @@ QString pathForWId(unsigned long long id) {
         // qDebug() << "probono: retStr:" << retStr;
         path = retStr;
     }
-    qDebug() << "probono: pathForWId returns:" << path;
+    // qDebug() << "probono: pathForWId returns:" << path;
     return path;
 }
 

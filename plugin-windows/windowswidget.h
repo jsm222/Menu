@@ -15,6 +15,8 @@ public:
 
 private:
     void updateWindows();
+    void hideOthers(WId id);
+    void activateWindow(WId id);
 
 private:
     QMenuBar *m_menubar;
