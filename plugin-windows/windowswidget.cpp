@@ -62,13 +62,15 @@ void WindowsWidget::updateWindows()
     // Hide frontmost app
     WId id = KWindowSystem::activeWindow();
     QAction *hideAction = m_menu->addAction(tr("Hide %1").arg(applicationNiceNameForWId(id)));
+    hideAction->setShortcut(QKeySequence("Ctrl+H"));
     connect(hideAction, &QAction::triggered, this, [hideAction, id, this]() {
         KWindowSystem::minimizeWindow(id);
     });
 
     // Hide others
-    QAction *hideAllAction = m_menu->addAction(tr("Hide Others"));
-    connect(hideAllAction, &QAction::triggered, this, [hideAllAction, id, this]() {
+    QAction *hideOthersAction = m_menu->addAction(tr("Hide Others"));
+    // hideOthersAction->setShortcut(QKeySequence("Shift+Alt+H"));
+    connect(hideOthersAction, &QAction::triggered, this, [hideOthersAction, id, this]() {
         for (WId cand_id : KWindowSystem::windows()){
             if(cand_id != id)
                 KWindowSystem::minimizeWindow(cand_id);
@@ -77,6 +79,7 @@ void WindowsWidget::updateWindows()
 
     // Show all
     QAction *showAllAction = m_menu->addAction(tr("Show All"));
+    // showAllAction->setShortcut(QKeySequence("Shift+Ctrl+H"));
     connect(showAllAction, &QAction::triggered, this, [showAllAction, id, this]() {
         for (WId cand_id : KWindowSystem::windows()){
             KWindowSystem::unminimizeWindow(cand_id);
