@@ -22,6 +22,7 @@
 #include <QPluginLoader>
 #include <QDebug>
 #include <QApplication>
+#include <QList>
 
 PluginManager::PluginManager(QObject *parent)
   : QObject(parent)
@@ -31,24 +32,44 @@ PluginManager::PluginManager(QObject *parent)
 
 void PluginManager::start()
 {
-    QString pathPlugins;
-    auto pluginsDir = QDir(QCoreApplication::applicationDirPath() + \
-        QString("/../lib/menubar/plugins"));
-    const QFileInfoList files = pluginsDir.entryInfoList(QDir::Files);
-    for (const QFileInfo file : files) {
-        const QString filePath = file.filePath();
-        if (!QLibrary::isLibrary(filePath))
-            continue;
+    QList<QDir> pluginsDirs;
 
-        QPluginLoader *loader = new QPluginLoader(filePath);
-        StatusBarExtension *plugin = qobject_cast<StatusBarExtension *>(loader->instance());
+    // Load plugins from FHS location
+    auto pluginsDir = QDir(QDir(QCoreApplication::applicationDirPath() + \
+        QString("/../lib/menubar/plugins")).canonicalPath());
+    pluginsDirs.append(pluginsDir);
 
-        if (plugin) {
-            qDebug() << "loaded " << plugin->pluginName() << " !!!";
-            ExtensionWidget *widget = new ExtensionWidget(plugin);
-            m_extensions.insert(plugin->pluginName(), widget);
-        } else {
-            qDebug() << filePath << loader->errorString();
+    // Load plugins from build/ subdirectories (useful during development)
+    QStringList filters;
+    filters << "plugin-*";
+    QStringList dirs = QDir(QCoreApplication::applicationDirPath() + \
+                            QString("/../")).entryList(filters);
+
+    {
+        for(QString dir : dirs) {
+            auto additionalPluginsDir = QDir(QCoreApplication::applicationDirPath() + \
+                                             QString("/../") + dir);
+            pluginsDirs.append(QDir(additionalPluginsDir.canonicalPath()));
+        }
+    }
+
+    for(auto pluginsDir : pluginsDirs) {
+        const QFileInfoList files = pluginsDir.entryInfoList(QDir::Files);
+        for (const QFileInfo file : files) {
+            const QString filePath = file.filePath();
+            if (!QLibrary::isLibrary(filePath))
+                continue;
+
+            QPluginLoader *loader = new QPluginLoader(filePath);
+            StatusBarExtension *plugin = qobject_cast<StatusBarExtension *>(loader->instance());
+
+            if (plugin) {
+                qDebug() << "loaded " << plugin->pluginName() << " !!!";
+                ExtensionWidget *widget = new ExtensionWidget(plugin);
+                m_extensions.insert(plugin->pluginName(), widget);
+            } else {
+                qDebug() << filePath << loader->errorString();
+            }
         }
     }
 }

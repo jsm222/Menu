@@ -37,6 +37,7 @@
 #include "appmenu/appmenumodel.h"
 #include "appmenu/menufilterproxy.h"
 #include "appmenu/menuimporter.h"
+
 class SearchLineEdit: public QLineEdit {
     Q_OBJECT
 public:

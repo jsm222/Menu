@@ -63,7 +63,6 @@
 
 #include "mainwindow.h"
 #include "thumbnails.h"
-#include "applicationwindow.h"
 
 // SystemMenu is like QMenu but has a first menu item
 // that changes depending on whether modifier keys are pressed
@@ -446,8 +445,7 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
 
     // Prepare System menu
     m_systemMenu = new SystemMenu(); // Using our SystemMenu subclass instead of a QMenu to be able to toggle "About..." when modifier key is pressed
-    // m_systemMenu->setTitle(tr("System"));
-    m_systemMenu->setTitle(applicationNiceNameForWId(KWindowSystem::activeWindow())); // TODO: Do not do this to the System menu
+    m_systemMenu->setTitle(tr("System"));
     QWidgetAction *widgetAction = new QWidgetAction(this);
     widgetAction->setDefaultWidget(searchLineEdit);
     m_searchMenu->addAction(widgetAction);
@@ -470,12 +468,7 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
     connect(m_systemMenu->actions().first(), SIGNAL(triggered()), this, SLOT(actionAbout()));
 
     m_systemMenu->addSeparator();
-    // TODO: Move to a separate "Windows" (sub-)menu?
-    QAction *minimizeAllAction = m_systemMenu->addAction(tr("Hide all"));
-    connect(minimizeAllAction, SIGNAL(triggered()), this, SLOT(actionMinimizeAll()));
-    QAction *maximizeAllAction = m_systemMenu->addAction(tr("Unhide all"));
-    connect(maximizeAllAction, SIGNAL(triggered()), this, SLOT(actionMaximizeAll()));
-    m_systemMenu->addSeparator();
+
     // Add submenus with applications to the System menu
     QStringList locationsContainingApps = {};
     locationsContainingApps.append(QDir::homePath());
@@ -994,7 +987,6 @@ void AppMenuWidget::onActiveWindowChanged()
 
     if (m_currentWindowID != KWindowSystem::activeWindow()) {
         qobject_cast<MainWindow*>(this->parent()->parent())->hideApplicationName();
-        m_systemMenu->setTitle(applicationNiceNameForWId(m_windowID)); // TODO: Do not do this to the System menu
         // TODO: Need to trigger updating the menu here? Sometimes it stays blank after an application has been closed
     }
 

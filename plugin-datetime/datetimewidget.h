@@ -2,7 +2,8 @@
 #define DATETIMEWIDGET_H
 
 #include <QWidget>
-#include <QLabel>
+#include <QMenu>
+#include <QMenuBar>
 #include <QTimer>
 
 class DateTimeWidget : public QWidget
@@ -14,10 +15,13 @@ public:
 
 private:
     void updateCurrentTimeString();
+    void change();
 
 private:
-    QLabel *m_label;
+    QMenuBar *m_menubar;
+    QMenu *m_menu;
     QTimer *m_refreshTimer;
+    QAction *dateAction;
 };
 
 #endif // DATETIMEWIDGET_H

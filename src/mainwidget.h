@@ -45,6 +45,7 @@ private:
     QHBoxLayout *m_statusnotifierLayout;
     QHBoxLayout *m_controlCenterLayout;
     QHBoxLayout *m_dateTimeLayout;
+    QHBoxLayout *m_windowsLayout;
     AppMenuWidget *m_appMenuWidget;
 
     PluginManager *m_pluginManager;
