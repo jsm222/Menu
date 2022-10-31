@@ -35,6 +35,7 @@ WindowsWidget::WindowsWidget(QWidget *parent)
     updateWindows();
 
     connect(KWindowSystem::self(), &KWindowSystem::activeWindowChanged, this, &WindowsWidget::updateWindows);
+    connect(KWindowSystem::self(), &KWindowSystem::windowRemoved, this, &WindowsWidget::updateWindows);
 }
 
 void WindowsWidget::updateWindows()
@@ -123,19 +124,21 @@ void WindowsWidget::updateWindows()
         if(windowsForThisPID <2) {
             QAction *appAction = m_menu->addAction(niceName);
 
+            QPixmap pixmap;
+            pixmap = KWindowSystem::icon(id, 24, 24, false);
+            appAction->setIcon(QIcon(pixmap));
+
             // Call the Desktop the "Desktop"
             KWindowInfo info(id, NET::WMPid | NET::WMWindowType);
             if (info.windowType(NET::AllTypesMask) & (NET::Desktop)) {
                 appAction->setText(tr("Desktop"));
+                appAction->setIcon(QIcon::fromTheme("desktop"));
             }
             appAction->setToolTip(QString("Window ID: %1\n"
                                           "Bundle: %2\n"
                                           "Launchee: %3").arg(id).arg(bundlePathForWId(id)).arg(pathForWId(id)));
             appAction->setCheckable(true);
 
-            QPixmap pixmap;
-            pixmap = KWindowSystem::icon(id, 24, 24, false);
-            appAction->setIcon(QIcon(pixmap));
             appAction->setIconVisibleInMenu(true); // So that an icon is shown even though the theme sets Qt::AA_DontShowIconsInMenus
 
             if(id == KWindowSystem::activeWindow()) {
@@ -165,6 +168,7 @@ void WindowsWidget::updateWindows()
                     // If more than one Filer window is open and one is the Desktop, call the Desktop the "Desktop"
                     if (cand_info.windowType(NET::AllTypesMask) & (NET::Desktop)) {
                         appAction->setText(tr("Desktop"));
+                        subMenu->menuAction()->setIcon(QIcon::fromTheme("folder")); // TODO: Remove this once Filer sets its icon on the desktop window
                     }
                     appAction->setToolTip(QString("Window ID: %1\n"
                                                   "Bundle: %2\n"
