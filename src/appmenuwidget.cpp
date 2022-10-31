@@ -28,6 +28,7 @@
 #include <QWidgetAction>
 #include <QX11Info>
 #include <QApplication>
+#include <QVariant>
 #include <QAbstractItemView>
 #include <QDBusConnection>
 #include <QDBusConnectionInterface>
@@ -1245,6 +1246,16 @@ void AppMenuWidget::actionMaximizeAll()
 
 void AppMenuWidget::actionLogout()
 {
+    if (QDBusConnection::systemBus().isConnected()) {
+         QDBusInterface iface("org.freedesktop.ConsoleKit", "/org/freedesktop/ConsoleKit/Manager", "org.freedesktop.ConsoleKit.Manager", QDBusConnection::systemBus());
+         if (iface.isValid()) {
+             QDBusReply<QString> reply = iface.call("CanPowerOff");
+             if (reply.isValid() && reply.value() == "yes") {
+                iface.call("PowerOff",QVariant(false));
+             }
+         }
+     }
+
     qDebug() << "actionLogout() called";
     // Check if we have the Shutdown binary at hand
     if(QFileInfo(QCoreApplication::applicationDirPath() + QString("/Shutdown")).isExecutable()) {
