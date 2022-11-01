@@ -7,8 +7,7 @@
 #include <QPixmap>
 #include <KF5/KWindowSystem/KWindowSystem>
 
-#include "../src/applicationwindow.h"
-
+#include "../src/applicationinfo.h"
 
 WindowsWidget::WindowsWidget(QWidget *parent)
     : QWidget(parent),
@@ -61,7 +60,8 @@ void WindowsWidget::updateWindows()
 // we can get away with this
 
 {
-    m_menu->setTitle(applicationNiceNameForWId(KWindowSystem::activeWindow()));
+    ApplicationInfo *ai;
+    m_menu->setTitle(ai->applicationNiceNameForWId(KWindowSystem::activeWindow()));
 
     m_menu->clear();
 
@@ -92,7 +92,7 @@ void WindowsWidget::updateWindows()
 
     // Hide frontmost app
     WId id = KWindowSystem::activeWindow();
-    QAction *hideAction = m_menu->addAction(tr("Hide %1").arg(applicationNiceNameForWId(id)));
+    QAction *hideAction = m_menu->addAction(tr("Hide %1").arg(ai->applicationNiceNameForWId(id)));
     hideAction->setShortcut(QKeySequence("Ctrl+H"));
     connect(hideAction, &QAction::triggered, this, [hideAction, id, this]() {
         KWindowSystem::minimizeWindow(id);
@@ -120,7 +120,7 @@ void WindowsWidget::updateWindows()
 
     for (WId id : distinctApps){
 
-        QString niceName = applicationNiceNameForWId(id);
+        QString niceName = ai->applicationNiceNameForWId(id);
 
         // Do not show this Menu application itself in the list of windows
         KWindowInfo info(id, NET::WMPid);
@@ -151,7 +151,7 @@ void WindowsWidget::updateWindows()
             }
             appAction->setToolTip(QString("Window ID: %1\n"
                                           "Bundle: %2\n"
-                                          "Launchee: %3").arg(id).arg(bundlePathForWId(id)).arg(pathForWId(id)));
+                                          "Launchee: %3").arg(id).arg(ai->bundlePathForWId(id)).arg(ai->pathForWId(id)));
             appAction->setCheckable(true);
 
             appAction->setIconVisibleInMenu(true); // So that an icon is shown even though the theme sets Qt::AA_DontShowIconsInMenus
@@ -187,7 +187,7 @@ void WindowsWidget::updateWindows()
                     }
                     appAction->setToolTip(QString("Window ID: %1\n"
                                                   "Bundle: %2\n"
-                                                  "Launchee: %3").arg(cand_id).arg(bundlePathForWId(cand_id)).arg(pathForWId(cand_id)));
+                                                  "Launchee: %3").arg(cand_id).arg(ai->bundlePathForWId(cand_id)).arg(ai->pathForWId(cand_id)));
                     appAction->setCheckable(true);
                     // appAction->setIcon(QIcon(KWindowSystem::icon(id))); // Why does this not work? TODO: Get icon from bundle?
                     if(cand_id == KWindowSystem::activeWindow()) {
@@ -201,11 +201,7 @@ void WindowsWidget::updateWindows()
                     }
                 }
             }
-
-
         }
-
-
     }
 
     m_menu->addSeparator();

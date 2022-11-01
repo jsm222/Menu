@@ -10,6 +10,8 @@ set(SRCS
     windowswidget.cpp
     ../src/applicationwindow.h
     ../src/applicationwindow.cpp
+    ../src/applicationinfo.h
+    ../src/applicationinfo.cpp
 )
 
 add_definitions("${QT_DEFINITIONS} -DQT_PLUGIN")
