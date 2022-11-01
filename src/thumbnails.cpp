@@ -85,7 +85,7 @@ bool Thumbnail::isValid()
 const QString Thumbnail::getFileHash()
 {
     if (!QFile::exists(_filename)) { return QString(); }
-    return QString(QCryptographicHash::hash(QUrl::fromUserInput(_filename).toString().toUtf8(), _hash).toHex());
+    return QString(QCryptographicHash::hash(QUrl::fromLocalFile(_filename).toEncoded(), _hash).toHex());
 }
 
 Thumbnails::Thumbnails(QObject *parent)
