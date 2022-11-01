@@ -248,7 +248,7 @@ void AppMenuWidget::findAppsInside(QStringList locationsContainingApps, QMenu *m
         QMenu *submenu;
 
         if(directory.endsWith(".app") == false && directory.endsWith(".AppDir") == false && numberOfAppsInDirectory > 0) {
-            qDebug() << "# Descending into" << directory;
+            // qDebug() << "# Descending into" << directory;
             QStringList locationsToBeChecked = {directory};
             QFileInfo fi(directory);
             QString base = fi.completeBaseName(); // baseName() gets it wrong e.g., when there are dots in version numbers
@@ -287,7 +287,7 @@ void AppMenuWidget::findAppsInside(QStringList locationsContainingApps, QMenu *m
                 QString AppCand = QDir(candidate).canonicalPath() + "/" + nameWithoutSuffix; // Dereference symlink to candidate
                 // qDebug() << "################### Checking" << AppCand;
                 if(QFileInfo(AppCand).exists() == true) {
-                    qDebug() << "# Found" << AppCand;
+                    // qDebug() << "# Found" << AppCand;
                     QFileInfo fi(file.fileName());
                     QString base = fi.completeBaseName();  // The name of the .app directory without suffix // baseName() gets it wrong e.g., when there are dots in version numbers
                     QAction *action = submenu->addAction(base);
@@ -305,7 +305,7 @@ void AppMenuWidget::findAppsInside(QStringList locationsContainingApps, QMenu *m
                 QString AppCand = QDir(candidate).canonicalPath() + "/" + "AppRun";
                 // qDebug() << "################### Checking" << AppCand;
                 if(QFileInfo(AppCand).exists() == true){
-                    qDebug() << "# Found" << AppCand;
+                    // qDebug() << "# Found" << AppCand;
                     QFileInfo fi(file.fileName());
                     QString base = fi.completeBaseName(); // baseName() gets it wrong e.g., when there are dots in version numbers
                     QStringList executableAndArgs = {AppCand};
@@ -334,24 +334,25 @@ void AppMenuWidget::findAppsInside(QStringList locationsContainingApps, QMenu *m
             }
             else if (file.fileName().endsWith(".AppImage") || file.fileName().endsWith(".appimage")) {
                 // .desktop file
-                qDebug() << "# Found" << file.fileName();
+                // qDebug() << "# Found" << file.fileName();
                 QFileInfo fi(file.fileName());
                 QString base = fi.completeBaseName(); // baseName() gets it wrong e.g., when there are dots in version numbers
                 QStringList executableAndArgs = {fi.absoluteFilePath()};
                 QAction *action = submenu->addAction(base);
                 action->setProperty("path", file.absoluteFilePath());
                 QString IconCand = Thumbnail(QDir(candidate).absolutePath(), QCryptographicHash::Md5,Thumbnail::ThumbnailSizeNormal, nullptr).getIconPath();
-                qDebug() << "#   ############################### thumbnail" << IconCand;
+                // qDebug() << "#   ############################### thumbnail for" << QDir(candidate).absolutePath();
                 if(QFileInfo(IconCand).exists() == true) {
-                    qDebug() << "#   Found thumbnail" << IconCand;
+                    // qDebug() << "#   Found thumbnail" << IconCand;
                     action->setIcon(QIcon(IconCand));
                     action->setIconVisibleInMenu(true); // So that an icon is shown even though the theme sets Qt::AA_DontShowIconsInMenus
                 } else {
-                    qDebug() << "#   Did not find thumbnail" << IconCand << "TODO: Request it from thumbnailer";
+                    // TODO: Request thumbnail; https://github.com/KDE/kio-extras/blob/master/thumbnail/thumbnail.cpp
+                    // qDebug() << "#   Did not find thumbnail" << IconCand << "TODO: Request it from thumbnailer";
                 }
             }
             else if (locationsContainingApps.contains(candidate) == false && file.isDir() && candidate.endsWith("/..") == false && candidate.endsWith("/.") == false && candidate.endsWith(".app") == false && candidate.endsWith(".AppDir") == false) {
-                qDebug() << "# Found" << file.fileName() << ", a directory that is not an .app bundle nor an .AppDir";
+                // qDebug() << "# Found" << file.fileName() << ", a directory that is not an .app bundle nor an .AppDir";
                 QStringList locationsToBeChecked({candidate});
                 findAppsInside(locationsToBeChecked, m_systemMenu, watcher);
             }
@@ -686,8 +687,21 @@ if(searchString != "") {
         QAction *res = new QAction();
         res->setText(iter.filePath().split("/").last());
         res->setToolTip(iter.filePath());
-        QIcon icon = QIcon::fromTheme(mimeType.iconName());
-        res->setIcon(icon);
+
+
+        // If there is a thumbnail, show it
+        QString IconCand = Thumbnail(QDir(iter.filePath()).absolutePath(), QCryptographicHash::Md5,Thumbnail::ThumbnailSizeNormal, nullptr).getIconPath();
+        // qDebug() << "#   ############################### thumbnail for" << QDir(iter.filePath()).absolutePath();
+        if(QFileInfo(IconCand).exists() == true) {
+            // qDebug() << "#   Found thumbnail" << IconCand;
+            res->setIcon(QIcon(IconCand));
+        } else {
+            // TODO: Request thumbnail; https://github.com/KDE/kio-extras/blob/master/thumbnail/thumbnail.cpp
+            // qDebug() << "#   Did not find thumbnail" << IconCand << "TODO: Request it from thumbnailer";
+            QIcon icon = QIcon::fromTheme(mimeType.iconName());
+            res->setIcon(icon);
+        }
+
         res->setIconVisibleInMenu(true);
         res->setProperty("path", iter.filePath());
         connect(res,&QAction::triggered,this,[this, res]{
