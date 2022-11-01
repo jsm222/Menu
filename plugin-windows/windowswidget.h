@@ -6,6 +6,8 @@
 #include <QMenuBar>
 #include <QTimer>
 
+#include <KWindowSystem>
+
 class WindowsWidget : public QWidget
 {
     Q_OBJECT
@@ -17,6 +19,7 @@ private:
     void updateWindows();
     void hideOthers(WId id);
     void activateWindow(WId id);
+    void onWindowChanged(WId window, NET::Properties prop, NET::Properties2 prop2);
 
 private:
     QMenuBar *m_menubar;

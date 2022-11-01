@@ -36,6 +36,21 @@ WindowsWidget::WindowsWidget(QWidget *parent)
 
     connect(KWindowSystem::self(), &KWindowSystem::activeWindowChanged, this, &WindowsWidget::updateWindows);
     connect(KWindowSystem::self(), &KWindowSystem::windowRemoved, this, &WindowsWidget::updateWindows);
+
+    connect(KWindowSystem::self(), static_cast<void (KWindowSystem::*)(WId, NET::Properties, NET::Properties2)>(&KWindowSystem::windowChanged)
+            , this, &WindowsWidget::onWindowChanged);
+}
+
+void WindowsWidget::onWindowChanged(WId window, NET::Properties prop, NET::Properties2 prop2)
+{
+    if (prop & NET::WMState) {
+        // Check whether a window is demanding attention
+        KWindowInfo info(window, NET::WMState);
+        if(info.hasState(NET::DemandsAttention)) {
+            qDebug() << "probono: Window demands attention" << window;
+            m_menu->menuAction()->setIcon(QIcon::fromTheme("dialog-warning")); // TODO: Blinking application icon
+        }
+    }
 }
 
 void WindowsWidget::updateWindows()
