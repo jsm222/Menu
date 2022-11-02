@@ -14,10 +14,11 @@ class WindowsWidget : public QWidget
 
 public:
     explicit WindowsWidget(QWidget *parent = nullptr);
+    void hideOthers(WId id);
 
 private:
     void updateWindows();
-    void hideOthers(WId id);
+
     void activateWindow(WId id);
     void onWindowChanged(WId window, NET::Properties prop, NET::Properties2 prop2);
 
