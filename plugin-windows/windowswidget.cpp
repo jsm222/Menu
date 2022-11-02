@@ -6,6 +6,7 @@
 #include <QApplication>
 #include <QPixmap>
 #include <KF5/KWindowSystem/KWindowSystem>
+#include <QtDBus/QDBusConnection>
 
 #include "../src/applicationinfo.h"
 
@@ -90,12 +91,23 @@ void WindowsWidget::updateWindows()
         }
     }
 
-    // Hide frontmost app
+    // Hide all windows of the process of the frontmost app
+    // NOTE: We need to ensure that the keyboard shortcut is not already taken by .config/lxqt/globalkeyshortcuts.conf
+    // if we want to use this here. But it seems like the shortcut set on this action never gets used?
+    // So we may need to make a tiny "hide_application" command line tool?
+    // Or register a GLOBAL shortcut in Qt?
     WId id = KWindowSystem::activeWindow();
     QAction *hideAction = m_menu->addAction(tr("Hide %1").arg(ai->applicationNiceNameForWId(id)));
     hideAction->setShortcut(QKeySequence("Ctrl+H"));
+
     connect(hideAction, &QAction::triggered, this, [hideAction, id, this]() {
         KWindowSystem::minimizeWindow(id);
+        KWindowInfo info(id, NET::WMPid);
+        for (WId cand_id : KWindowSystem::windows()){
+            KWindowInfo cand_info(cand_id, NET::WMPid);
+            if(cand_info.pid() == info.pid())
+                KWindowSystem::minimizeWindow(cand_id);
+        }
     });
 
     // Hide others
