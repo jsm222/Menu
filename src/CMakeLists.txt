@@ -14,8 +14,8 @@ set(SRCS
     popupwindow.cpp
     pluginmanager.h
     pluginmanager.cpp
-    applicationwindow.h
-    applicationwindow.cpp
+    applicationinfo.h
+    applicationinfo.cpp
     appmenuwidget.cpp
     appmenuwidget.h
     appmenu/appmenumodel.h

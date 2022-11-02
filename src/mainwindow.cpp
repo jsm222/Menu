@@ -18,6 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "applicationinfo.h"
 #include "mainwindow.h"
 #include <QApplication>
 #include <QHBoxLayout>
@@ -36,7 +37,6 @@
 #include <xcb/xcb.h>
 #include <X11/Xlib.h>
 
-#include "applicationwindow.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QFrame(parent),
@@ -242,12 +242,14 @@ QString MainWindow::showApplicationName(const QString &arg)
     // This seeme to be a reasonable compromise in terms of speed,
     // but we are not showing the second of two applications with the same name
     // being launched from two different locations. Maybe this is good enough for now
+    ApplicationInfo *ai = new ApplicationInfo();
     for (WId id : KWindowSystem::windows()){
-        if(applicationNiceNameForWId(id) == arg){
+        if(ai->applicationNiceNameForWId(id) == arg){
             alreadyRunningApp = true;
             break;
         }
     }
+    ai->~ApplicationInfo();
 
     if (! alreadyRunningApp) {
         m_MainWidget->hide();

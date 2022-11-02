@@ -60,7 +60,7 @@ void WindowsWidget::updateWindows()
 // we can get away with this
 
 {
-    ApplicationInfo *ai;
+    ApplicationInfo *ai = new ApplicationInfo();
     m_menu->setTitle(ai->applicationNiceNameForWId(KWindowSystem::activeWindow()));
 
     m_menu->clear();
@@ -212,7 +212,7 @@ void WindowsWidget::updateWindows()
     connect(fullscreenAction, &QAction::triggered, this, [fullscreenAction, id, this]() {
         KWindowSystem::setState(id, KWindowSystem::FullScreen);
     });
-
+    ai->~ApplicationInfo();
 }
 
 void WindowsWidget::hideOthers(WId id) {

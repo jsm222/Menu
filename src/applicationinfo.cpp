@@ -19,8 +19,7 @@
 #include <libprocstat.h>
 #endif
 
-ApplicationInfo::ApplicationInfo(QObject *parent)
-    : QObject{parent}
+ApplicationInfo::ApplicationInfo()
 {
 
 }

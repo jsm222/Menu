@@ -8,8 +8,6 @@ set(SRCS
     windows.cpp
     windowswidget.h
     windowswidget.cpp
-    ../src/applicationwindow.h
-    ../src/applicationwindow.cpp
     ../src/applicationinfo.h
     ../src/applicationinfo.cpp
 )

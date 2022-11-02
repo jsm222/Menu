@@ -1,13 +1,15 @@
 #ifndef APPLICATIONINFO_H
 #define APPLICATIONINFO_H
 
-#include <QObject>
+#include <QString>
 
-class ApplicationInfo : public QObject
+
+
+class ApplicationInfo
 {
-    Q_OBJECT
+
 public:
-    explicit ApplicationInfo(QObject *parent = nullptr);
+    explicit ApplicationInfo();
     ~ApplicationInfo();
     QString bundlePath(QString path);
     QString bundleName(unsigned long long id);
@@ -17,8 +19,6 @@ public:
     QString pathForWId(unsigned long long id);
     QString applicationNiceNameForWId(unsigned long long id);
 
-
-signals:
 
 };
 
