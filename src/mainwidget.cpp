@@ -78,7 +78,7 @@ MainWidget::MainWidget(QWidget *parent)
     // layout->addSpacing(10);
 
     layout->addWidget(windowsWidget);
-    layout->addSpacing(5); // Right edge of the screen
+    // layout->addSpacing(5); // Right edge of the screen
 
     layout->setContentsMargins(0, 0, 0, 0);
     setLayout(layout);
