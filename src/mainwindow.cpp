@@ -172,14 +172,11 @@ void MainWindow::initSize()
 
 void MainWindow::setStrutPartial()
 {
-    //不清真的作法，kwin设置blur后设置程序支撑导致模糊无效
-    //TRANSLATED Unclear practice, setting program support after kwin set blur causes blur invalid
+    // Unclear practice, setting program support after kwin set blur causes blur invalid
     QRect r(geometry());
     r.setHeight(1);
     r.setWidth(1);
 
-
-    const QRect windowRect = this->rect();
     NETExtendedStrut strut;
 
     strut.top_width = height(); // + 1; // 1 pixel between menu bar and maximized window not needed if we have a shadow
@@ -203,7 +200,6 @@ void MainWindow::setStrutPartial()
 
 QString MainWindow::showApplicationName(const QString &arg)
 {
-    QString message = QString("showApplicationName(\"%1\") got called").arg(arg);
     qDebug() << "showApplicationName" << arg << "got called";
 
     // Find out whether we already have a window open from this application;
@@ -234,7 +230,8 @@ QString MainWindow::showApplicationName(const QString &arg)
     // but we are not showing the second of two applications with the same name
     // being launched from two different locations. Maybe this is good enough for now
     ApplicationInfo *ai = new ApplicationInfo();
-    for (WId id : KWindowSystem::windows()){
+    const QList<WId> windows = KWindowSystem::windows();
+    for (WId id : windows){
         if(ai->applicationNiceNameForWId(id) == arg){
             alreadyRunningApp = true;
             break;

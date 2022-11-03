@@ -128,7 +128,6 @@ QString ApplicationInfo::bundlePathForPId(unsigned int pid) {
 }
 
 QString ApplicationInfo::bundlePathForWId(unsigned long long id) {
-    QString path;
     KWindowInfo info(id, NET::WMPid, NET::WM2TransientFor | NET::WM2WindowClass);
     return bundlePathForPId(info.pid());
 }
@@ -162,10 +161,8 @@ QString ApplicationInfo::pathForWId(unsigned long long id) {
 }
 
 QString ApplicationInfo::applicationNiceNameForWId(unsigned long long id) {
-    QString path;
-    QString applicationNiceName;
     KWindowInfo info(id, NET::WMPid, NET::WM2TransientFor | NET::WM2WindowClass);
-    applicationNiceName = applicationNiceNameForPath(bundlePathForPId(info.pid()));
+    QString applicationNiceName = applicationNiceNameForPath(bundlePathForPId(info.pid()));
     if(applicationNiceName.isEmpty()) {
         applicationNiceName = QFileInfo(pathForWId(id)).fileName();
     }
