@@ -250,8 +250,6 @@ void AppMenuWidget::findAppsInside(QStringList locationsContainingApps, QMenu *m
         if(directory.endsWith(".app") == false && directory.endsWith(".AppDir") == false && numberOfAppsInDirectory > 0) {
             // qDebug() << "# Descending into" << directory;
             QStringList locationsToBeChecked = {directory};
-            QFileInfo fi(directory);
-            QString base = fi.completeBaseName(); // baseName() gets it wrong e.g., when there are dots in version numbers
             // submenu = m_systemMenu->addMenu(base); // TODO: Use this once we have nested submenus rather than flat ones with '→'
             submenu = m_systemMenu->addMenu(directory);
             submenu->setProperty("path", directory);
@@ -286,7 +284,7 @@ void AppMenuWidget::findAppsInside(QStringList locationsContainingApps, QMenu *m
             if (file.fileName().endsWith(".app")){
                 QString AppCand = QDir(candidate).canonicalPath() + "/" + nameWithoutSuffix; // Dereference symlink to candidate
                 // qDebug() << "################### Checking" << AppCand;
-                if(QFileInfo(AppCand).exists() == true) {
+                if(QFileInfo::exists(AppCand) == true) {
                     // qDebug() << "# Found" << AppCand;
                     QFileInfo fi(file.fileName());
                     QString base = fi.completeBaseName();  // The name of the .app directory without suffix // baseName() gets it wrong e.g., when there are dots in version numbers
@@ -294,7 +292,7 @@ void AppMenuWidget::findAppsInside(QStringList locationsContainingApps, QMenu *m
                     action->setToolTip(file.absoluteFilePath());
                     action->setProperty("path", file.absoluteFilePath());
                     QString IconCand = QDir(candidate).canonicalPath() + "/Resources/" + nameWithoutSuffix + ".png";
-                    if(QFileInfo(IconCand).exists() == true) {
+                    if(QFileInfo::exists(IconCand) == true) {
                         // qDebug() << "#   Found icon" << IconCand;
                         action->setIcon(QIcon(IconCand));
                         action->setIconVisibleInMenu(true); // So that an icon is shown even though the theme sets Qt::AA_DontShowIconsInMenus
@@ -304,7 +302,7 @@ void AppMenuWidget::findAppsInside(QStringList locationsContainingApps, QMenu *m
             else if (file.fileName().endsWith(".AppDir")) {
                 QString AppCand = QDir(candidate).canonicalPath() + "/" + "AppRun";
                 // qDebug() << "################### Checking" << AppCand;
-                if(QFileInfo(AppCand).exists() == true){
+                if(QFileInfo::exists(AppCand) == true){
                     // qDebug() << "# Found" << AppCand;
                     QFileInfo fi(file.fileName());
                     QString base = fi.completeBaseName(); // baseName() gets it wrong e.g., when there are dots in version numbers
@@ -313,7 +311,7 @@ void AppMenuWidget::findAppsInside(QStringList locationsContainingApps, QMenu *m
                     action->setToolTip(file.absoluteFilePath());
                     action->setProperty("path", file.absoluteFilePath());
                     QString IconCand = QDir(candidate).canonicalPath() + "/.DirIcon";
-                    if(QFileInfo(IconCand).exists() == true) {
+                    if(QFileInfo::exists(IconCand) == true) {
                         // qDebug() << "#   Found icon" << IconCand;
                         action->setIcon(QIcon(IconCand));
                         action->setIconVisibleInMenu(true); // So that an icon is shown even though the theme sets Qt::AA_DontShowIconsInMenus
@@ -342,7 +340,7 @@ void AppMenuWidget::findAppsInside(QStringList locationsContainingApps, QMenu *m
                 action->setProperty("path", file.absoluteFilePath());
                 QString IconCand = Thumbnail(QDir(candidate).absolutePath(), QCryptographicHash::Md5,Thumbnail::ThumbnailSizeNormal, nullptr).getIconPath();
                 // qDebug() << "#   ############################### thumbnail for" << QDir(candidate).absolutePath();
-                if(QFileInfo(IconCand).exists() == true) {
+                if(QFileInfo::exists(IconCand) == true) {
                     // qDebug() << "#   Found thumbnail" << IconCand;
                     action->setIcon(QIcon(IconCand));
                     action->setIconVisibleInMenu(true); // So that an icon is shown even though the theme sets Qt::AA_DontShowIconsInMenus
@@ -395,7 +393,7 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
         if (!w) {
             // Clean the search box if the user has left the Menu application altogether
             searchLineEdit->clear();
-            searchLineEdit->textChanged("");
+            emit searchLineEdit->textChanged("");
             }
         });
 
@@ -421,7 +419,7 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
     // QAction *aboutAction = m_systemMenu->addAction(tr("About This Computer"));
     // connect(aboutAction, SIGNAL(triggered()), this, SLOT(actionAbout()));
     // Since we are using our SystemMenu subclass instead which already contains the first menu item, we do:
-    connect(m_systemMenu->actions().first(), SIGNAL(triggered()), this, SLOT(actionAbout()));
+    connect(m_systemMenu->actions().constFirst(), SIGNAL(triggered()), this, SLOT(actionAbout()));
 
     m_systemMenu->addSeparator();
 
@@ -580,7 +578,7 @@ void AppMenuWidget::updateActionSearch() {
 
 void AppMenuWidget::searchMenu() {
 
-    for(QAction *sr: searchResults) {
+    for(QAction *sr: qAsConst(searchResults)) {
         if(m_searchMenu->actions().contains(sr)) {
             m_searchMenu->removeAction(sr);
             CloneAction * ca = qobject_cast<CloneAction*>(sr);
@@ -597,14 +595,14 @@ void AppMenuWidget::searchMenu() {
     QString searchString = searchLineEdit->text();
     QStringList names;
 
-    for(QMenu * menu : menus) {
+    for(QMenu * menu : qAsConst(menus)) {
 
         m_appMenuModel->filterMenu(menu,searchString,searchString=="",names);
 
 
     }
-
-for(QString v : m_appMenuModel->filteredActions().keys()) {
+const QStringList keys = m_appMenuModel->filteredActions().keys();
+for(const QString &v : keys) {
     QAction *orig = m_appMenuModel->filteredActions()[v];
     CloneAction *cpy = new CloneAction(orig);
     cpy->setText(v);
@@ -616,7 +614,7 @@ for(QString v : m_appMenuModel->filteredActions().keys()) {
     searchResults << cpy;
     connect(cpy,&QAction::triggered,this,[this]{
         searchLineEdit->setText("");
-        searchLineEdit->textChanged("");
+        emit searchLineEdit->textChanged("");
         m_searchMenu->close();
 
     });
@@ -657,7 +655,7 @@ if(searchString != "") {
         // If there is a thumbnail, show it
         QString IconCand = Thumbnail(QDir(iter.filePath()).absolutePath(), QCryptographicHash::Md5,Thumbnail::ThumbnailSizeNormal, nullptr).getIconPath();
         // qDebug() << "#   ############################### thumbnail for" << QDir(iter.filePath()).absolutePath();
-        if(QFileInfo(IconCand).exists() == true) {
+        if(QFileInfo::exists(IconCand) == true) {
             // qDebug() << "#   Found thumbnail" << IconCand;
             res->setIcon(QIcon(IconCand));
         } else {
@@ -672,7 +670,7 @@ if(searchString != "") {
         connect(res,&QAction::triggered,this,[this, res]{
             openBalooSearchResult(res);
             searchLineEdit->setText("");
-            searchLineEdit->textChanged("");
+            emit searchLineEdit->textChanged("");
             m_searchMenu->close();
         });
 
@@ -741,7 +739,8 @@ if(searchString != "") {
 
 // If there is only one search result, select it
 int number_of_enabled_actions = 0;
-for (QAction *a : m_searchMenu->actions()) {
+const QList<QAction*> actions = m_searchMenu->actions();
+for (QAction *a : actions) {
     if(a->isEnabled())
             number_of_enabled_actions++;
 }
@@ -816,11 +815,11 @@ bool AppMenuWidget::event(QEvent *e)
     if (e->type() == QEvent::ApplicationFontChange) {
         QMenu *menu = m_appMenuModel->menu();
         if (menu) {
-            for (QAction *a : menu->actions()) {
+            const QList<QAction*> actions = menu->actions();
+            for (QAction *a : actions) {
                 a->setFont(qApp->font());
             }
         }
-        qDebug() << "gengxinle  !!!" << qApp->font().toString();
         m_menuBar->setFont(qApp->font());
         m_menuBar->update();
     }
@@ -885,7 +884,7 @@ void AppMenuWidget::onActiveWindowChanged()
     if(m_currentWindowID >0 && m_currentWindowID != m_windowID && m_windowID !=0) {
 
         searchLineEdit->clear();
-        searchLineEdit->textChanged("");
+        emit searchLineEdit->textChanged("");
         // bool isMax = info.hasState(NET::Max);
     }
 
@@ -946,7 +945,7 @@ void AppMenuWidget::actionAbout()
         // Center window on screen
         msgBox->setFixedWidth(350); // FIXME: Remove hardcoding; but need to be able to center on screen
         msgBox->setFixedHeight(500); // FIXME: Same
-        QRect screenGeometry = QGuiApplication::screens()[0]->geometry();
+        QRect screenGeometry = QGuiApplication::screens().constFirst()->geometry();
         int x = (screenGeometry.width()-msgBox->geometry().width()) / 2;
         int y = (screenGeometry.height()-msgBox->geometry().height()) / 2;
         msgBox->move(x, y);
@@ -1123,7 +1122,7 @@ void AppMenuWidget::actionAbout()
         // Center window on screen
         msgBox->setFixedWidth(350); // FIXME: Remove hardcoding; but need to be able to center on screen
         msgBox->setFixedHeight(500); // FIXME: Same
-        QRect screenGeometry = QGuiApplication::screens()[0]->geometry();
+        QRect screenGeometry = QGuiApplication::screens().constFirst()->geometry();
         int x = (screenGeometry.width()-msgBox->geometry().width()) / 2;
         int y = (screenGeometry.height()-msgBox->geometry().height()) / 2;
         msgBox->move(x, y);
