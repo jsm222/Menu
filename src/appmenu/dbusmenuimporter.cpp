@@ -384,7 +384,7 @@ void DBusMenuImporter::slotItemActivationRequested(int id, uint /*timestamp*/)
 {
     QAction *action = d->m_actionForId.value(id);
     DMRETURN_IF_FAIL(action);
-    actionActivationRequested(action);
+    emit actionActivationRequested(action);
 }
 
 void DBusMenuImporter::slotGetLayoutFinished(QDBusPendingCallWatcher *watcher)
@@ -419,12 +419,13 @@ void DBusMenuImporter::slotGetLayoutFinished(QDBusPendingCallWatcher *watcher)
     //remove outdated actions
     QSet<int> newDBusMenuItemIds;
     newDBusMenuItemIds.reserve(rootItem.children.count());
-
-    for (const DBusMenuLayoutItem &item : rootItem.children) {
+    const QList<DBusMenuLayoutItem> items = rootItem.children;
+    for (const DBusMenuLayoutItem &item :items) {
         newDBusMenuItemIds << item.id;
     }
 
-    for (QAction *action : menu->actions()) {
+    const QList<QAction*> actions = menu->actions();
+    for (QAction *action : actions) {
         int id = action->property(DBUSMENU_PROPERTY_ID).toInt();
 
         if (! newDBusMenuItemIds.contains(id)) {
@@ -437,7 +438,7 @@ void DBusMenuImporter::slotGetLayoutFinished(QDBusPendingCallWatcher *watcher)
     }
 
     //insert or update new actions into our menu
-    for (const DBusMenuLayoutItem &dbusMenuItem : rootItem.children) {
+    for (const DBusMenuLayoutItem &dbusMenuItem : items) {
         DBusMenuImporterPrivate::ActionForId::Iterator it = d->m_actionForId.find(dbusMenuItem.id);
         QAction *action = nullptr;
 
@@ -528,8 +529,8 @@ void DBusMenuImporter::slotAboutToShowDBusCallFinished(QDBusPendingCallWatcher *
 
     if (reply.isError()) {
         qDebug() << "Call to AboutToShow() failed:" << reply.error().message();
-        menuUpdated(menu);
-	return;
+        emit menuUpdated(menu);
+    return;
     }
 
     //Note, this isn't used by Qt's QPT - but we get a LayoutChanged emitted before
@@ -540,7 +541,7 @@ void DBusMenuImporter::slotAboutToShowDBusCallFinished(QDBusPendingCallWatcher *
         d->m_idsRefreshedByAboutToShow << id;
         d->refresh(id);
     } else if (menu) {
-	emit menuUpdated(menu);
+    emit menuUpdated(menu);
     }
 }
 

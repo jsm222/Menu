@@ -56,9 +56,12 @@ void WindowsWidget::onWindowChanged(WId window, NET::Properties prop, NET::Prope
 void WindowsWidget::updateWindows()
 
 // FIXME: Instead of doing this whole thing each time the frontmost window changes
-// we could probably keep some internal state and change just what needs to be changed;
-// but writing the code for this is more complex and error-prone; so let's see whether
-// we can get away with this
+// we could keep some internal state and change just what needs to be changed;
+// but writing the code for this would be significantly more complex
+// and error-prone; so let's see whether we can get away with this.
+// Looks like preformance is good since we use X11 atoms to store the kind of
+// information we need directly on the windows themselves, so that we don't have
+// to re-compute it each time windows are switched.
 
 {
     ApplicationInfo *ai = new ApplicationInfo();
@@ -73,7 +76,8 @@ void WindowsWidget::updateWindows()
 
     // Find out one process ID per application that has at least one window
     // TODO: No Dock windows
-    for (WId id : KWindowSystem::windows()){
+    const QList<WId> winIds = KWindowSystem::windows();
+    for (WId id : winIds){
         KWindowInfo info(id, NET::WMPid | NET::WMWindowType | NET::WMState, NET::WM2TransientFor | NET::WM2WindowClass | NET::WM2WindowRole);
         // Don't add the Dock and the Menu to this menu
         // but do add Desktop (even though it could be filtered away using NET::Desktop)
@@ -103,7 +107,8 @@ void WindowsWidget::updateWindows()
     connect(hideAction, &QAction::triggered, this, [hideAction, id, this]() {
         KWindowSystem::minimizeWindow(id);
         KWindowInfo info(id, NET::WMPid);
-        for (WId cand_id : KWindowSystem::windows()){
+        const QList<WId> winIds = KWindowSystem::windows();
+        for (WId cand_id : winIds){
             KWindowInfo cand_info(cand_id, NET::WMPid);
             if(cand_info.pid() == info.pid())
                 KWindowSystem::minimizeWindow(cand_id);
@@ -121,7 +126,8 @@ void WindowsWidget::updateWindows()
     QAction *showAllAction = m_menu->addAction(tr("Show All"));
     // showAllAction->setShortcut(QKeySequence("Shift+Ctrl+H"));
     connect(showAllAction, &QAction::triggered, this, [showAllAction, id, this]() {
-        for (WId cand_id : KWindowSystem::windows()){
+        const QList<WId> winIds = KWindowSystem::windows();
+        for (WId cand_id : winIds){
             KWindowSystem::unminimizeWindow(cand_id);
         }
     });
@@ -141,7 +147,8 @@ void WindowsWidget::updateWindows()
 
         // Find out how many menus there are for this PID
         int windowsForThisPID = 0;
-        for (WId cand_id : KWindowSystem::windows()){
+        const QList<WId> winIds = KWindowSystem::windows();
+        for (WId cand_id : winIds){
             KWindowInfo cand_info(cand_id, NET::WMPid);
             if(cand_info.pid() == info.pid())
                 windowsForThisPID++;
@@ -163,7 +170,7 @@ void WindowsWidget::updateWindows()
             }
             appAction->setToolTip(QString("Window ID: %1\n"
                                           "Bundle: %2\n"
-                                          "Launchee: %3").arg(id).arg(ai->bundlePathForWId(id)).arg(ai->pathForWId(id)));
+                                          "Executable: %3").arg(id).arg(ai->bundlePathForWId(id)).arg(ai->pathForWId(id)));
             appAction->setCheckable(true);
 
             appAction->setIconVisibleInMenu(true); // So that an icon is shown even though the theme sets Qt::AA_DontShowIconsInMenus
@@ -188,7 +195,8 @@ void WindowsWidget::updateWindows()
             subMenu->menuAction()->setIcon(QIcon(pixmap));
             subMenu->menuAction()->setIconVisibleInMenu(true); // So that an icon is shown even though the theme sets Qt::AA_DontShowIconsInMenus
 
-            for (WId cand_id : KWindowSystem::windows()){
+            const QList<WId> winIds = KWindowSystem::windows();
+            for (WId cand_id : winIds){
                 KWindowInfo cand_info(cand_id, NET::WMPid | NET::WMName | NET::WMWindowType);
                 if(cand_info.pid() == info.pid()) {
                     QAction *appAction = subMenu->addAction(cand_info.name());
@@ -199,7 +207,7 @@ void WindowsWidget::updateWindows()
                     }
                     appAction->setToolTip(QString("Window ID: %1\n"
                                                   "Bundle: %2\n"
-                                                  "Launchee: %3").arg(cand_id).arg(ai->bundlePathForWId(cand_id)).arg(ai->pathForWId(cand_id)));
+                                                  "Executable: %3").arg(cand_id).arg(ai->bundlePathForWId(cand_id)).arg(ai->pathForWId(cand_id)));
                     appAction->setCheckable(true);
                     // appAction->setIcon(QIcon(KWindowSystem::icon(id))); // Why does this not work? TODO: Get icon from bundle?
                     if(cand_id == KWindowSystem::activeWindow()) {
@@ -229,7 +237,8 @@ void WindowsWidget::updateWindows()
 
 void WindowsWidget::hideOthers(WId id) {
     // TODO: Should we be hiding not all other windows, but only windows belonging to other applications (PIDs)?
-    for (WId cand_id : KWindowSystem::windows()){
+    const QList<WId> winIds = KWindowSystem::windows();
+    for (WId cand_id : winIds){
         if(cand_id != id)
             KWindowSystem::minimizeWindow(cand_id);
     }
@@ -244,7 +253,8 @@ void WindowsWidget::activateWindow(WId id) {
     KWindowInfo info(id, NET::WMPid | NET::WMWindowType);
     if (info.windowType(NET::AllTypesMask) & (NET::Desktop)) {
         qDebug() << "probono: Desktop selected, hence hiding all";
-        for (WId cand_id : KWindowSystem::windows()) {
+        const QList<WId> winIds = KWindowSystem::windows();
+        for (WId cand_id : winIds) {
             KWindowSystem::minimizeWindow(cand_id);
         }
     }
@@ -252,7 +262,8 @@ void WindowsWidget::activateWindow(WId id) {
     // If a modifier key is pressed, close all other open windows
     if (QApplication::keyboardModifiers()){
         qDebug() << "probono: Modifier key pressed, hence hiding all others";
-        for (WId cand_id : KWindowSystem::windows()) {
+        const QList<WId> winIds = KWindowSystem::windows();
+        for (WId cand_id : winIds) {
             if(id != cand_id)
             KWindowSystem::minimizeWindow(cand_id);
         }

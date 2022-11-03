@@ -612,7 +612,7 @@ QVariant AppMenuModel::data(const QModelIndex &index, int role) const
         return m_names.keys().at(index.row());
     }
     if(role == Qt::DisplayRole) {
-        if(index.row()> m_names.keys().count())
+        if(index.row()> m_names.size())
             return QVariant();
         return m_names.keys().at(index.row());
     }
