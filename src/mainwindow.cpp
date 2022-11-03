@@ -50,13 +50,13 @@ MainWindow::MainWindow(QWidget *parent)
     qDebug() << "translated: tr(\"About This Computer\"):" << tr("About This Computer");
 
     QHBoxLayout *layout = new QHBoxLayout;
+    layout->setAlignment(Qt::AlignCenter); // Center QHBoxLayout vertically
     layout->addSpacing(7); // Left screen edge; if space is too small, blue box overlaps rounded corner
     layout->addWidget(m_MainWidget);
 
     applicationStartingLabel->hide();
     // TODO: Instead of having applicationStartingLabel here, we might want to make it a part of m_MainWidget
     // to allow for it to be animated from the center to the side and morph into a menu with an animation...
-    applicationStartingLabel->setFixedHeight(22); // FIXME: Dynamically get the height of a QMenuItem and use that
     applicationStartingLabel->setStyleSheet("align: center; font-weight: bold;");
     layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(applicationStartingLabel, 0, Qt::AlignCenter);
@@ -146,16 +146,7 @@ void MainWindow::initSize()
 
     setFixedWidth(primaryRect.width());
 
-    // probono: Construct a populated(!) QMenuBar so that we can determine
-    // its height and use the same height for the MainWindow. Is there a better way?
-    /*QMenuBar *dummyMenuBar = new QMenuBar;
-    dummyMenuBar->setContentsMargins(0, 0, 0, 0);
-    dummyMenuBar->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Expanding);
-    QMenu *dummyMenu = new QMenu;
-    dummyMenuBar->addMenu(dummyMenu);
-    qDebug() << "probono: dummyMenu->sizeHint().height():" << dummyMenu->sizeHint().height();- */
-    //use m_MainWidget instead of dummyMenu
-    setFixedHeight(m_MainWidget->sizeHint().height());
+    setFixedHeight(m_MainWidget->sizeHint().height()); // Set height of the overall Menu application
 
     //move this to the active screen and xrandr position
     move(qApp->primaryScreen()->geometry().x(), qApp->primaryScreen()->geometry().y());

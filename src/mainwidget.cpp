@@ -46,18 +46,18 @@ MainWidget::MainWidget(QWidget *parent)
       m_pluginManager(new PluginManager(this))
 {
     m_pluginManager->start();
-
+    m_globalMenuLayout->setAlignment(Qt::AlignCenter); // Center QHBoxLayout vertically
     m_appMenuWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-
-    QWidget *dateTimeWidget = new QWidget;
-    dateTimeWidget->setLayout(m_dateTimeLayout);
-    dateTimeWidget->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Expanding); // Naming is counterintuitive. "Maximum" keeps its size to a minimum! Need "Expanding" in y direction so that font will be centered
-    m_dateTimeLayout->setMargin(0);
 
     QWidget *statusnotifierWidget = new QWidget;
     statusnotifierWidget->setLayout(m_statusnotifierLayout);
     statusnotifierWidget->setSizePolicy(QSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum)); // Naming is counterintuitive. "Maximum" keeps its size to a minimum!
     m_statusnotifierLayout->setMargin(0);
+
+    QWidget *dateTimeWidget = new QWidget;
+    dateTimeWidget->setLayout(m_dateTimeLayout);
+    dateTimeWidget->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Expanding); // Naming is counterintuitive. "Maximum" keeps its size to a minimum! Need "Expanding" in y direction so that font will be centered
+    m_dateTimeLayout->setMargin(0);
 
     QWidget *windowsWidget = new QWidget;
     windowsWidget->setLayout(m_windowsLayout);
@@ -67,20 +67,15 @@ MainWidget::MainWidget(QWidget *parent)
     m_controlCenterLayout->setSpacing(10);
 
     QHBoxLayout *layout = new QHBoxLayout;
-    layout->setSpacing(0);
-    // layout->addSpacing(10);
+    layout->setAlignment(Qt::AlignCenter); // Center QHBoxLayout vertically
+
     layout->addWidget(m_appMenuWidget); // Main menu including Action Search
-
-    // layout->addStretch();
-    // layout->addSpacing(10);
-    // layout->addLayout(m_controlCenterLayout); // Volume, etc.
-    // layout->addSpacing(10);
-
-    layout->addWidget(dateTimeWidget);
-    layout->addSpacing(10);
 
     layout->addWidget(statusnotifierWidget); // Tray applications
     layout->addSpacing(10);
+
+    layout->addWidget(dateTimeWidget);
+    // layout->addSpacing(10);
 
     layout->addWidget(windowsWidget);
     layout->addSpacing(5); // Right edge of the screen

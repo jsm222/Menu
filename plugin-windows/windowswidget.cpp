@@ -25,9 +25,9 @@ WindowsWidget::WindowsWidget(QWidget *parent)
     m_menu->menuAction()->setFont(f);
 
     QHBoxLayout *layout = new QHBoxLayout;
+    layout->setAlignment(Qt::AlignCenter); // Center QHBoxLayout vertically
     layout->setMargin(0);
     layout->setSpacing(0);
-
     layout->addWidget(m_menubar);
     m_menubar->addMenu(m_menu);
     setLayout(layout);

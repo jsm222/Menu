@@ -7,6 +7,7 @@ ControlWidget::ControlWidget(QWidget *parent)
     m_widget(new VolumeWidget)
 {
     QHBoxLayout *layout = new QHBoxLayout;
+    layout->setAlignment(Qt::AlignCenter); // Center QHBoxLayout vertically
     layout->setMargin(0);
     layout->setSpacing(0);
     setLayout(layout);

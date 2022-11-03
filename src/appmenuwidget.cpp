@@ -371,56 +371,24 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
     connect(watcher, SIGNAL(directoryChanged(QString)), SLOT(rebuildMenu()));                // We need a slot that rebuilds the menu
 
     QHBoxLayout *layout = new QHBoxLayout;
+    layout->setAlignment(Qt::AlignCenter); // Center QHBoxLayout vertically
     setLayout(layout);
     layout->setContentsMargins(0, 0, 0, 0);
-    // setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     // Add search box to menu
     searchLineEdit = new SearchLineEdit(this);
 
     // Make sure the search box gets cleared when this application loses focus
     searchLineEdit->setObjectName("actionSearch"); // probono: This name can be used in qss to style it specifically
-    //searchLineEdit->setPlaceholderText(tr("Search"));
-    //auto* pLineEditEvtFilter = new MyLineEditEventFilter(searchLineEdit);
-    //searchLineEdit->installEventFilter(pLineEditEvtFilter);
-    // searchLineEdit->setMinimumWidth(150);
     searchLineEdit->setFixedHeight(22); // FIXME: Dynamically get the height of a QMenuItem and use that
-    // searchLineEdit->setStyleSheet("border-radius: 9px"); // We do this in the stylesheet.qss instead
     searchLineEdit->setWindowFlag(Qt::WindowDoesNotAcceptFocus, false);
-    // searchLineEdit->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
-    // Try to get the focus so that one can start typing immediately whenever the Menu is invoked
-    // https://stackoverflow.com/questions/526761/set-qlineedit-focus-in-qt
-    // searchLineEdit->setFocus(); alone does not always succeed
     searchLineEdit->setFocus();
-
-    // searchLineEdit->setToolTip("Alt+Space"); // This is actually a feature not of this application, but some other application that merely launches this application upon Alt+Space
-    // layout->addSpacing(10); // Space to the left before the searchLineWidget
-    //searchLineWidget = new QWidget(this);
-    // searchLineWidget->setWindowFlag(Qt::WindowDoesNotAcceptFocus, true); // Does not seem to do anything
-    //auto searchLineLayout = new QHBoxLayout(searchLineWidget);
-    //searchLineLayout->setContentsMargins(0, 0, 0, 0);
-    // searchLineLayout->setSpacing(3);
-    //searchLineLayout->addWidget(searchLineEdit, 0, Qt::AlignLeft);
-    // searchLineWidget->setLayout(searchLineLayout);fffffff
-    //searchLineWidget->setObjectName("SearchLineWidget");
-    // layout->addWidget(searchLineWidget, 0, Qt::AlignRight);
-    // layout->addWidget(searchLineWidget, 0, Qt::AlignLeft);
     m_searchMenu = new QMenu();
     m_searchMenu->setIcon(QIcon::fromTheme("search-symbolic"));
     connect(m_searchMenu,&QMenu::aboutToShow
             ,[this]() {
-
-
         searchLineEdit->setFocus();
-        // qobject_cast<QWidgetAction*>(m_searchMenu->actions().at(0))->defaultWidget()->show();
-        //qobject_cast<QWidgetAction*>(m_searchMenu->actions().at(0))->defaultWidget()->setFocus();
     });
-    /*
-    connect(m_searchMenu,&QMenu::aboutToHide,this,[this]{
-            searchLineEdit->clear();
-            searchLineEdit->textChanged("");
-    });
-    */
 
     // https://github.com/helloSystem/Menu/issues/95
     connect(qApp, &QApplication::focusWindowChanged, this, [this](QWindow *w) {
@@ -480,10 +448,7 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
     connect(shutdownAction, SIGNAL(triggered()), this, SLOT(actionLogout()));
     // Add main menu
     m_menuBar = new QMenuBar(this);
-
-    // m_menuBar->setStyleSheet("padding: 0px; padding: 0px;");
     m_menuBar->setContentsMargins(0, 0, 0, 0);
-    m_menuBar->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Expanding); // Naming is counterintuitive. "Maximum" keeps its size to a minimum! Need "Expanding" in y direction so that font will be centered
 
     integrateSystemMenu(m_menuBar); // Add System menu to main menu
     layout->addWidget(m_menuBar, 0, Qt::AlignLeft);

@@ -13,6 +13,7 @@ DateTimeWidget::DateTimeWidget(QWidget *parent)
       m_refreshTimer(new QTimer(this))
 {
     QHBoxLayout *layout = new QHBoxLayout;
+    layout->setAlignment(Qt::AlignCenter); // Center QHBoxLayout vertically
     layout->setMargin(0);
     layout->setSpacing(0);
     // m_label->setStyleSheet("padding-top: 2px;"); // FIXME: Find a way to achieve vertically centered text without this crude workaround
