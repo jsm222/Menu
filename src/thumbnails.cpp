@@ -74,7 +74,7 @@ const QString Thumbnail::getIconPath()
     QString cache = getCachePath();
     QString hash = getFileHash();
     if (cache.isEmpty() || hash.isEmpty()) { return QString(); }
-    return QString("%1/%2.png").arg(cache).arg(hash);
+    return QString("%1/%2.png").arg(cache, hash);
 }
 
 bool Thumbnail::isValid()
