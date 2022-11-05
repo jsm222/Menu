@@ -36,8 +36,8 @@ DateTimeWidget::DateTimeWidget(QWidget *parent)
 
 void DateTimeWidget::updateCurrentTimeString()
 {
-    // m_menu->menuAction()->setText(QLocale::system().toString(QTime::currentTime(), QLocale::ShortFormat)); // Only time
-    m_menu->menuAction()->setText(QLocale::system().toString(QDateTime::currentDateTime(), QLocale::ShortFormat)); // Date and time
+    m_menu->menuAction()->setText(QLocale::system().toString(QTime::currentTime(), QLocale::ShortFormat)); // Only time
+    // m_menu->menuAction()->setText(QLocale::system().toString(QDateTime::currentDateTime(), QLocale::ShortFormat)); // Date and time
     dateAction->setText(QLocale::system().toString(QDateTime::currentDateTime(), QLocale::LongFormat)); // Weekday, date and time with seconds and timezone
 }
 
