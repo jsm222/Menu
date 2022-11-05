@@ -6,8 +6,9 @@
 #include <QProcess>
 #include <QFile>
 #include <QFileInfo>
+#include <QDir>
 
-#include <sys/syslimits.h>
+#include <limits.h>
 #if defined(__FreeBSD__)
 #include <sys/socket.h>
 #include <sys/sysctl.h>
@@ -98,8 +99,7 @@ QString ApplicationInfo::applicationNiceNameForPath(QString path) {
 QString ApplicationInfo::environmentVariableForPId(unsigned int pid, const QByteArray & environmentVariable) {
     QString path;
 
-    if (QFile::exists("/usr/bin/procstat")) {
-        // FreeBSD
+#if defined(__FreeBSD__)
 
         struct procstat *prstat = procstat_open_sysctl();
         if (prstat == NULL) {
@@ -136,11 +136,11 @@ QString ApplicationInfo::environmentVariableForPId(unsigned int pid, const QByte
         procstat_freeenvv(prstat);
         procstat_close(prstat);
 
-    } else if (QFile::exists(QString("/proc/%1/environ").arg(pid))) {
+#else
         // Linux
         qDebug() << "probono: TODO: Implement getting env";
         path = "ThisIsOnlyImplementedForFreeBSDSoFar";
-    }
+#endif
 
     return path;
 }

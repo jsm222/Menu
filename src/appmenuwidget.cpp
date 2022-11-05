@@ -51,12 +51,12 @@
 #include <QWindow>
 #include <QTimer>
 #include <Baloo/Query>
-#include <magic.h>
 #include <KF5/KWindowSystem/KWindowSystem>
 #include <KF5/KWindowSystem/KWindowInfo>
 #include <KF5/KWindowSystem/NETWM>
 
 #if defined(Q_OS_FREEBSD)
+#include <magic.h>
 #include <sys/types.h>
 #include <sys/extattr.h>
 #endif

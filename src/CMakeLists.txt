@@ -80,7 +80,6 @@ target_link_libraries(${TARGET}
     ${XCB_LIBRARIES}
     ${XCB_EWMH_LIBRARIES}
     ${XCB_EWMH_LIBRARIES}
-    procstat
 )
 
 if("${CMAKE_SYSTEM_NAME}" MATCHES "FreeBSD")
