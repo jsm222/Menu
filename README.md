@@ -34,7 +34,7 @@ __Note__ that not all functionality is implemented for anything else than FreeBS
 On FreeBSD:
 
 ```
-sudo pkg install -y cmake pkgconf qt5-x11extras qt5-qmake qt5-widgets qt5-buildtools kf5-kdbusaddons kf5-kwindowsystem kf5-baloo libdbusmenu-qt5 qt5-concurrent
+sudo pkg install -y cmake pkgconf qt5-x11extras qt5-qmake qt5-widgets qt5-buildtools kf5-kdbusaddons kf5-kwindowsystem kf5-baloo libdbusmenu-qt5 qt5-concurrent qt5-qtmultimedia-dev libfm-dev libfm-extra-dev menu-cache-dev
 ```
 
 ## Build
@@ -46,6 +46,7 @@ cmake ..
 make
 sudo make install
 ```
+
 ## How to use
 
 ### Qt applications (KDEPlasmaPlatformTheme.so and libqgtk3.so work, plain Qt and qt5ct don't work yet)
