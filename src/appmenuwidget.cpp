@@ -263,7 +263,7 @@ void AppMenuWidget::findAppsInside(QStringList locationsContainingApps, QMenu *m
             submenu->setToolTipsVisible(true); // Seems to be needed here, too, so that the submenu items show their correct tooltips?
             // Make it possible to open the directory that contains the app by clicking on the submenu itself
             submenu->installEventFilter(this);
-            connect(submenu, SIGNAL(triggered(QAction*)), SLOT(actionOpen(QAction*)));
+            connect(submenu, SIGNAL(triggered(QAction*)), SLOT(actionLaunch(QAction*)));
         } else {
             continue;
         }
@@ -1097,14 +1097,14 @@ void AppMenuWidget::actionAbout()
     }
 }
 
-void AppMenuWidget::actionOpen(QAction *action)
+void AppMenuWidget::actionLaunch(QAction *action)
 {
     qDebug() << "actionLaunch(QAction *action) called";
     // Setting a busy cursor in this way seems only to affect the own application's windows
     // rather than the full screen, which is why it is not suitable for this application
     // QApplication::setOverrideCursor(Qt::WaitCursor);
     QStringList pathToBeLaunched = {action->property("path").toString()};
-    QProcess::startDetached("open", pathToBeLaunched);
+    QProcess::startDetached("launch", pathToBeLaunched);
 }
 
 // probono: When a modifier key is held down, then just show the item in Filer;
