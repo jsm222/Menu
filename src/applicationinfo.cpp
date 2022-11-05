@@ -207,7 +207,9 @@ QString ApplicationInfo::pathForWId(unsigned long long winId) {
             // Linux
             arguments = QStringList() << "-f" << QString("/proc/%1/exe").arg(info.pid());
         }
-        p.start("readlink", arguments);
+        p.setProgram("readlink");
+        p.setArguments(arguments);
+        p.start();
         p.waitForFinished();
         QString retStr(p.readAllStandardOutput().trimmed());
         if(! retStr.isEmpty()) {

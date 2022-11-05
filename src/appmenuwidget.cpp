@@ -262,9 +262,8 @@ void AppMenuWidget::findAppsInside(QStringList locationsContainingApps, QMenu *m
             submenu->setTitle(directory.remove(0, 1).replace("/", " → "));
             submenu->setToolTipsVisible(true); // Seems to be needed here, too, so that the submenu items show their correct tooltips?
             // Make it possible to open the directory that contains the app by clicking on the submenu itself
-            qDebug() << "probono: Installing event filter";
             submenu->installEventFilter(this);
-            connect(submenu, SIGNAL(triggered(QAction*)), SLOT(actionLaunch(QAction*)));
+            connect(submenu, SIGNAL(triggered(QAction*)), SLOT(actionOpen(QAction*)));
         } else {
             continue;
         }
@@ -993,19 +992,17 @@ void AppMenuWidget::actionAbout()
         // On FreeBSD, get information about the machine
         if(which("kenv")){
             QProcess p;
-            QString program = "kenv";
-            QStringList arguments;
-            arguments << "-q" << "smbios.system.maker";
-            p.start(program, arguments);
+            p.setProgram("kenv");
+            p.setArguments({"-q", "smbios.system.maker"});
+            p.start();
             p.waitForFinished();
             QString vendorname(p.readAllStandardOutput());
             vendorname.replace("\n", "");
             vendorname = vendorname.trimmed();
             qDebug() << "vendorname:" << vendorname;
 
-            QStringList arguments2;
-            arguments2 << "-q" << "smbios.system.product";
-            p.start(program, arguments2);
+            p.setArguments({"-q", "smbios.system.product"});
+            p.start();
             p.waitForFinished();
             QString productname(p.readAllStandardOutput());
             productname.replace("\n", "");
@@ -1013,10 +1010,9 @@ void AppMenuWidget::actionAbout()
             qDebug() << "systemname:" << productname;
             msgBox->setText("<b>" + vendorname + " " + productname + "</b>");
 
-            QString program2 = "pkg";
-            QStringList arguments3;
-            arguments3 << "info" << "hello";
-            p.start(program2, arguments3);
+            p.setProgram("pkg");
+            p.setArguments({"info", "hello"});
+            p.start();
             p.waitForFinished();
             QString operatingsystem(p.readAllStandardOutput());
             operatingsystem = operatingsystem.split("\n")[0].trimmed();
@@ -1028,10 +1024,9 @@ void AppMenuWidget::actionAbout()
                 operatingsystem = "helloDesktop (not running on helloSystem)";
             }
 
-            QString program3 = "sysctl";
-            QStringList arguments5;
-            arguments5 << "-n" << "hw.model";
-            p.start(program3, arguments5);
+            p.setProgram("sysctl");
+            p.setArguments({"-n", "hw.model"});
+            p.start();
             p.waitForFinished();
             QString cpu(p.readAllStandardOutput());
             cpu = cpu.trimmed();
@@ -1039,57 +1034,25 @@ void AppMenuWidget::actionAbout()
             cpu = cpu.replace("(TM)", "™");
             qDebug() << "cpu:" << cpu;
 
-            QStringList arguments6;
-            arguments6 << "-n" << "hw.realmem";
-            p.start(program3, arguments6);
+            p.setArguments({"-n", "hw.realmem"});
+            p.start();
             p.waitForFinished();
-            QString memory(p.readAllStandardOutput());
-            memory = memory.trimmed();
+            QString memory(p.readAllStandardOutput().trimmed());
             qDebug() << "memory:" << memory;
             double m = memory.toDouble();
             m = m/1024/1024/1024;
             qDebug() << "m:" << m;
 
-            QStringList arguments7;
-            arguments7 << "-n" << "kern.disks";
-            p.start(program3, arguments7);
-            p.waitForFinished();
-            QString disks(p.readAllStandardOutput());
-            disks = disks.replace("\n", "");
-            QString disk = disks.split(" ")[0];
-            qDebug() << "disk:" << disk;
-
-            QString program4 = "lsblk";
-            QStringList arguments8;
-            arguments8 << disk;
-            p.start(program4, arguments8);
-            p.waitForFinished();
-            QString diskinfo(p.readAllStandardOutput());
-            QStringList di;
-            di = diskinfo.split("\n");
-            QString disksize ="Unknown";
-
-            QString program5 = "freebsd-version";
-            QStringList arguments9;
-            arguments9 << "-k";
-            p.start(program5, arguments9);
+            p.setProgram("freebsd-version");
+            p.setArguments({"-k"});
+            p.start();
             p.waitForFinished();
             QString kernelVersion(p.readAllStandardOutput());
 
-
-            QStringList arguments10;
-            arguments9 << "-u";
-            p.start(program5, arguments10);
+            p.setArguments({"-u"});
+            p.start();
             p.waitForFinished();
             QString userlandVersion(p.readAllStandardOutput());
-
-            foreach (QString ds, di) {
-                if(ds.startsWith(disk)) {
-                    // qDebug() << "ds:" << ds ;
-                    disksize = ds.simplified().split(" ")[2].trimmed().replace("G", " GiB"); // .simplified() replaces multiple spaces with one
-                    qDebug() << "disksize:" << disksize ;
-                }
-            }
 
             QString icon = "/usr/local/share/icons/elementary-xfce/devices/128/computer-hello.png";
 
@@ -1112,7 +1075,6 @@ void AppMenuWidget::actionAbout()
                             "FreeBSD userland version: " + userlandVersion + "</p>" + \
                             "<p>Processor: " + cpu +"<br>" + \
                             "Memory: " + QString::number(m) +" GiB<br>" + \
-                            "Startup Disk: " + disksize +"</p>" + \
                             helloSystemInfo + \
                             "<p><a href='file:///COPYRIGHT'>FreeBSD copyright information</a><br>" + \
                             "Other components are subject to<br>their respective license terms</p>" + \
@@ -1135,14 +1097,14 @@ void AppMenuWidget::actionAbout()
     }
 }
 
-void AppMenuWidget::actionLaunch(QAction *action)
+void AppMenuWidget::actionOpen(QAction *action)
 {
     qDebug() << "actionLaunch(QAction *action) called";
     // Setting a busy cursor in this way seems only to affect the own application's windows
     // rather than the full screen, which is why it is not suitable for this application
     // QApplication::setOverrideCursor(Qt::WaitCursor);
     QStringList pathToBeLaunched = {action->property("path").toString()};
-    QProcess::startDetached("launch", pathToBeLaunched);
+    QProcess::startDetached("open", pathToBeLaunched);
 }
 
 // probono: When a modifier key is held down, then just show the item in Filer;

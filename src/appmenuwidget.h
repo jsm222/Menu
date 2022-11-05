@@ -107,7 +107,7 @@ public slots:
     void rebuildMenu();
     void findAppsInside(QStringList locationsContainingApps, QMenu *m_systemMenu,  QFileSystemWatcher *watcher);
     void actionAbout();
-    void actionLaunch(QAction *action);
+    void actionOpen(QAction *action);
     void openBalooSearchResult(QAction *action);
     // void actionDisplays();
     // void actionShortcuts();
