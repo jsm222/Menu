@@ -37,8 +37,6 @@ On FreeBSD:
 sudo pkg install -y cmake pkgconf qt5-x11extras qt5-qmake qt5-widgets qt5-buildtools kf5-kdbusaddons kf5-kwindowsystem kf5-baloo libdbusmenu-qt5 qt5-concurrent qt5-qtmultimedia-dev libfm-dev libfm-extra-dev menu-cache-dev
 ```
 
-Not all of the above may actually be required.
-
 ## Build
 
 ```
