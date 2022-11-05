@@ -64,6 +64,26 @@ add_dependencies(${CMAKE_PROJECT_NAME} resources)
 
 find_package(Qt5 COMPONENTS Network REQUIRED)  # probono: For qtsingleapplication
 
+if(${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD")
+target_link_libraries(${TARGET}
+    Qt5::DBus
+    Qt5::Widgets
+    Qt5::Concurrent
+    Qt5::X11Extras
+    Qt5::Network # probono: For qtsingleapplication
+    KF5::DBusAddons
+    KF5::WindowSystem
+    KF5::Baloo
+    ${X11_LIBRARIES}
+    ${XCOMPOSITE_LDFLAGS}
+    ${XDAMAGE_LIBRARIES}
+    ${XRENDER_LIBRARIES}
+    ${XCB_LIBRARIES}
+    ${XCB_EWMH_LIBRARIES}
+    ${XCB_EWMH_LIBRARIES}
+    procstat
+)
+else()
 target_link_libraries(${TARGET}
     Qt5::DBus
     Qt5::Widgets
@@ -81,10 +101,6 @@ target_link_libraries(${TARGET}
     ${XCB_EWMH_LIBRARIES}
     ${XCB_EWMH_LIBRARIES}
 )
-
-if("${CMAKE_SYSTEM_NAME}" MATCHES "FreeBSD")
-        list(APPEND target_link_libraries
-                procstat)
 endif()
 
 install(TARGETS ${TARGET} DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
