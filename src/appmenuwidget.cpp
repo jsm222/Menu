@@ -1283,7 +1283,7 @@ bool AppMenuWidget::eventFilter(QObject *watched, QEvent *event)
             this->m_systemMenu->close(); // Could instead figure out the top-level menu iterating through submenu->parent();
             QString pathToBeLaunched = submenu->property("path").toString();
             if(QFile::exists(pathToBeLaunched)) {
-                QProcess::startDetached("launch", {"Filer", pathToBeLaunched});
+                QProcess::startDetached("open", {pathToBeLaunched});
             } else {
                 qDebug() << pathToBeLaunched << "does not exist";
             }

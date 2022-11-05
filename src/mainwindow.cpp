@@ -231,11 +231,25 @@ QString MainWindow::showApplicationName(const QString &arg)
     // being launched from two different locations. Maybe this is good enough for now
     ApplicationInfo *ai = new ApplicationInfo();
     const QList<WId> windows = KWindowSystem::windows();
-    for (WId id : windows){
-        if(ai->applicationNiceNameForWId(id) == arg){
+    for (WId winId : windows){
+        if(ai->applicationNiceNameForWId(winId) == arg){
             alreadyRunningApp = true;
             break;
         }
+        // Additionally check for applications not launched from bundles
+        if(ai->pathForWId(winId).endsWith("/" + arg)){
+            alreadyRunningApp = true;
+            break;
+        }
+        // If this is still not sufficient we could also do this...
+        /*
+        KWindowInfo info(winId, NET::WMPid, NET::WM2WindowClass);
+        qDebug() << "windowClassName" << info.windowClassName();
+        if(info.windowClassName() == arg){
+            alreadyRunningApp = true;
+            break;
+        }
+        */
     }
     ai->~ApplicationInfo();
 
