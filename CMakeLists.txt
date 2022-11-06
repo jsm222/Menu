@@ -9,6 +9,11 @@ set(CMAKE_AUTORCC ON)
 
 include(GNUInstallDirs)
 
+# Do not put qDebug() into Release builds
+if(NOT CMAKE_BUILD_TYPE STREQUAL Debug)
+    add_definitions(-DQT_NO_DEBUG_OUTPUT)
+endif()
+
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 
 find_package(PkgConfig REQUIRED)
