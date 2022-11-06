@@ -294,79 +294,78 @@ void AppMenuModel::onActiveWindowChanged(WId id)
     auto pw = qobject_cast<QWidget*>(w_parent);
 
     if(pw){
-    	if(id == pw->effectiveWinId()) {
-		/// Get more options for search
-		if(m_initialApplicationFromWindowId == -1) {
-            qDebug()<< __FILE__ ":" <<__LINE__;
-			return;
-		}
-            	
-		
-		if (KWindowSystem::isPlatformX11()) {
-        		auto *c = QX11Info::connection();
+        if(id == pw->effectiveWinId()) {
+        /// Get more options for search
+        if(m_initialApplicationFromWindowId == -1) {
+            return;
+        }
 
-        		auto getWindowPropertyString = [c, this](WId id, const QByteArray & name) -> QByteArray {
-            		QByteArray value;
 
-            		if (!s_atoms.contains(name)) {
-                	   const xcb_intern_atom_cookie_t atomCookie = xcb_intern_atom(c, false, name.length(), name.constData());
-                	   QScopedPointer<xcb_intern_atom_reply_t, 
-				          QScopedPointerPodDeleter> atomReply(xcb_intern_atom_reply(c, atomCookie, nullptr));
+        if (KWindowSystem::isPlatformX11()) {
+                auto *c = QX11Info::connection();
 
-                	   if (atomReply.isNull()) {
-                    		return value;
-                	   }
+                auto getWindowPropertyString = [c, this](WId id, const QByteArray & name) -> QByteArray {
+                    QByteArray value;
 
-                  	   s_atoms[name] = atomReply->atom;
+                    if (!s_atoms.contains(name)) {
+                       const xcb_intern_atom_cookie_t atomCookie = xcb_intern_atom(c, false, name.length(), name.constData());
+                       QScopedPointer<xcb_intern_atom_reply_t,
+                          QScopedPointerPodDeleter> atomReply(xcb_intern_atom_reply(c, atomCookie, nullptr));
 
-                	   if (s_atoms[name] == XCB_ATOM_NONE) {
-                    		return value;
-                	   }
-            		}
+                       if (atomReply.isNull()) {
+                            return value;
+                       }
 
-            		static const long MAX_PROP_SIZE = 10000;
-            		auto propertyCookie = xcb_get_property(c, false, id, s_atoms[name], XCB_ATOM_STRING, 0, MAX_PROP_SIZE);
-            		QScopedPointer<xcb_get_property_reply_t, 
-				       QScopedPointerPodDeleter> propertyReply(xcb_get_property_reply(c, propertyCookie, nullptr));
+                       s_atoms[name] = atomReply->atom;
 
-            		if (propertyReply.isNull())
-            		{
-                	   return value;
-            		}
+                       if (s_atoms[name] == XCB_ATOM_NONE) {
+                            return value;
+                       }
+                    }
 
-            		if (propertyReply->type == XCB_ATOM_STRING && propertyReply->format == 8 && propertyReply->value_len > 0)
-            		{
-                	   const char *data = (const char *) xcb_get_property_value(propertyReply.data());
-                	   int len = propertyReply->value_len;
+                    static const long MAX_PROP_SIZE = 10000;
+                    auto propertyCookie = xcb_get_property(c, false, id, s_atoms[name], XCB_ATOM_STRING, 0, MAX_PROP_SIZE);
+                    QScopedPointer<xcb_get_property_reply_t,
+                       QScopedPointerPodDeleter> propertyReply(xcb_get_property_reply(c, propertyCookie, nullptr));
 
-                	   if (data) {
-                    	      value = QByteArray(data, data[len - 1] ? len : len - 1);
-                	   }
-            		}
+                    if (propertyReply.isNull())
+                    {
+                       return value;
+                    }
 
-            	   	   return value;
-        		};
-	
-			const QString serviceName = QString::fromUtf8(
-						getWindowPropertyString(m_initialApplicationFromWindowId,
-									s_x11AppMenuServiceNamePropertyName));
+                    if (propertyReply->type == XCB_ATOM_STRING && propertyReply->format == 8 && propertyReply->value_len > 0)
+                    {
+                       const char *data = (const char *) xcb_get_property_value(propertyReply.data());
+                       int len = propertyReply->value_len;
 
-            		const QString menuObjectPath = QString::fromUtf8(
-						getWindowPropertyString(m_initialApplicationFromWindowId, 
-									s_x11AppMenuObjectPathPropertyName));
+                       if (data) {
+                              value = QByteArray(data, data[len - 1] ? len : len - 1);
+                       }
+                    }
 
-		
-			if(m_serviceName == serviceName &&
-		  	    m_menuObjectPath == menuObjectPath) {
-			    updateApplicationMenu(m_serviceName, m_menuObjectPath);
-			}else {
-			    m_initialApplicationFromWindowId = -1;
-			}
-		}else {
-			m_initialApplicationFromWindowId = -1;
-		}
-		return;
-    	}
+                       return value;
+                };
+
+            const QString serviceName = QString::fromUtf8(
+                        getWindowPropertyString(m_initialApplicationFromWindowId,
+                                    s_x11AppMenuServiceNamePropertyName));
+
+                    const QString menuObjectPath = QString::fromUtf8(
+                        getWindowPropertyString(m_initialApplicationFromWindowId,
+                                    s_x11AppMenuObjectPathPropertyName));
+
+
+            if(m_serviceName == serviceName &&
+                m_menuObjectPath == menuObjectPath) {
+                updateApplicationMenu(m_serviceName, m_menuObjectPath);
+            }else {
+                m_initialApplicationFromWindowId = -1;
+            }
+        }else {
+            m_initialApplicationFromWindowId = -1;
+        }
+        return;
+        }
     }
 
     if (m_winId != -1  && m_winId != id) {
@@ -442,9 +441,8 @@ void AppMenuModel::onActiveWindowChanged(WId id)
                 qDebug() << serviceName << menuObjectPath << __LINE__ << id;
             if (!serviceName.isEmpty() && !menuObjectPath.isEmpty()) {
                 m_initialApplicationFromWindowId = id;
-                updateApplicationMenu(serviceName, menuObjectPath);
-
-		return true;
+        updateApplicationMenu(serviceName, menuObjectPath);
+        return true;
             }
 
             return false;
@@ -575,8 +573,8 @@ bool AppMenuModel::filterMenu(QMenu* searchMenu,QString searchString,bool includ
         if(!searchMenu->title().isEmpty())
             names << searchMenu->title();
 
-
-    for(QAction *action : searchMenu->actions()) {
+    const QList<QAction*> actions = searchMenu->actions();
+    for(QAction *action : actions) {
         action->setVisible(searchString=="");
 
         if(action->menu()) {
@@ -603,9 +601,6 @@ bool AppMenuModel::filterMenu(QMenu* searchMenu,QString searchString,bool includ
      } else {
             filterMenu(action->menu(),searchString,searchString=="",names);
         }
-
-
-
 
     } else {
         if(searchString == "") {
@@ -655,18 +650,10 @@ bool AppMenuModel::filterMenu(QMenu* searchMenu,QString searchString,bool includ
         }else if (!searchString.isEmpty()) {
             action->setVisible(false);
             hasVisible = false;
-
-
         }
 
 
 }
-
-
-
-
-    //for(QAction * action : m_visibleActions.values()) {
-
 
 }
 
@@ -684,7 +671,8 @@ void AppMenuModel::readMenuActions(QMenu* menu,QStringList names) {
         return;
     if (!menu->title().isEmpty())
             names << menu->title();
-    for (auto action: menu->actions())
+    const QList<QAction*> actions = menu->actions();
+    for (auto action: actions)
     {
         if (action->menu() != NULL)
         {

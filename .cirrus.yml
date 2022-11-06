@@ -16,19 +16,19 @@ task:
     - mkdir build ; cd build
     - cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
     - make -j$(sysctl -n hw.ncpu)
-    - make DESTDIR=Menu.AppDir -j$(sysctl -n hw.ncpu) install
-    - mkdir -p Menu.AppDir/usr/share/icons/hicolor/64x64/apps/
-    - cp ../Menubar.png Menu.AppDir/usr/share/icons/hicolor/64x64/apps/
-    - ( cd Menu.AppDir/ ; ln -s usr/bin/Menu AppRun )
-    - rm -rf Menu.AppDir/usr/include
+    - make DESTDIR=Menu.app -j$(sysctl -n hw.ncpu) install
+    - mkdir -p Menu.app/Resources
+    - cp ../Menubar.png Menu.app/Resources/Menu.png
+    - ( cd Menu.app/ ; ln -s usr/bin/Menu Menu )
+    - rm -rf Menu.app/usr/include
     - mkdir -p ../Shutdown/build
     - cd ../Shutdown/build
     - cmake ..
     - make -j$(sysctl -n hw.ncpu)
     - cd -
-    - cp ../Shutdown/build/Shutdown Menu.AppDir/usr/bin/
-    - find Menu.AppDir/
-    - zip --symlinks -r Menu_FreeBSD.zip Menu.AppDir/
+    - cp ../Shutdown/build/Shutdown Menu.app/usr/bin/
+    - find Menu.app/
+    - zip --symlinks -r Menu_FreeBSD.zip Menu.app/
     # curl --upload-file ./Filer_FreeBSD.zip https://transfer.sh/Filer_FreeBSD.zip
     - case "$CIRRUS_BRANCH" in *pull/*) echo skipping since PR ;; * ) wget https://github.com/tcnksm/ghr/files/5247714/ghr.zip ; unzip ghr.zip ; rm ghr.zip ; ./ghr -delete -t "${GITHUB_TOKEN}" -u "${CIRRUS_REPO_OWNER}" -r "${CIRRUS_REPO_NAME}" -c "${CIRRUS_CHANGE_IN_REPO}" continuous "${CIRRUS_WORKING_DIR}"/build/*zip ; esac
   only_if: $CIRRUS_TAG != 'continuous'

@@ -14,8 +14,8 @@ set(SRCS
     popupwindow.cpp
     pluginmanager.h
     pluginmanager.cpp
-    applicationwindow.h
-    applicationwindow.cpp
+    applicationinfo.h
+    applicationinfo.cpp
     appmenuwidget.cpp
     appmenuwidget.h
     appmenu/appmenumodel.h
@@ -71,6 +71,7 @@ find_package(dbusmenu-qt5 REQUIRED)
 
 target_include_directories(${TARGET} PUBLIC ${dbusmenu-qt5_INCLUDE_DIRS})
 
+if(${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD")
 target_link_libraries(${TARGET}
     Qt5::DBus
     Qt5::Widgets

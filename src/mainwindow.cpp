@@ -18,6 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "applicationinfo.h"
 #include "mainwindow.h"
 #include <QApplication>
 #include <QHBoxLayout>
@@ -36,7 +37,6 @@
 #include <xcb/xcb.h>
 #include <X11/Xlib.h>
 
-#include "applicationwindow.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QFrame(parent),
@@ -50,13 +50,13 @@ MainWindow::MainWindow(QWidget *parent)
     qDebug() << "translated: tr(\"About This Computer\"):" << tr("About This Computer");
 
     QHBoxLayout *layout = new QHBoxLayout;
+    layout->setAlignment(Qt::AlignCenter); // Center QHBoxLayout vertically
     layout->addSpacing(7); // Left screen edge; if space is too small, blue box overlaps rounded corner
     layout->addWidget(m_MainWidget);
 
     applicationStartingLabel->hide();
     // TODO: Instead of having applicationStartingLabel here, we might want to make it a part of m_MainWidget
     // to allow for it to be animated from the center to the side and morph into a menu with an animation...
-    applicationStartingLabel->setFixedHeight(22); // FIXME: Dynamically get the height of a QMenuItem and use that
     applicationStartingLabel->setStyleSheet("align: center; font-weight: bold;");
     layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(applicationStartingLabel, 0, Qt::AlignCenter);
@@ -146,16 +146,7 @@ void MainWindow::initSize()
 
     setFixedWidth(primaryRect.width());
 
-    // probono: Construct a populated(!) QMenuBar so that we can determine
-    // its height and use the same height for the MainWindow. Is there a better way?
-    /*QMenuBar *dummyMenuBar = new QMenuBar;
-    dummyMenuBar->setContentsMargins(0, 0, 0, 0);
-    dummyMenuBar->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Expanding);
-    QMenu *dummyMenu = new QMenu;
-    dummyMenuBar->addMenu(dummyMenu);
-    qDebug() << "probono: dummyMenu->sizeHint().height():" << dummyMenu->sizeHint().height();- */
-    //use m_MainWidget instead of dummyMenu
-    setFixedHeight(m_MainWidget->sizeHint().height());
+    setFixedHeight(m_MainWidget->sizeHint().height()); // Set height of the overall Menu application
 
     //move this to the active screen and xrandr position
     move(qApp->primaryScreen()->geometry().x(), qApp->primaryScreen()->geometry().y());
@@ -181,14 +172,11 @@ void MainWindow::initSize()
 
 void MainWindow::setStrutPartial()
 {
-    //不清真的作法，kwin设置blur后设置程序支撑导致模糊无效
-    //TRANSLATED Unclear practice, setting program support after kwin set blur causes blur invalid
+    // Unclear practice, setting program support after kwin set blur causes blur invalid
     QRect r(geometry());
     r.setHeight(1);
     r.setWidth(1);
 
-
-    const QRect windowRect = this->rect();
     NETExtendedStrut strut;
 
     strut.top_width = height(); // + 1; // 1 pixel between menu bar and maximized window not needed if we have a shadow
@@ -212,7 +200,6 @@ void MainWindow::setStrutPartial()
 
 QString MainWindow::showApplicationName(const QString &arg)
 {
-    QString message = QString("showApplicationName(\"%1\") got called").arg(arg);
     qDebug() << "showApplicationName" << arg << "got called";
 
     // Find out whether we already have a window open from this application;
@@ -242,12 +229,29 @@ QString MainWindow::showApplicationName(const QString &arg)
     // This seeme to be a reasonable compromise in terms of speed,
     // but we are not showing the second of two applications with the same name
     // being launched from two different locations. Maybe this is good enough for now
-    for (WId id : KWindowSystem::windows()){
-        if(applicationNiceNameForWId(id) == arg){
+    ApplicationInfo *ai = new ApplicationInfo();
+    const QList<WId> windows = KWindowSystem::windows();
+    for (WId winId : windows){
+        if(ai->applicationNiceNameForWId(winId) == arg){
             alreadyRunningApp = true;
             break;
         }
+        // Additionally check for applications not launched from bundles
+        if(ai->pathForWId(winId).endsWith("/" + arg)){
+            alreadyRunningApp = true;
+            break;
+        }
+        // If this is still not sufficient we could also do this...
+        /*
+        KWindowInfo info(winId, NET::WMPid, NET::WM2WindowClass);
+        qDebug() << "windowClassName" << info.windowClassName();
+        if(info.windowClassName() == arg){
+            alreadyRunningApp = true;
+            break;
+        }
+        */
     }
+    ai->~ApplicationInfo();
 
     if (! alreadyRunningApp) {
         m_MainWidget->hide();

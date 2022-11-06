@@ -42,20 +42,20 @@ void PluginManager::start()
     // Load plugins from build/ subdirectories (useful during development)
     QStringList filters;
     filters << "plugin-*";
-    QStringList dirs = QDir(QCoreApplication::applicationDirPath() + \
+    const QStringList dirs = QDir(QCoreApplication::applicationDirPath() + \
                             QString("/../")).entryList(filters);
 
     {
-        for(QString dir : dirs) {
+        for(const QString &dir : dirs) {
             auto additionalPluginsDir = QDir(QCoreApplication::applicationDirPath() + \
                                              QString("/../") + dir);
             pluginsDirs.append(QDir(additionalPluginsDir.canonicalPath()));
         }
     }
-    qDebug() << pluginsDirs;
-    for(auto pluginsDir : pluginsDirs) {
+
+    for(const auto &pluginsDir : pluginsDirs) {
         const QFileInfoList files = pluginsDir.entryInfoList(QDir::Files);
-        for (const QFileInfo file : files) {
+        for (const QFileInfo &file : files) {
             const QString filePath = file.filePath();
             if (!QLibrary::isLibrary(filePath))
                 continue;

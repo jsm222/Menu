@@ -18,8 +18,8 @@ set(SRCS
     statusnotifierwidget.cpp
     sniasync.h
     sniasync.cpp
-    ../../src/mainwindow.h
-    ../../src/mainwindow.cpp
+    ../src/mainwindow.h
+    ../src/mainwindow.cpp
 )
 
 #qt5_add_dbus_adaptor(DBUS_SOURCES

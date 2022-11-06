@@ -29,6 +29,7 @@ StatusNotifierWidget::StatusNotifierWidget(QWidget *parent)
   : QWidget(parent),
     m_layout(new QHBoxLayout(this))
 {
+    m_layout->setAlignment(Qt::AlignCenter); // Center QHBoxLayout vertically
     m_layout->setSpacing(10);
     m_layout->setMargin(0);
 
