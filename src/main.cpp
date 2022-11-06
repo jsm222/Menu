@@ -55,7 +55,7 @@ void rebuildSystemMenuSignalHandler(int sig){
 
 // probono: Using QtSingleApplication so that only one instance can run at any time,
 // launching it again just brings the running instance into focus
-// https://github.com/qtproject/qt-solutions/blob/master/qtsingleapplication/examples/trivial/main.cpp
+// https://github.com/qtprojectqtproject/qt-solutions/blob/master/qtsingleapplication/examples/trivial/main.cpp
 
 int main(int argc, char **argv)
 {
@@ -128,7 +128,7 @@ w.m_MainWidget->triggerFocusMenu();
         exit(1);
     }
 
-    QDBusConnection::sessionBus().registerObject("/", &w, QDBusConnection::ExportAllSlots);
+    //QDBusConnection::sessionBus().registerObject("/", &w, QDBusConnection::ExportAllSlots);
 
     // probono: QUESTION: Why do we have to call this with
     // gdbus call --session --dest local.Menu --object-path / --method local.Menu.MainWindow.showApplicationName "AppName"

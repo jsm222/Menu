@@ -31,6 +31,7 @@
 #include <QAbstractItemView>
 #include <QDBusConnection>
 #include <QDBusConnectionInterface>
+#include <QList>
 #include <QDBusServiceWatcher>
 #include <QLineEdit>
 #include <QMessageBox>
@@ -51,7 +52,6 @@
 #include <QWindow>
 #include <QTimer>
 #include <Baloo/Query>
-#include <magic.h>
 #include <KF5/KWindowSystem/KWindowSystem>
 #include <KF5/KWindowSystem/KWindowInfo>
 #include <KF5/KWindowSystem/NETWM>
@@ -73,7 +73,7 @@ private:
     bool alt;
 
 public:
-    SystemMenu(): QMenu(),
+    SystemMenu(QWidget *parent): QMenu(parent),
         qCmdAbout(tr("About This Computer")),
         alt(false)
     {
@@ -382,10 +382,10 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
     // watcher->connect(watcher, SIGNAL(directoryChanged(QString)), this, SLOT(updateMenu())); // We need a slot that rebuilds the menu
     connect(watcher, SIGNAL(directoryChanged(QString)), SLOT(rebuildMenu()));                // We need a slot that rebuilds the menu
 
-    QHBoxLayout *layout = new QHBoxLayout;
+    QVBoxLayout *layout = new QVBoxLayout;
     setLayout(layout);
     layout->setContentsMargins(0, 0, 0, 0);
-    // setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     // Add search box to menu
     searchLineEdit = new SearchLineEdit(this);
@@ -436,15 +436,13 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
 
     // https://github.com/helloSystem/Menu/issues/95
     connect(qApp, &QApplication::focusWindowChanged, this, [this](QWindow *w) {
-        if (!w) {
-            // Clean the search box if the user has left the Menu application altogether
-            searchLineEdit->clear();
-            searchLineEdit->textChanged("");
+        if (!w) { /* This does not work on qt  5.12.8 on ubuntu 20.04 with lxqt */
+                              searchLineEdit->clear();
             }
         });
-
+    setFocusPolicy(Qt::NoFocus);
     // Prepare System menu
-    m_systemMenu = new SystemMenu(); // Using our SystemMenu subclass instead of a QMenu to be able to toggle "About..." when modifier key is pressed
+    m_systemMenu = new QMenu(this); // Using our SystemMenu subclass instead of a QMenu to be able to toggle "About..." when modifier key is pressed
     m_systemMenu->setTitle(tr("System"));
     QWidgetAction *widgetAction = new QWidgetAction(this);
     widgetAction->setDefaultWidget(searchLineEdit);
@@ -465,7 +463,7 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
     // QAction *aboutAction = m_systemMenu->addAction(tr("About This Computer"));
     // connect(aboutAction, SIGNAL(triggered()), this, SLOT(actionAbout()));
     // Since we are using our SystemMenu subclass instead which already contains the first menu item, we do:
-    connect(m_systemMenu->actions().first(), SIGNAL(triggered()), this, SLOT(actionAbout()));
+    //connect(m_systemMenu->actions().first(), SIGNAL(triggered()), this, SLOT(actionAbout()));
 
     m_systemMenu->addSeparator();
 
@@ -493,7 +491,7 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
     // Add main menu
     m_menuBar = new QMenuBar(this);
 
-    // m_menuBar->setStyleSheet("padding: 0px; padding: 0px;");
+     m_menuBar->setStyleSheet("padding: 0px; padding: 0px;");
     m_menuBar->setContentsMargins(0, 0, 0, 0);
     m_menuBar->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Expanding); // Naming is counterintuitive. "Maximum" keeps its size to a minimum! Need "Expanding" in y direction so that font will be centered
 
@@ -502,7 +500,9 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
     layout->insertStretch(2); // Stretch after the main menu, which is the 2nd item in the layout
 
     m_lw= new QMenuView();
-    m_appMenuModel = new AppMenuModel(this);
+    m_appMenuModel = new AppMenuModel(m_menuBar);
+
+    m_lw->setTitle("DD");
 
     m_proxyModel = new MenuFilterProxy(this);
     m_proxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
@@ -513,16 +513,11 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
 
 
     m_proxyModel->setFilterRole(Qt::DisplayRole);
-    m_lw->setModel(m_appMenuModel);
+    //m_lw->setModel(m_appMenuModel);
 
-    connect(m_appMenuModel,&AppMenuModel::firstLevelParsed,this,[this] {
 
-   if(m_appMenuModel->menuAvailable()) {
-         emit m_lw->aboutToShow();
-       m_menuBar->addActions(m_lw->actions());
-    }
-    });
-    connect(m_appMenuModel, &AppMenuModel::menuParsed, this, &AppMenuWidget::updateMenu);
+
+    connect(m_appMenuModel, &AppMenuModel::menuAvailableChanged, this, &AppMenuWidget::updateMenu);
 
     connect(KWindowSystem::self(), &KWindowSystem::activeWindowChanged, this, &AppMenuWidget::delayUpdateActiveWindow);
     connect(KWindowSystem::self(), static_cast<void (KWindowSystem::*)(WId, NET::Properties, NET::Properties2)>(&KWindowSystem::windowChanged),
@@ -530,9 +525,9 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
 
     // Load action search
     actionCompleter = nullptr;
-    updateActionSearch();
     MenuImporter *menuImporter = new MenuImporter(this);
     menuImporter->connectToBus();
+
 }
 
 void AppMenuWidget::searchEditingDone() {
@@ -552,7 +547,7 @@ void AppMenuWidget::refreshTimer() {
 
 void AppMenuWidget::focusMenu() {
     QMouseEvent event(QEvent::MouseButtonPress,QPoint(0,0),
-                      m_menuBar->mapToGlobal(QPoint(0,0)),Qt::LeftButton,0,0);
+    m_menuBar->mapToGlobal(QPoint(0,0)),Qt::LeftButton,0,0);
     QApplication::sendEvent(m_menuBar,&event);
     searchLineEdit->setFocus();
 }
@@ -648,7 +643,7 @@ void AppMenuWidget::updateActionSearch() {
 }
 
 void AppMenuWidget::searchMenu() {
-    m_searchMenu->addSeparator();
+    qDebug() << searchLineEdit->text() << __LINE__;
     for(QAction *sr: searchResults) {
         if(m_searchMenu->actions().contains(sr)) {
             m_searchMenu->removeAction(sr);
@@ -659,6 +654,80 @@ void AppMenuWidget::searchMenu() {
             }
         }
     }
+
+        m_proxyModel->setFilterRegExp(searchLineEdit->text().isEmpty() ? "" : searchLineEdit->text());
+        m_proxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
+
+                std::function<int(QModelIndex idx,int depth)> setResultVisbileMbar =[this](QModelIndex idx,int depth) {
+                if(idx.data().value<QAction*>()->isVisible()) {
+                        m_wasVisible.append(idx);
+                }
+                  if(idx.data().value<QAction*>()->text().contains(m_proxyModel->filterRegExp()) && (idx.data().value<QAction*>()->isVisible() || m_wasVisible.contains(idx))) {
+                 idx.data().value<QAction*>()->setVisible(true);
+
+
+                 if(!m_proxyModel->filterRegExp().pattern().isEmpty()) {
+                 QModelIndex p = idx.parent();
+                 QStringList names;
+                 while(p.isValid()) {
+
+                        p.data().value<QAction*>()->setVisible(true);
+
+                        names << p.data().value<QAction*>()->text();
+                  p= p.parent();
+                 }
+                    std::reverse(names.begin(),names.end());
+
+                    QAction *orig= idx.data().value<QAction*>();
+                    if(!orig->menu()) {
+                    CloneAction *cpy = new CloneAction(orig);
+                    cpy->setText(names.join(" → ") + " → " + orig->text());
+                    cpy->setShortcut(orig->shortcut());
+                    cpy->setToolTip(orig->toolTip());
+                    cpy->updateMe();
+                    cpy->setShortcutContext(Qt::ApplicationShortcut);
+                    orig->setShortcutContext(Qt::WindowShortcut);
+                    searchResults << cpy;
+                    connect(cpy,&QAction::triggered,this,[this]{
+                        searchLineEdit->setText("");
+                        searchLineEdit->textChanged("");
+                        m_searchMenu->close();
+
+                    });
+                    cpy->setDisconnectOnClear(connect(orig,&QAction::triggered,this,[this]{
+                        searchLineEdit->setText("");
+                        searchLineEdit->textChanged("");
+                        m_searchMenu->close();
+
+                    }));
+                    m_searchMenu->addAction(cpy);
+                    }
+                    return 0;
+                 }
+                 return 0;
+                 } else {
+                 idx.data().value<QAction*>()->setVisible(false);
+                }
+                 return 0;
+                };
+        m_searchMenu->addSeparator();
+        std::function<int(QModelIndex idx,int depth)> traverse =[this](QModelIndex idx,int depth) {
+        qDebug() << __LINE__<< idx.data().value<QAction*>()->text();
+        if(idx.data().value<QAction*>()->menu())
+                Q_EMIT idx.data().value<QAction*>()->menu()->aboutToShow();
+
+
+        return 0;
+         };
+        iterate(QModelIndex(),m_appMenuModel,traverse);
+
+        iterate(QModelIndex(),m_appMenuModel,setResultVisbileMbar);
+             m_isSearching=false;
+
+
+
+    m_searchMenu->addSeparator();
+
 
 
     QList<QMenu*> menus;
@@ -672,11 +741,7 @@ void AppMenuWidget::searchMenu() {
 
 
     }
-    if(!m_isSearching) {
-        m_isSearching=true;
-        m_appMenuModel->refreshSearch();
 
-    }
 for(QString v : m_appMenuModel->filteredActions().keys()) {
     QAction *orig = m_appMenuModel->filteredActions()[v];
     CloneAction *cpy = new CloneAction(orig);
@@ -826,79 +891,20 @@ void AppMenuWidget::rebuildMenu()
 
 //doesn't work for https://github.com/helloSystem/Menu/issues/16
 //what does this even do??
-void AppMenuWidget::updateMenu()
-{
-    qDebug() << m_isSearching<< __LINE__ << searchLineEdit->text();
-        if(m_isSearching) {
-        m_proxyModel->setFilterRegExp(searchLineEdit->text().isEmpty() ? "" : searchLineEdit->text());
-        m_proxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
-        std::function<int(QModelIndex idx,int depth)> clearMbar =[this](QModelIndex idx,int depth) {
-            qDebug() << depth <<__LINE__;
+void AppMenuWidget::updateMenu() {
+qDebug() <<__LINE__ <<":" <<__FILE__;
+if(!m_appMenuModel->menuAvailable()) {
+    int cnt = m_menuBar->actions().count();
+    QList<QAction*> remove;
+    for(int i=2;i<cnt;i++)
+         remove.append(m_menuBar->actions().at(i));
+    for(QAction *r : remove) {
+        m_menuBar->removeAction(r);
 
-            m_menuBar->removeAction(idx.data().value<QAction*>());
-            if(depth==1)
-                return 1;
-            return 0;
-        };
-                iterate(m_lw->rootIndex(), m_appMenuModel,clearMbar);
-                std::function<int(QModelIndex idx,int depth)> setResultVisbileMbar =[this](QModelIndex idx,int depth) {
+   }
 
-                if(idx.data().value<QAction*>()->text().contains(m_proxyModel->filterRegExp())) {
-                 idx.data().value<QAction*>()->setVisible(true);
-                 qDebug()<<idx.data().value<QAction*>()->text()  << __LINE__;
-                 if(!m_proxyModel->filterRegExp().pattern().isEmpty()) {
-                 QModelIndex p = idx.parent();
-                 QStringList names;
-                 while(p.isValid()) {
-                     qDebug()<< p << __LINE__;
-                        p.data().value<QAction*>()->setVisible(true);
-
-                        names << p.data().value<QAction*>()->text();
-                  p= p.parent();
-                 }
-                    std::reverse(names.begin(),names.end());
-                    qDebug() << names << __LINE__ << idx.data().value<QAction*>()->text();
-                    QAction *orig= idx.data().value<QAction*>();
-                    if(!orig->menu()) {
-                    CloneAction *cpy = new CloneAction(orig);
-                    cpy->setText(names.join(" → ") + " → " + orig->text());
-                    cpy->setShortcut(orig->shortcut());
-                    cpy->setToolTip(orig->toolTip());
-                    cpy->updateMe();
-                    cpy->setShortcutContext(Qt::ApplicationShortcut);
-                    orig->setShortcutContext(Qt::WindowShortcut);
-                    searchResults << cpy;
-                    connect(cpy,&QAction::triggered,this,[this]{
-                        searchLineEdit->setText("");
-                        searchLineEdit->textChanged("");
-                        m_searchMenu->close();
-
-                    });
-                    cpy->setDisconnectOnClear(connect(orig,&QAction::triggered,this,[this]{
-                        searchLineEdit->setText("");
-                        searchLineEdit->textChanged("");
-                        m_searchMenu->close();
-
-                    }));
-                    m_searchMenu->addAction(cpy);
-                    }
-                    return 0;
-                 }
-                 return 0;
-                 } else {
-                 idx.data().value<QAction*>()->setVisible(false);
-                }
-                 return 0;
-                };
-        m_searchMenu->addSeparator();
-        emit m_lw->aboutToShow();
-        iterate(m_lw->rootIndex(),m_appMenuModel,setResultVisbileMbar);
-        m_menuBar->addActions(m_lw->actions());
-
-        m_isSearching=false;
-
-        }
-qDebug() << __LINE__<<sender() << m_isSearching;
+}
+m_appMenuModel->invalidateMenu();
 }
 
 void AppMenuWidget::toggleMaximizeWindow()
@@ -921,6 +927,7 @@ void AppMenuWidget::toggleMaximizeWindow()
 
 bool AppMenuWidget::event(QEvent *e)
 {
+    /*
     if (e->type() == QEvent::ApplicationFontChange) {
         QMenu *menu = m_appMenuModel->menu();
         if (menu) {
@@ -932,7 +939,7 @@ bool AppMenuWidget::event(QEvent *e)
         m_menuBar->setFont(qApp->font());
         m_menuBar->update();
     }
-
+*/
     return QWidget::event(e);
 }
 
@@ -993,7 +1000,7 @@ void AppMenuWidget::onActiveWindowChanged()
     if(m_currentWindowID >0 && m_currentWindowID != m_windowID && m_windowID !=0) {
 
         searchLineEdit->clear();
-        searchLineEdit->textChanged("");
+        //searchLineEdit->textChanged("");
 
         // bool isMax = info.hasState(NET::Max);
     }
@@ -1003,7 +1010,7 @@ void AppMenuWidget::onActiveWindowChanged()
 
 void AppMenuWidget::onWindowChanged(WId /*id*/, NET::Properties /*properties*/, NET::Properties2 /*properties2*/)
 {
-    if (m_windowID == KWindowSystem::activeWindow())
+    if (m_windowID && m_windowID== KWindowSystem::activeWindow())
         onActiveWindowChanged();
 }
 
@@ -1049,7 +1056,7 @@ void AppMenuWidget::actionAbout()
                         "<p>Lovingly crafted by true connoisseurs<br>of the desktop metaphor</p>" + \
                         "<p>Inspired by the timeless vision<br>of Bill Atkinson and Andy Hertzfeld</p>" + \
                         "<small>" + \
-                        "<p>Recommended reading: <a href='https://dl.acm.org/doi/book/10.5555/573097'>ISBN 978-0-201-62216-4</a><br>" + \
+                        "<p>Recommended reading: <a href='https://dl.acm.org/doi/book/10.5555/573097'>ISBN 978-0-201-2216-4</a><br>" + \
                         "</small></center>");
 
         // Center window on screen
@@ -1401,4 +1408,3 @@ bool AppMenuWidget::eventFilter(QObject *watched, QEvent *event)
     }
     return QWidget::eventFilter(watched,event);
 }
-

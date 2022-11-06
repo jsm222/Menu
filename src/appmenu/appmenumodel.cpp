@@ -34,28 +34,18 @@
 #include <QGuiApplication>
 #include <QTimer>
 #include <QWidgetAction>
+#include <QHBoxLayout>
 #include <QDebug>
+#include<QModelIndex>
 
-
-#include "dbusmenuimporter.h"
+#include <dbusmenu-qt5/dbusmenuimporter.h>
 
 static const QByteArray s_x11AppMenuServiceNamePropertyName = QByteArrayLiteral("_KDE_NET_WM_APPMENU_SERVICE_NAME");
 static const QByteArray s_x11AppMenuObjectPathPropertyName = QByteArrayLiteral("_KDE_NET_WM_APPMENU_OBJECT_PATH");
 
 static QHash<QByteArray, xcb_atom_t> s_atoms;
 
-class KDBusMenuImporter : public DBusMenuImporter
-{
-public:
-    KDBusMenuImporter(const QString &service, const QString &path, QObject *parent)
-        : DBusMenuImporter(service, path, parent) {
-    }
 
-protected:
-    QIcon iconForName(const QString &name) override {
-        return QIcon::fromTheme(name);
-    }
-};
 
 AppMenuModel::AppMenuModel(QObject *parent)
     : QAbstractItemModel(parent),
@@ -102,6 +92,7 @@ AppMenuModel::AppMenuModel(QObject *parent)
             setMenuAvailable(false);
             emit modelNeedsUpdate();
 
+
         }
     });
 }
@@ -111,21 +102,19 @@ AppMenuModel::~AppMenuModel() = default;
 QModelIndex AppMenuModel::index(int row, int column, const QModelIndex &parent)
             const
 {
-   qDebug() << __LINE__ << row << column << parent;
-    if (!hasIndex(row, column, parent)) {
-
-        return QModelIndex();
+         if (!hasIndex(row, column, parent)) {
+            return QModelIndex();
     }
 
     QAction *parentItem;
     parentItem = static_cast<QAction*>(parent.internalPointer());
 
-    if (!parent.isValid())
+    if (!parent.isValid()) {
         parentItem = m_menu->menuAction();
 
+    }
     if( row >= 0 && parentItem->menu() && row < parentItem->menu()->actions().count() ) {
-        qDebug() << row<<column << parentItem->menu()->actions().at(row) << __LINE__;
-        return createIndex(row, column, parentItem->menu()->actions().at(row));
+            return createIndex(row, column, parentItem->menu()->actions().at(row));
     }
     else
     return QModelIndex();
@@ -136,8 +125,8 @@ QModelIndex AppMenuModel::index(int row, int column, const QModelIndex &parent)
     }
 QAction * AppMenuModel::findParent(QAction * child,QAction *root) const {
 
-        QAction * menu = qobject_cast<QMenu*>(child->parent())->menuAction();
-    qDebug() << __LINE__<<menu->text() << child->text();
+    QAction * menu = qobject_cast<QMenu*>(child->parent())->menuAction();
+
     return menu;
 }
 int AppMenuModel::columnCount(const QModelIndex &parent) const {
@@ -155,17 +144,16 @@ QModelIndex AppMenuModel::parent(const QModelIndex &index) const
         return QModelIndex();
     int row;
     QAction *item = static_cast<QAction*>(index.internalPointer());
-    qDebug() << item;
     QAction *p = findParent(item,m_menu->menuAction());
     if( p == m_menu->menuAction() ) {
-        qDebug() <<__LINE__;
+
         return QModelIndex();
     }
-    qDebug() << __LINE__ << p;
+
     QAction *gp = findParent(p,m_menu->menuAction());
-    qDebug() << __LINE__ << gp;
+
     row = gp->menu()->actions().indexOf(p);
-    qDebug() << __LINE__ << row << p->menu()->title() << p->text() << item->text();
+
 
 
     return createIndex(row, 0, p);
@@ -208,6 +196,7 @@ bool AppMenuModel::menuAvailable() const
 
 void AppMenuModel::setMenuAvailable(bool set)
 {
+
     if (m_menuAvailable != set) {
         m_menuAvailable = set;
         onWindowChanged(m_currentWindowId);
@@ -250,6 +239,7 @@ QVariant AppMenuModel::winId() const
 
 void AppMenuModel::setWinId(const QVariant &id)
 {
+
     if (m_winId == id) {
         return;
     }
@@ -260,8 +250,10 @@ void AppMenuModel::setWinId(const QVariant &id)
 
 int AppMenuModel::rowCount(const QModelIndex &parent) const
     {
+    qDebug()<< parent << __FILE__<<":"<<__LINE__;
+
         Q_UNUSED(parent);
-        if (!m_menuAvailable || !m_menu) {
+        if (!m_menu) {
             return 0;
         }
 
@@ -274,12 +266,11 @@ int AppMenuModel::rowCount(const QModelIndex &parent) const
         else
             parentItem = static_cast<QAction*>(parent.internalPointer());
 
-
-
             if(parentItem->menu()) {
-                QList<QAction*> a = parentItem->menu()->actions();
-             qDebug() << __LINE__ << parentItem->text() << parentItem->menu()->actions().count();
-             return  parentItem->menu()->actions().count(); //std::count_if(a.begin(),a.end(),[](QAction *mi) { return !mi->isSeparator();});
+
+
+
+             return  parentItem->menu()->actions().count();
             }
             return 0;
     }
@@ -306,6 +297,7 @@ void AppMenuModel::onActiveWindowChanged(WId id)
     	if(id == pw->effectiveWinId()) {
 		/// Get more options for search
 		if(m_initialApplicationFromWindowId == -1) {
+            qDebug()<< __FILE__ ":" <<__LINE__;
 			return;
 		}
             	
@@ -447,10 +439,9 @@ void AppMenuModel::onActiveWindowChanged(WId id)
             // which we could retrieve here like this on FreeBSD (is there a portable way?):
             // Get _NET_WM_PID
             // procstat -e $_NET_WM_PID
-
+                qDebug() << serviceName << menuObjectPath << __LINE__ << id;
             if (!serviceName.isEmpty() && !menuObjectPath.isEmpty()) {
                 m_initialApplicationFromWindowId = id;
-                m_newApplication=true;
                 updateApplicationMenu(serviceName, menuObjectPath);
 
 		return true;
@@ -528,7 +519,7 @@ bool AppMenuModel::hasChildren(const QModelIndex &parent) const {
     QAction * parentItem;
     if(!parent.isValid())
         return true;
-    qDebug() <<parent.internalPointer() << __LINE__;
+
     parentItem = static_cast<QAction*>(parent.internalPointer());
     return (bool)(parentItem->menu());
 }
@@ -600,8 +591,10 @@ bool AppMenuModel::filterMenu(QMenu* searchMenu,QString searchString,bool includ
                 parent->setVisible(!parent->isSeparator());
                 if(parent->menu() && parent->menu()->parent()) {
 
-
-                    parent = qobject_cast<QMenu*>(parent->menu()->parent())->menuAction();
+                    QMenu *p = qobject_cast<QMenu*>(parent->menu()->parent());
+                    if(!p)
+                        break;
+                    parent = p->menuAction();
                 } else {
                     break;
                 }
@@ -643,7 +636,10 @@ bool AppMenuModel::filterMenu(QMenu* searchMenu,QString searchString,bool includ
                     if(parent->menu() && parent->menu()->parent()) {
 
 
-                        parent = qobject_cast<QMenu*>(parent->menu()->parent())->menuAction();
+                       QMenu * p = qobject_cast<QMenu*>(parent->menu()->parent());
+                        if(!p)
+                            break;
+                       parent = p->menuAction();
 
                     } else {
                         break;
@@ -714,7 +710,8 @@ void AppMenuModel::readMenuActions(QMenu* menu,QStringList names) {
 }
 QVariant AppMenuModel::data(const QModelIndex &index, int role) const
 {
-    if (!m_menuAvailable || !m_menu) {
+    if (    m_menu.isNull()) {
+        qDebug() << __LINE__;
         return QVariant();
     }
 
@@ -754,90 +751,43 @@ void AppMenuModel::execute(QString actionName)
     }
 }*/
 void AppMenuModel::refreshSearch() {
-    if(m_menu && menuAvailable())
-        m_refreshSearch = true;
-        m_awaitsUpdate.clear();
 
-        m_importer->updateMenu(m_menu);
 }
+
 void AppMenuModel::updateApplicationMenu(const QString &serviceName, const QString &menuObjectPath)
 {
-    if(m_newApplication)
-        m_awaitsUpdate.clear();
-    if (m_serviceName == serviceName && m_menuObjectPath == menuObjectPath) {
-        if (m_importer) {
-		QMetaObject::invokeMethod(m_importer, "updateMenu", Qt::QueuedConnection);
-        }
 
-        return;
+        QMenuBar * menuBar = qobject_cast<QMenuBar*>(w_parent);/*m_importers[serviceName+menuObjectPath]->menu()->parent());*/
+        int cnt = menuBar->actions().count();
+        QList<QAction*> remove;
+        for(int i=2;i<cnt;i++)
+             remove.append(menuBar->actions().at(i));
+        for(QAction *r : remove) {
+            menuBar->removeAction(r);
+
+       }
+    if(m_importers[serviceName+menuObjectPath]) {
+        m_importers[serviceName+menuObjectPath]->deleteLater();
+
     }
 
     m_serviceName = serviceName;
+    m_menuObjectPath = menuObjectPath;
     m_serviceWatcher->setWatchedServices(QStringList({m_serviceName}));
 
-    m_menuObjectPath = menuObjectPath;
 
-    if (m_importer) {
-        m_importer->deleteLater();
-    }
+    HDBusMenuImporter *importer = new HDBusMenuImporter(serviceName, menuObjectPath, DBusMenuImporterType::SYNCHRONOUS);
+    m_importers[serviceName+menuObjectPath]=importer;
 
-    m_importer = new KDBusMenuImporter(serviceName, menuObjectPath, this);
-    if(serviceName =="org.kde.plasma.gmenu_dbusmenu_proxy") {
-        QTimer::singleShot(800,this, [=](){m_importer->updateMenu();});
-    } else {
-    QMetaObject::invokeMethod(m_importer, "updateMenu", Qt::QueuedConnection);
-    }
-    m_menu = m_importer->menu();
+    m_importers[serviceName+menuObjectPath]->menu()->setParent(w_parent);
+    m_menu = m_importers[serviceName+menuObjectPath]->menu();
+  qDebug() << serviceName << menuObjectPath << __LINE__ << m_menu;
+m_menuAvailable = !m_menu.isNull();
 
-    connect(m_importer.data(), &DBusMenuImporter::menuUpdated, this, [=](QMenu *menu) {
 
-        if(m_awaitsUpdate.contains(menu))
-            m_awaitsUpdate.removeOne(menu);
-        m_menu = m_importer->menu();
-        if (m_menu.isNull()) {
-            return;
-        }
-
-        // cache first layer of sub menus, which we'll be popping up
-        const auto actions = menu->actions();
-        for (QAction *a : actions) {
-            qDebug() << __LINE__ << a->text();
-        if(m_menu == menu) {
-            // signal dataChanged when the action changes
-            connect(a, &QAction::changed, this, [this, a] {
-                if (m_menuAvailable && m_menu) {
-                    const int actionIdx = m_menu->actions().indexOf(a);
-                    if (actionIdx > -1) {
-                        const QModelIndex modelIdx = index(actionIdx, 0);
-                        Q_EMIT dataChanged(modelIdx, modelIdx);
-                    }
-                }
-            });
-        }
-            connect(a, &QAction::destroyed, this, &AppMenuModel::modelNeedsUpdate);
-        if(m_newApplication || m_refreshSearch) {
-            if (a->menu()) {
-                m_awaitsUpdate <<a->menu();
-                m_importer->updateMenu(a->menu());
-            }
-        }
-        }
-        if(m_menu == menu && !m_refreshSearch) {
-            m_menuAvailable =true;
-            Q_EMIT beginResetModel();
-            Q_EMIT endResetModel();
-            emit firstLevelParsed();
-
-        }
-        qDebug() << m_newApplication << m_awaitsUpdate << __LINE__;
-        if(m_awaitsUpdate.isEmpty() && (m_newApplication || m_refreshSearch)) {
-
-            m_newApplication = false;
-            m_refreshSearch = false;
-            emit menuParsed();
-        }
-    });
 }
+
+
 void AppMenuModel::updateSearch() {
 
     }

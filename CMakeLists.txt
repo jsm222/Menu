@@ -1,13 +1,13 @@
 cmake_minimum_required(VERSION 3.0)
 
-project(Menu)
+    project(Menu)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-include(GNUInstallDirs)
+include(GNUInstallDirs) 
 
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 
@@ -36,6 +36,6 @@ add_subdirectory(plugin-datetime)
 add_subdirectory(plugin-statusnotifier)
 add_subdirectory(plugin-volume)
 add_subdirectory(plugin-windows)
-# add_subdirectory(plugin-battery)
+#add_subdirectory(plugin-battery)
 
 install(FILES ${INTERFACES} DESTINATION ${CMAKE_INSTALL_PREFIX}/include/menubar)

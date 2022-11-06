@@ -219,9 +219,6 @@ void QMenuView::createMenu(const QModelIndex &parent, QMenu *parentMenu, QMenu *
 {
     if (! menu)
     {
-        QIcon icon = qvariant_cast<QIcon>(parent.data(Qt::DecorationRole));
-
-        QVariant v;
         //v.setValue(parent);
 
         //menu = parentMenu;

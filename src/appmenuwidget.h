@@ -147,6 +147,7 @@ private:
     AppMenuModel *m_appMenuModel;
     MenuImporter *m_menuImporter;
     QWidget *m_buttonsWidget;
+    QList<QModelIndex> m_wasVisible;
     WId m_currentWindowID=0;
     // QToolButton *m_minButton;
     // QToolButton *m_restoreButton;

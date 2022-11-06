@@ -52,14 +52,14 @@ void PluginManager::start()
             pluginsDirs.append(QDir(additionalPluginsDir.canonicalPath()));
         }
     }
-
+    qDebug() << pluginsDirs;
     for(auto pluginsDir : pluginsDirs) {
         const QFileInfoList files = pluginsDir.entryInfoList(QDir::Files);
         for (const QFileInfo file : files) {
             const QString filePath = file.filePath();
             if (!QLibrary::isLibrary(filePath))
                 continue;
-
+            qDebug() << filePath;
             QPluginLoader *loader = new QPluginLoader(filePath);
             StatusBarExtension *plugin = qobject_cast<StatusBarExtension *>(loader->instance());
 

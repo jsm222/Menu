@@ -24,14 +24,14 @@ set(SRCS
     appmenu/qmenuview.cpp
     appmenu/menufilterproxy.h
     appmenu/menufilterproxy.cpp
-    appmenu/dbusmenuimporter.h
-    appmenu/dbusmenuimporter.cpp
-    appmenu/dbusmenu_interface.h
-    appmenu/dbusmenu_interface.cpp
-    appmenu/dbusmenushortcut_p.h
-    appmenu/dbusmenushortcut_p.cpp
-    appmenu/dbusmenutypes_p.h
-    appmenu/dbusmenutypes_p.cpp
+    # appmenu/dbusmenuimporter.h
+    # appmenu/dbusmenuimporter.cpp
+    # appmenu/dbusmenu_interface.h
+    # appmenu/dbusmenu_interface.cpp
+    # appmenu/dbusmenushortcut_p.h
+    # appmenu/dbusmenushortcut_p.cpp
+    # appmenu/dbusmenutypes_p.h
+    # appmenu/dbusmenutypes_p.cpp
     appmenu/menuimporteradaptor.h
     appmenu/menuimporteradaptor.cpp
     appmenu/menuimporter.h
@@ -67,6 +67,9 @@ add_executable(${TARGET} ${SRCS} resources.qrc)
 add_dependencies(${CMAKE_PROJECT_NAME} resources)
 
 find_package(Qt5 COMPONENTS Network REQUIRED)  # probono: For qtsingleapplication
+find_package(dbusmenu-qt5 REQUIRED)
+
+target_include_directories(${TARGET} PUBLIC ${dbusmenu-qt5_INCLUDE_DIRS})
 
 target_link_libraries(${TARGET}
     Qt5::DBus
@@ -84,12 +87,10 @@ target_link_libraries(${TARGET}
     ${XCB_LIBRARIES}
     ${XCB_EWMH_LIBRARIES}
     ${XCB_EWMH_LIBRARIES}
-    procstat
+    dbusmenu-qt5
 )
-
 if("${CMAKE_SYSTEM_NAME}" MATCHES "FreeBSD")
-        list(APPEND target_link_libraries
-                procstat)
+    target_link_libraries(${TARGET} procstat)
 endif()
 
 install(TARGETS ${TARGET} DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
