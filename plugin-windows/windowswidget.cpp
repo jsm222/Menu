@@ -241,7 +241,7 @@ void WindowsWidget::updateWindows()
                     appAction->setToolTip(QString("Window ID: %1\n"
                                                   "Bundle: %2\n"
                                                   "Executable: %3").arg(cand_id).arg(ai->bundlePathForWId(cand_id)).arg(ai->pathForWId(cand_id)));
-                    }
+                    
 #endif
                     // appAction->setIcon(QIcon(KWindowSystem::icon(id))); // Why does this not work? TODO: Get icon from bundle?
                     if(cand_id == KWindowSystem::activeWindow()) {

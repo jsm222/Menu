@@ -20,10 +20,6 @@ set(SRCS
     appmenuwidget.h
     appmenu/appmenumodel.h
     appmenu/appmenumodel.cpp
-    appmenu/qmenuview.h
-    appmenu/qmenuview.cpp
-    appmenu/menufilterproxy.h
-    appmenu/menufilterproxy.cpp
     # appmenu/dbusmenuimporter.h
     # appmenu/dbusmenuimporter.cpp
     # appmenu/dbusmenu_interface.h
@@ -71,7 +67,6 @@ find_package(dbusmenu-qt5 REQUIRED)
 
 target_include_directories(${TARGET} PUBLIC ${dbusmenu-qt5_INCLUDE_DIRS})
 
-if(${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD")
 target_link_libraries(${TARGET}
     Qt5::DBus
     Qt5::Widgets

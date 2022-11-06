@@ -128,7 +128,7 @@ w.m_MainWidget->triggerFocusMenu();
         exit(1);
     }
 
-    //QDBusConnection::sessionBus().registerObject("/", &w, QDBusConnection::ExportAllSlots);
+    QDBusConnection::sessionBus().registerObject("/", &w, QDBusConnection::ExportAllSlots);
 
     // probono: QUESTION: Why do we have to call this with
     // gdbus call --session --dest local.Menu --object-path / --method local.Menu.MainWindow.showApplicationName "AppName"

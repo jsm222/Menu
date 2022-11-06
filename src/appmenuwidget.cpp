@@ -409,7 +409,7 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
         });
     setFocusPolicy(Qt::NoFocus);
     // Prepare System menu
-    m_systemMenu = new QMenu(this); // Using our SystemMenu subclass instead of a QMenu to be able to toggle "About..." when modifier key is pressed
+    m_systemMenu = new SystemMenu(this); // Using our SystemMenu subclass instead of a QMenu to be able to toggle "About..." when modifier key is pressed
     m_systemMenu->setTitle(tr("System"));
     QWidgetAction *widgetAction = new QWidgetAction(this);
     widgetAction->setDefaultWidget(searchLineEdit);
@@ -463,21 +463,8 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
     layout->addWidget(m_menuBar, 0, Qt::AlignLeft);
     layout->insertStretch(2); // Stretch after the main menu, which is the 2nd item in the layout
 
-    m_lw= new QMenuView();
     m_appMenuModel = new AppMenuModel(m_menuBar);
 
-    m_lw->setTitle("DD");
-
-    m_proxyModel = new MenuFilterProxy(this);
-    m_proxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
-    m_proxyModel->setSourceModel(m_appMenuModel);
-    m_proxyModel->setRecursiveFilteringEnabled(true);
-
-
-
-
-    m_proxyModel->setFilterRole(Qt::DisplayRole);
-    //m_lw->setModel(m_appMenuModel);
 
 
 
@@ -619,18 +606,16 @@ void AppMenuWidget::searchMenu() {
         }
     }
 
-        m_proxyModel->setFilterRegExp(searchLineEdit->text().isEmpty() ? "" : searchLineEdit->text());
-        m_proxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
 
                 std::function<int(QModelIndex idx,int depth)> setResultVisbileMbar =[this](QModelIndex idx,int depth) {
                 if(idx.data().value<QAction*>()->isVisible()) {
                         m_wasVisible.append(idx);
                 }
-                  if(idx.data().value<QAction*>()->text().contains(m_proxyModel->filterRegExp()) && (idx.data().value<QAction*>()->isVisible() || m_wasVisible.contains(idx))) {
+                  if(idx.data().value<QAction*>()->text().contains(searchLineEdit->text(),Qt::CaseInsensitive) && (idx.data().value<QAction*>()->isVisible() || m_wasVisible.contains(idx))) {
                  idx.data().value<QAction*>()->setVisible(true);
 
 
-                 if(!m_proxyModel->filterRegExp().pattern().isEmpty()) {
+                 if(!searchLineEdit->text().isEmpty()) {
                  QModelIndex p = idx.parent();
                  QStringList names;
                  while(p.isValid()) {
