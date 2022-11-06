@@ -5,6 +5,9 @@
 #include <QDebug>
 #include <QApplication>
 #include <QPixmap>
+#include <QFileInfo>
+#include <QDir>
+#include <QImageReader>
 #include <KF5/KWindowSystem/KWindowSystem>
 #include <QtDBus/QDBusConnection>
 
@@ -160,6 +163,29 @@ void WindowsWidget::updateWindows()
 
             QPixmap pixmap;
             pixmap = KWindowSystem::icon(id, 24, 24, false);
+            // Some applications don't set icons on their windows.
+            // Yes, I am looking at you, Qt Creator, of all applications.
+            // In this case, try to get one from the bundle
+            if(pixmap.isNull()) {
+                QString bPath = ai->bundlePathForWId(id);
+                // TODO: To be moved to a function that gets the icon given a bundle path
+                // .app
+                const QString iconCand1 = QDir(bPath).canonicalPath() +
+                        "/Resources/" + QFileInfo(bPath).completeBaseName() + ".png"; // TODO: Also check for other supported formats
+                // .AppDir
+                const QString iconCand2 = QDir(bPath).canonicalPath() +
+                        "/.DirIcon";
+                for(const QString iconCand : QStringList({iconCand1, iconCand2})) {
+                    if(QFileInfo::exists(iconCand)) {
+                        QImageReader r(iconCand);
+                        r.setDecideFormatFromContent(true);
+                        QImage i = r.read();
+                        if (!i.isNull())
+                            pixmap = QPixmap::fromImage(i);
+                    }
+                }
+            }
+
             appAction->setIcon(QIcon(pixmap));
 
             // Call the Desktop the "Desktop"
@@ -168,9 +194,12 @@ void WindowsWidget::updateWindows()
                 appAction->setText(tr("Desktop"));
                 appAction->setIcon(QIcon::fromTheme("desktop"));
             }
+#ifdef QT_DEBUG
+            // For development and debugging, show information about the windows
             appAction->setToolTip(QString("Window ID: %1\n"
                                           "Bundle: %2\n"
                                           "Executable: %3").arg(id).arg(ai->bundlePathForWId(id)).arg(ai->pathForWId(id)));
+#endif
             appAction->setCheckable(true);
 
             appAction->setIconVisibleInMenu(true); // So that an icon is shown even though the theme sets Qt::AA_DontShowIconsInMenus
@@ -193,6 +222,8 @@ void WindowsWidget::updateWindows()
             QPixmap pixmap;
             pixmap = KWindowSystem::icon(id, 24, 24, false);
             subMenu->menuAction()->setIcon(QIcon(pixmap));
+
+
             subMenu->menuAction()->setIconVisibleInMenu(true); // So that an icon is shown even though the theme sets Qt::AA_DontShowIconsInMenus
 
             const QList<WId> winIds = KWindowSystem::windows();
@@ -205,10 +236,13 @@ void WindowsWidget::updateWindows()
                         appAction->setText(tr("Desktop"));
                         subMenu->menuAction()->setIcon(QIcon::fromTheme("folder")); // TODO: Remove this once Filer sets its icon on the desktop window
                     }
+#ifdef QT_DEBUG
+                    // For development and debugging, show information about the windows
                     appAction->setToolTip(QString("Window ID: %1\n"
                                                   "Bundle: %2\n"
                                                   "Executable: %3").arg(cand_id).arg(ai->bundlePathForWId(cand_id)).arg(ai->pathForWId(cand_id)));
-                    appAction->setCheckable(true);
+                    }
+#endif
                     // appAction->setIcon(QIcon(KWindowSystem::icon(id))); // Why does this not work? TODO: Get icon from bundle?
                     if(cand_id == KWindowSystem::activeWindow()) {
                             appAction->setChecked(true);
