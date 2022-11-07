@@ -966,6 +966,8 @@ void AppMenuWidget::actionAbout()
 
 #if defined(Q_OS_FREEBSD)
         // Try to get extended attributes on the /.url file
+        // TODO: We should use our cross-platform funcitons for this; we are using them
+        // in other places already in Menu. That way we can remove the ifdef
         if (QFile::exists("/.url")) {
             url = nullptr;
             char buf[256] = "";
@@ -989,8 +991,9 @@ void AppMenuWidget::actionAbout()
         }
 #endif
 
-        // On FreeBSD, get information about the machine
-        if(which("kenv")){
+
+#if defined(Q_OS_FREEBSD)
+            // On FreeBSD, get information about the machine
             QProcess p;
             p.setProgram("kenv");
             p.setArguments({"-q", "smbios.system.maker"});
@@ -1062,7 +1065,6 @@ void AppMenuWidget::actionAbout()
             // See https://github.com/openwebos/qt/blob/92fde5feca3d792dfd775348ca59127204ab4ac0/tools/qdbus/qdbusviewer/qdbusviewer.cpp#L477 for loading icon from resources
             QString helloSystemInfo;
             if(sha != "" && url != "" && build != "") {
-                qDebug() << " xxxxxxxxxxxxxxxxxx  " ;
                 helloSystemInfo = "</p>helloSystem build: "+ build +" for commit: <a href='" + url + "'>" + sha + "</a></p>";
             } else if(sha != "" && url != "") {
                 helloSystemInfo = "</p>helloSystem commit: <a href='" + url + "'>" + sha + "</a></p>";
@@ -1079,11 +1081,23 @@ void AppMenuWidget::actionAbout()
                             "<p><a href='file:///COPYRIGHT'>FreeBSD copyright information</a><br>" + \
                             "Other components are subject to<br>their respective license terms</p>" + \
                             "</small></center>");
-        }
+
+#else
+        msgBox->setText(QString("<center><h3>helloDesktop</h3>"
+                        "<p>Running on an unsupported operating system<br>"
+                        "with reduced functionality</p>"
+                        "<small><p>The full desktop experience<br>"
+                        "can best be experienced on helloSystem<br>"
+                        "which helloDesktop is designed for</p>"
+                        ""
+                        "<a href='https://hellosystem.github.io'>https://hellosystem.github.io/</a><br>"
+                        "</small></center>"));
+
+#endif
 
         // Center window on screen
-        msgBox->setFixedWidth(350); // FIXME: Remove hardcoding; but need to be able to center on screen
-        msgBox->setFixedHeight(500); // FIXME: Same
+        // msgBox->setFixedWidth(350); // FIXME: Remove hardcoding; but need to be able to center on screen
+        // msgBox->setFixedHeight(500); // FIXME: Same
         QRect screenGeometry = QGuiApplication::screens().constFirst()->geometry();
         int x = (screenGeometry.width()-msgBox->geometry().width()) / 2;
         int y = (screenGeometry.height()-msgBox->geometry().height()) / 2;

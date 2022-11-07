@@ -14,19 +14,15 @@ task:
     - pkg install -y curl wget zip pkgconf cmake qt5-x11extras qt5-quickcontrols qt5-qmake qt5-widgets qt5-buildtools qt5-concurrent kf5-kdbusaddons kf5-kwindowsystem kf5-baloo libdbusmenu-qt5 pulseaudio pulseaudio-qt libXcomposite
   test_script:
     - mkdir build ; cd build
-    - cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
-    - make -j$(sysctl -n hw.ncpu)
-    - make DESTDIR=Menu.app -j$(sysctl -n hw.ncpu) install
-    - mkdir -p Menu.app/Resources
-    - cp ../Menubar.png Menu.app/Resources/Menu.png
-    - ( cd Menu.app/ ; ln -s usr/bin/Menu Menu )
-    - rm -rf Menu.app/usr/include
+    - cmake .. -DCMAKE_BUILD_TYPE=Release
+    # make -j$(sysctl -n hw.ncpu)
+    - make DESTDIR=. -j$(sysctl -n hw.ncpu) install
     - mkdir -p ../Shutdown/build
     - cd ../Shutdown/build
     - cmake ..
     - make -j$(sysctl -n hw.ncpu)
     - cd -
-    - cp ../Shutdown/build/Shutdown Menu.app/usr/bin/
+    - cp ../Shutdown/build/Shutdown Menu.app/
     - find Menu.app/
     - zip --symlinks -r Menu_FreeBSD.zip Menu.app/
     # curl --upload-file ./Filer_FreeBSD.zip https://transfer.sh/Filer_FreeBSD.zip

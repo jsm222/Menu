@@ -36,7 +36,7 @@ void PluginManager::start()
 
     // Load plugins from FHS location
     auto pluginsDir = QDir(QDir(QCoreApplication::applicationDirPath() + \
-        QString("/../lib/menubar/plugins")).canonicalPath());
+        QString("/Resources/plugins")).canonicalPath());
     pluginsDirs.append(pluginsDir);
 
     // Load plugins from build/ subdirectories (useful during development)

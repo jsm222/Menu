@@ -103,5 +103,5 @@ target_link_libraries(${TARGET}
 )
 endif()
 
-install(TARGETS ${TARGET} DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
-install(FILES ${QM_FILES} DESTINATION "${CMAKE_INSTALL_DATADIR}/menubar/translations")
+install(TARGETS ${TARGET} DESTINATION ${CMAKE_INSTALL_PREFIX})
+install(FILES ${QM_FILES} DESTINATION "${CMAKE_INSTALL_DATADIR}/Resources/translations")
