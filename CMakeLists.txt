@@ -44,6 +44,7 @@ add_subdirectory(plugin-statusnotifier)
 add_subdirectory(plugin-volume)
 add_subdirectory(plugin-windows)
 # add_subdirectory(plugin-battery)
+add_subdirectory(Shutdown)
 
 install(FILES ${INTERFACES} DESTINATION ${CMAKE_INSTALL_PREFIX}/Resources/include/menubar)
 

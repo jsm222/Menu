@@ -40,3 +40,5 @@ add_executable(Shutdown
 target_link_libraries(Shutdown PRIVATE Qt5::Widgets PUBLIC Qt5::Quick PUBLIC Qt5::Qml)
 
 qt5_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
+
+install(TARGETS Shutdown DESTINATION ${CMAKE_INSTALL_PREFIX})

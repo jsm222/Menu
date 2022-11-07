@@ -15,14 +15,7 @@ task:
   test_script:
     - mkdir build ; cd build
     - cmake .. -DCMAKE_BUILD_TYPE=Release
-    # make -j$(sysctl -n hw.ncpu)
     - make DESTDIR=. -j$(sysctl -n hw.ncpu) install
-    - mkdir -p ../Shutdown/build
-    - cd ../Shutdown/build
-    - cmake ..
-    - make -j$(sysctl -n hw.ncpu)
-    - cd -
-    - cp ../Shutdown/build/Shutdown ./System/Menu.app/
     - find System/Menu.app/
     - ( cd ./System/ ; zip --symlinks -r ../Menu_FreeBSD.zip Menu.app/ )
     # curl --upload-file ./Filer_FreeBSD.zip https://transfer.sh/Filer_FreeBSD.zip
