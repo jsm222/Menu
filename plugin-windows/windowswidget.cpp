@@ -241,13 +241,12 @@ void WindowsWidget::updateWindows()
                     appAction->setToolTip(QString("Window ID: %1\n"
                                                   "Bundle: %2\n"
                                                   "Executable: %3").arg(cand_id).arg(ai->bundlePathForWId(cand_id)).arg(ai->pathForWId(cand_id)));
-                    }
 #endif
                     // appAction->setIcon(QIcon(KWindowSystem::icon(id))); // Why does this not work? TODO: Get icon from bundle?
                     if(cand_id == KWindowSystem::activeWindow()) {
-                            appAction->setChecked(true);
-                            appAction->setEnabled(false);
-                            m_menu->menuAction()->setIcon(QIcon(pixmap)); // Also set the icon for the overall Windows menu
+                        appAction->setChecked(true);
+                        appAction->setEnabled(false);
+                        m_menu->menuAction()->setIcon(QIcon(pixmap)); // Also set the icon for the overall Windows menu
                     } else {
                         connect(appAction, &QAction::triggered, this, [appAction, cand_id, this]() {
                             WindowsWidget::activateWindow(cand_id);
@@ -299,7 +298,7 @@ void WindowsWidget::activateWindow(WId id) {
         const QList<WId> winIds = KWindowSystem::windows();
         for (WId cand_id : winIds) {
             if(id != cand_id)
-            KWindowSystem::minimizeWindow(cand_id);
+                KWindowSystem::minimizeWindow(cand_id);
         }
     }
 }
