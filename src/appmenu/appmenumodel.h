@@ -21,7 +21,7 @@
 
 #ifndef APPMENUMODEL_H
 #define APPMENUMODEL_H
-
+#include <chrono>
 #include <QAbstractListModel>
 #include <QAbstractNativeEventFilter>
 #include <QStringList>
@@ -39,35 +39,19 @@
 class QAction;
 class QModelIndex;
 class QDBusServiceWatcher;
+class AppMenuModel;
+class MainWindow;
 class HMenu :public QMenu {
+ Q_OBJECT
 public:
+
     HMenu(QWidget* parent=0):QMenu(parent) {
-
-
     }
+    std::chrono::high_resolution_clock::time_point lastOpened;
 protected:
-    void actionEvent(QActionEvent *e)  {
+     void actionEvent(QActionEvent *e) override;
 
-        if(e->type() == QEvent::ActionAdded) {
-            if (qobject_cast<QMenuBar*>(parent())!=nullptr) {
-                if(e->action()->menu())
-                    qobject_cast<QMenuBar*>(parent())->addMenu(e->action()->menu());
-
-           }
-
-
-        }
-       if(e->type() == QEvent::ActionRemoved) {
-            if (qobject_cast<QMenuBar*>(parent())!=nullptr) {
-                     qobject_cast<QMenuBar*>(parent())->removeAction(e->action());
-
-        }
-       }
-
-}
 };
-
-
 class HDBusMenuImporter : public DBusMenuImporter
 {
 public:
@@ -80,8 +64,30 @@ public:
 
     QMenu *createMenu(QWidget *parent) override {
         HMenu * menu = new HMenu(parent);
+        /* make some workarounds for focus loss which  calls closeAllPoupus(); */
+        if(parent && qobject_cast<QMenuBar*>(parent->parent())) {
+            connect(menu,&QMenu::aboutToShow,this,[this]{
+               qobject_cast<HMenu*>(sender())->lastOpened = std::chrono::high_resolution_clock::now();
+            });
+            connect(menu,&QMenu::aboutToHide,this,[this]{
+                HMenu *reshow = qobject_cast<HMenu*>(sender());
+                std::chrono::duration<double,std::milli> dur = std::chrono::high_resolution_clock::now()-reshow->lastOpened;
+                if(dur.count()<200) {
+               QTimer::singleShot(10,this,[this,reshow] {
+                   reshow->blockSignals(true);
+                   qobject_cast<QMenuBar*>(reshow->parent()->parent())->setActiveAction(reshow->menuAction());
+                   reshow->blockSignals(false);
+
+
+               });
+            }
+
+            });
+
+        }
         return menu;
     }
+
 
 };
 class AppMenuModel : public QAbstractItemModel, public QAbstractNativeEventFilter

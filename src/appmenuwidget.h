@@ -96,6 +96,7 @@ protected:
 
 private:
     bool m_isSearching=false;
+
     bool isAcceptWindow(WId id);
     void delayUpdateActiveWindow();
     void onActiveWindowChanged();
@@ -130,6 +131,7 @@ private:
 /// For System Main Menu.
 private:
     QMenu *m_systemMenu;
+     bool m_searchMenuOpened=false;
      QMenu *m_searchMenu;
      QList<QAction *> searchResults;
      QMap<QAction*,QString*> filteredActions;

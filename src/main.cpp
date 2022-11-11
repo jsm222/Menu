@@ -138,6 +138,6 @@ w.m_MainWidget->triggerFocusMenu();
     //
     // probono: QUESTION: How can we avoid the string "MainWindow" from being part of the '--method' argument?
     // The name 'MainWindow' is a mere implementation detail and should not leak to the outside world
-    instance.setActivationWindow(&w);
+
     return instance.exec();
 }
