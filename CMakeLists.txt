@@ -2,12 +2,16 @@ cmake_minimum_required(VERSION 3.0)
 
     project(Menu)
 
+set(CMAKE_INSTALL_PREFIX "/System/Menu.app")
+
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-include(GNUInstallDirs) 
+
+# include(GNUInstallDirs)
+
 
 # Do not put qDebug() into Release builds
 if(NOT CMAKE_BUILD_TYPE STREQUAL Debug)
@@ -41,6 +45,9 @@ add_subdirectory(plugin-datetime)
 add_subdirectory(plugin-statusnotifier)
 add_subdirectory(plugin-volume)
 add_subdirectory(plugin-windows)
-#add_subdirectory(plugin-battery)
+# add_subdirectory(plugin-battery)
+add_subdirectory(Shutdown)
 
-install(FILES ${INTERFACES} DESTINATION ${CMAKE_INSTALL_PREFIX}/include/menubar)
+install(FILES ${INTERFACES} DESTINATION ${CMAKE_INSTALL_PREFIX}/Resources/include/menubar)
+
+install(FILES Menu.png DESTINATION ${CMAKE_INSTALL_PREFIX}/Resources)

@@ -43,4 +43,4 @@ target_link_libraries(${PLUGIN} PRIVATE
 )
 target_include_directories(${PLUGIN} PUBLIC ../interfaces ${dbusmenu-qt5_INCLUDE_DIRS})
 
-install(TARGETS ${PLUGIN} LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/menubar/plugins)
+install(TARGETS ${PLUGIN} LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/Resources/plugins)
