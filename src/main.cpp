@@ -59,7 +59,7 @@ void rebuildSystemMenuSignalHandler(int sig){
 
 int main(int argc, char **argv)
 {
-    QtSingleApplication instance(argc, argv);
+    QtSingleApplication instance(argc, argv,true);
     if (instance.sendMessage("Wake up!")) {
         return 0;
     }
@@ -138,6 +138,6 @@ w.m_MainWidget->triggerFocusMenu();
     //
     // probono: QUESTION: How can we avoid the string "MainWindow" from being part of the '--method' argument?
     // The name 'MainWindow' is a mere implementation detail and should not leak to the outside world
-
+    instance.setActivationWindow(&w);
     return instance.exec();
 }

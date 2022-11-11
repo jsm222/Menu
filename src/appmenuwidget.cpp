@@ -1,4 +1,4 @@
-/*
+    /*
  * Copyright (C) 2020 PandaOS Team.
  * Author:     rekols <revenmartin@gmail.com>
  * Portions Copyright (C) 2020-22 Simon Peter.
@@ -41,6 +41,7 @@
 #include <QDesktopWidget>
 #include <QScreen>
 #include <QObject>
+#include <QSharedPointer>
 #include <QStandardPaths>
 #include <QMouseEvent>
 #include <QTimer>
@@ -238,6 +239,7 @@ void AppMenuWidget::findAppsInside(QStringList locationsContainingApps, QMenu *m
 // TODO: Nested submenus rather than flat ones with '→'
 // This code is similar to the code in the 'launch' command
 {
+        return;
     QStringList nameFilter({"*.app", "*.AppDir", "*.desktop", "*.AppImage", "*.appimage"});
     foreach (QString directory, locationsContainingApps) {
         // Shall we process this directory? Only if it contains at least one application, to optimize for speed
@@ -361,6 +363,7 @@ void iterate(const QModelIndex & index, const QAbstractItemModel * model,
              const std::function<int(const QModelIndex&, int depth)>  & fun,
              int depth=0)
 {
+
     if (index.isValid())
             if(fun(index, depth)>0)
             return;
@@ -396,17 +399,49 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
     searchLineEdit->setFocus();
     m_searchMenu = new QMenu();
     m_searchMenu->setIcon(QIcon::fromTheme("search-symbolic"));
+    std::function<int(QModelIndex idx,int depth)> traverse =[this](QModelIndex idx,int depth) {
+QAction * action =idx.data().value<QAction*>();
+if(action->isVisible() && idx.parent().isValid()) {
+    m_wasVisible.push_back(cmpAction({idx.parent().data().value<QAction*>()->text().toStdString(),idx.data().value<QAction*>()->text().toStdString(),idx.row()}));
+
+
+}
+if(action->menu()) {
+            Q_EMIT action->menu()->aboutToShow();
+
+    }
+    return 0;
+    };
+    std::function<int(QModelIndex idx,int depth)> traverse1 =[this](QModelIndex idx,int depth) {
+    QAction * action =idx.data().value<QAction*>();
+    if(action->menu()) {
+            Q_EMIT action->menu()->aboutToShow();
+
+    }
+    return 0;
+    };
     connect(m_searchMenu,&QMenu::aboutToShow
-            ,[this]() {
+            ,[this,traverse1]() {
+
+iterate(QModelIndex(),m_appMenuModel,traverse1);
         searchLineEdit->setFocus();
     });
 
-    // https://github.com/helloSystem/Menu/issues/95
+    // https://github.co    m/helloSystem/Menu/issues/95
+/*
     connect(qApp, &QApplication::focusWindowChanged, this, [this](QWindow *w) {
-        if (!w) { /* This does not work on qt  5.12.8 on ubuntu 20.04 with lxqt */
-                              searchLineEdit->clear();
-            }
-        });
+        if(w) {
+            qDebug() << __LINE__ << w<< qApp->focusWindow();
+
+        }
+        if (!w) { // This is not always true and does always work but never on qt  5.12.8 on ubuntu 20.04 with lxqt //
+qDebug() << __LINE__ << w<< qApp->focusWindow();
+
+
+
+        }
+            });
+    */
     setFocusPolicy(Qt::NoFocus);
     // Prepare System menu
     m_systemMenu = new SystemMenu(this); // Using our SystemMenu subclass instead of a QMenu to be able to toggle "About..." when modifier key is pressed
@@ -466,6 +501,18 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
     m_appMenuModel = new AppMenuModel(m_menuBar);
 
 
+  connect(m_appMenuModel,&AppMenuModel::menuImported,this,[this,traverse]{
+m_wasVisible.clear();
+        qDebug() <<__LINE__ << m_appMenuModel->menuAvailable();
+            if(m_appMenuModel->menuAvailable()) {
+
+                qDebug() <<__LINE__ << m_appMenuModel->menuAvailable();
+                m_appMenuModel->menu()->aboutToShow();
+iterate(QModelIndex(),m_appMenuModel,traverse);
+
+
+    }
+    });
 
 
     connect(m_appMenuModel, &AppMenuModel::menuAvailableChanged, this, &AppMenuWidget::updateMenu);
@@ -482,7 +529,7 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
 }
 
 void AppMenuWidget::searchEditingDone() {
-    if(m_searchMenu && m_searchMenu->actions().count()>1) {
+     if(m_searchMenu && m_searchMenu->actions().count()>1) {
         searchLineEdit->clearFocus();
         for(QAction *findActivateeCanidcate : m_searchMenu->actions())
             if(!findActivateeCanidcate->isSeparator()) {
@@ -493,6 +540,7 @@ void AppMenuWidget::searchEditingDone() {
 }
 
 void AppMenuWidget::refreshTimer() {
+    qDebug() << __LINE__;
     m_typingTimer->start(300); // https://wiki.qt.io/Delay_action_to_wait_for_user_interaction
 }
 
@@ -594,7 +642,8 @@ void AppMenuWidget::updateActionSearch() {
 }
 
 void AppMenuWidget::searchMenu() {
-
+    QString searchString = searchLineEdit->text();
+    qDebug() << searchString << __LINE__;
     for(QAction *sr: qAsConst(searchResults)) {
         if(m_searchMenu->actions().contains(sr)) {
             m_searchMenu->removeAction(sr);
@@ -607,15 +656,48 @@ void AppMenuWidget::searchMenu() {
     }
 
 
-                std::function<int(QModelIndex idx,int depth)> setResultVisbileMbar =[this](QModelIndex idx,int depth) {
-                if(idx.data().value<QAction*>()->isVisible()) {
-                        m_wasVisible.append(idx);
+                std::function<int(QModelIndex idx,int depth)> setResultVisbileMbar =[this,searchString](QModelIndex idx,int depth) {
+                    QAction * action =idx.data().value<QAction*>();
+                    if(searchString.isEmpty()) {
+                        qDebug() <<__LINE__<< m_wasVisible.size();
+
+                            if(idx.parent().isValid()) {
+                                std::vector<cmpAction>::iterator it = std::find(m_wasVisible.begin(),m_wasVisible.end(),cmpAction({idx.parent().data().value<QAction*>()->text().toStdString(),idx.data().value<QAction*>()->text().toStdString(),idx.row()}));
+                                bool visible  = it != m_wasVisible.end();
+                                action->setVisible(visible);
+                                qDebug() << visible << __LINE__ << action->text();
+
+                                QModelIndex p = idx.parent();
+                                while(p.isValid()) {
+
+                                       p.data().value<QAction*>()->setVisible(true);
+
+
+                                 p= p.parent();
+                                }
+
+                            }
+                            return 0;
+                            }
+
+
+                bool visible = false;
+               if(idx.parent().isValid()) {
+                cmpAction cmp1 ={
+                    idx.parent().data().value<QAction*>()->text().toStdString(),
+                            idx.data().value<QAction*>()->text().toStdString(),
+                            idx.row()
+                };
+                std::vector<cmpAction>::iterator it= std::find(m_wasVisible.begin(),m_wasVisible.end(),cmp1);
+                visible = it!=m_wasVisible.end();
                 }
-                  if(idx.data().value<QAction*>()->text().contains(searchLineEdit->text(),Qt::CaseInsensitive) && (idx.data().value<QAction*>()->isVisible() || m_wasVisible.contains(idx))) {
-                 idx.data().value<QAction*>()->setVisible(true);
+                 if(!searchString.isEmpty() && action->text().contains(searchString,Qt::CaseInsensitive)) {
 
 
-                 if(!searchLineEdit->text().isEmpty()) {
+                    qDebug()  << visible << __LINE__;
+                 action->setVisible(true && visible);
+
+
                  QModelIndex p = idx.parent();
                  QStringList names;
                  while(p.isValid()) {
@@ -623,7 +705,7 @@ void AppMenuWidget::searchMenu() {
                         p.data().value<QAction*>()->setVisible(true);
 
                         names << p.data().value<QAction*>()->text();
-                  p= p.parent();
+                        p= p.parent();
                  }
                     std::reverse(names.begin(),names.end());
 
@@ -651,24 +733,21 @@ void AppMenuWidget::searchMenu() {
                     }));
                     m_searchMenu->addAction(cpy);
                     }
-                    return 0;
+
+
                  }
-                 return 0;
-                 } else {
-                 idx.data().value<QAction*>()->setVisible(false);
+
+
+                  else if(!searchString.isEmpty()) {
+                         action->setVisible(false);
+
                 }
+
                  return 0;
                 };
         m_searchMenu->addSeparator();
-        std::function<int(QModelIndex idx,int depth)> traverse =[this](QModelIndex idx,int depth) {
-        qDebug() << __LINE__<< idx.data().value<QAction*>()->text();
-        if(idx.data().value<QAction*>()->menu())
-                Q_EMIT idx.data().value<QAction*>()->menu()->aboutToShow();
 
 
-        return 0;
-         };
-        iterate(QModelIndex(),m_appMenuModel,traverse);
 
         iterate(QModelIndex(),m_appMenuModel,setResultVisbileMbar);
              m_isSearching=false;
@@ -681,7 +760,6 @@ void AppMenuWidget::searchMenu() {
 
     QList<QMenu*> menus;
     menus << m_systemMenu;
-    QString searchString = searchLineEdit->text();
     QStringList names;
 
     for(QMenu * menu : qAsConst(menus)) {
@@ -709,7 +787,7 @@ for(const QString &v : keys) {
     });
     cpy->setDisconnectOnClear(connect(orig,&QAction::triggered,this,[this]{
         searchLineEdit->setText("");
-        searchLineEdit->textChanged("");
+        emit searchLineEdit->textChanged("");
         m_searchMenu->close();
 
     }));
@@ -844,6 +922,8 @@ if(number_of_enabled_actions == 2 || ( number_of_enabled_actions == 3 && m_appMe
 }
 
 m_appMenuModel->clearFilteredActions();
+
+
 }
 
 void AppMenuWidget::rebuildMenu()
@@ -866,8 +946,9 @@ if(!m_appMenuModel->menuAvailable()) {
 
    }
 
-}
+
 m_appMenuModel->invalidateMenu();
+}
 }
 
 void AppMenuWidget::toggleMaximizeWindow()
@@ -962,7 +1043,7 @@ void AppMenuWidget::onActiveWindowChanged()
 
     if(m_currentWindowID >0 && m_currentWindowID != m_windowID && m_windowID !=0) {
 
-        searchLineEdit->clear();
+        //searchLineEdit->clear();
         //searchLineEdit->textChanged("");
 
         // bool isMax = info.hasState(NET::Max);
@@ -1318,6 +1399,7 @@ bool AppMenuWidget::eventFilter(QObject *watched, QEvent *event)
 {
     if(event->type() == QEvent::MouseButtonRelease) // here we are checking mouse button press event
     {
+        qDebug() << __FILE__ ":"<<__LINE__;
         QMouseEvent *mouseEvent  = static_cast<QMouseEvent*>(event);
         QMenu *submenu = qobject_cast<QMenu*>(watched);  // Workaround for: no member named 'toolTip' in 'QObject'
         if(!submenu->rect().contains(mouseEvent->pos())) { // Prevent the Menu action from getting triggred when user click on actions in submenu

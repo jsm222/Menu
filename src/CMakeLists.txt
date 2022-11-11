@@ -89,5 +89,8 @@ if("${CMAKE_SYSTEM_NAME}" MATCHES "FreeBSD")
     target_link_libraries(${TARGET} procstat)
 endif()
 
+if("${CMAKE_SYSTEM_NAME}" MATCHES "Linux")
+    target_link_libraries(${TARGET} procps)
+endif()
 install(TARGETS ${TARGET} DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
 install(FILES ${QM_FILES} DESTINATION "${CMAKE_INSTALL_DATADIR}/menubar/translations")

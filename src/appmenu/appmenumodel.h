@@ -1,4 +1,4 @@
-/******************************************************************
+    /******************************************************************
  * Copyright 2016 Chinmoy Ranjan Pradhan <chinmoyrp65@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
@@ -35,12 +35,14 @@
 #include <QMenu>
 #include <QMenuBar>
 #include <QActionEvent>
+#include <QApplication>
 class QAction;
 class QModelIndex;
 class QDBusServiceWatcher;
 class HMenu :public QMenu {
 public:
     HMenu(QWidget* parent=0):QMenu(parent) {
+
 
     }
 protected:
@@ -50,17 +52,18 @@ protected:
             if (qobject_cast<QMenuBar*>(parent())!=nullptr) {
                 if(e->action()->menu())
                     qobject_cast<QMenuBar*>(parent())->addMenu(e->action()->menu());
-            }
+
+           }
 
 
         }
-        if(e->type() == QEvent::ActionRemoved) {
+       if(e->type() == QEvent::ActionRemoved) {
             if (qobject_cast<QMenuBar*>(parent())!=nullptr) {
                      qobject_cast<QMenuBar*>(parent())->removeAction(e->action());
-                 }
+
         }
-        if(!qobject_cast<QMenuBar*>(parent()))
-            QMenu::actionEvent(e);
+       }
+
 }
 };
 
@@ -158,10 +161,11 @@ private Q_SLOTS:
     void setVisible(bool visible);
     void update();
 
+
 signals:
     void menuAvailableChanged();
     void modelNeedsUpdate();
-    void menuParsed();
+    void menuImported();
     void firstLevelParsed();
     void filterByActiveChanged();
     void filterChildrenChanged();

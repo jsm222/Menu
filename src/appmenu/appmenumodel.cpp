@@ -199,7 +199,7 @@ void AppMenuModel::setMenuAvailable(bool set)
 
     if (m_menuAvailable != set) {
         m_menuAvailable = set;
-        onWindowChanged(m_currentWindowId);
+        //onWindowChanged(m_currentWindowId);
         emit menuAvailableChanged();
     }
 }
@@ -250,10 +250,7 @@ void AppMenuModel::setWinId(const QVariant &id)
 
 int AppMenuModel::rowCount(const QModelIndex &parent) const
     {
-    qDebug()<< parent << __FILE__<<":"<<__LINE__;
-
-        Q_UNUSED(parent);
-        if (!m_menu) {
+      if (!m_menu) {
             return 0;
         }
 
@@ -306,6 +303,7 @@ void AppMenuModel::onActiveWindowChanged(WId id)
 
                 auto getWindowPropertyString = [c, this](WId id, const QByteArray & name) -> QByteArray {
                     QByteArray value;
+
 
                     if (!s_atoms.contains(name)) {
                        const xcb_intern_atom_cookie_t atomCookie = xcb_intern_atom(c, false, name.length(), name.constData());
@@ -364,7 +362,7 @@ void AppMenuModel::onActiveWindowChanged(WId id)
         }else {
             m_initialApplicationFromWindowId = -1;
         }
-        return;
+     return;
         }
     }
 
@@ -518,7 +516,8 @@ bool AppMenuModel::hasChildren(const QModelIndex &parent) const {
     if(!parent.isValid())
         return true;
 
-    parentItem = static_cast<QAction*>(parent.internalPointer());
+    parentItem =static_cast<QAction*>(parent.internalPointer());
+
     return (bool)(parentItem->menu());
 }
 void AppMenuModel::onWindowChanged(WId id)
@@ -698,14 +697,15 @@ void AppMenuModel::readMenuActions(QMenu* menu,QStringList names) {
 }
 QVariant AppMenuModel::data(const QModelIndex &index, int role) const
 {
-    if (    m_menu.isNull()) {
-        qDebug() << __LINE__;
+    if (m_menu.isNull()) {
+
         return QVariant();
     }
 
     if (!index.isValid()) {
+
        if (role == Qt::DisplayRole) {
-            return QVariant::fromValue(m_menu->menuAction());
+            return QVariant::fromValue( m_menu->menuAction());
         }
     }
 
@@ -719,14 +719,14 @@ QVariant AppMenuModel::data(const QModelIndex &index, int role) const
         }
     }*/
 
-
+;
     if (role == Qt::DisplayRole) {
-        QAction *item = static_cast<QAction*>(index.internalPointer());
-        return QVariant::fromValue(item);
+
+        return QVariant::fromValue(static_cast< QAction*>(index.internalPointer()));
     }
     if (role == Qt::EditRole) {
-        QAction *item = static_cast<QAction*>(index.internalPointer());
-        return QVariant::fromValue(item);
+
+        return QVariant::fromValue(static_cast< QAction*>(index.internalPointer()));
     }
     return QVariant();
 }
@@ -765,12 +765,13 @@ void AppMenuModel::updateApplicationMenu(const QString &serviceName, const QStri
 
 
     HDBusMenuImporter *importer = new HDBusMenuImporter(serviceName, menuObjectPath, DBusMenuImporterType::SYNCHRONOUS);
-    m_importers[serviceName+menuObjectPath]=importer;
 
+    m_importers[serviceName+menuObjectPath]=importer;
     m_importers[serviceName+menuObjectPath]->menu()->setParent(w_parent);
     m_menu = m_importers[serviceName+menuObjectPath]->menu();
-  qDebug() << serviceName << menuObjectPath << __LINE__ << m_menu;
 m_menuAvailable = !m_menu.isNull();
+emit menuImported();
+
 
 
 }
