@@ -59,7 +59,7 @@ StatusNotifierButton::StatusNotifierButton(QString service, QString objectPath, 
             DBusMenuImporter * imp = new DBusMenuImporter{interface->service(), path.path(), this};
             m_menu =  imp->menu();
             m_menu->setObjectName(QLatin1String("StatusNotifierMenu"));
-            qDebug() << m_menu->title() << __LINE__;
+
 
 
     }

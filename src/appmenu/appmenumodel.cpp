@@ -47,12 +47,15 @@ static QHash<QByteArray, xcb_atom_t> s_atoms;
 
 void HMenu::actionEvent(QActionEvent *e) {
 
-
        if(e->type() == QEvent::ActionAdded) {
            if (qobject_cast<QMenuBar*>(parent())!=nullptr) { // only happens for first level
                if(e->action()->menu())
                    qobject_cast<QMenuBar*>(parent())->addMenu(e->action()->menu());
-
+                   if(m_locale_lang == QLocale::German) {
+                       if(e->action()->text().replace("&","") == "Datei") {
+                            e->action()->setText("Ablage");
+                       }
+                   }
           }
 
 
@@ -63,9 +66,7 @@ void HMenu::actionEvent(QActionEvent *e) {
 
        }
       }
-
-      QMenu::actionEvent(e);
-
+    QMenu::actionEvent(e);
 }
 
 

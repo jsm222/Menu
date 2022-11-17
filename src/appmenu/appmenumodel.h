@@ -46,11 +46,13 @@ class HMenu :public QMenu {
 public:
 
     HMenu(QWidget* parent=0):QMenu(parent) {
+        m_locale_lang = QLocale().language();
     }
     std::chrono::high_resolution_clock::time_point lastOpened;
 protected:
      void actionEvent(QActionEvent *e) override;
-
+private:
+     QLocale::Language m_locale_lang;
 };
 class HDBusMenuImporter : public DBusMenuImporter
 {
@@ -72,7 +74,7 @@ public:
             connect(menu,&QMenu::aboutToHide,this,[this]{
                 HMenu *reshow = qobject_cast<HMenu*>(sender());
                 std::chrono::duration<double,std::milli> dur = std::chrono::high_resolution_clock::now()-reshow->lastOpened;
-                if(dur.count()<200) {
+                if(dur.count()<250) {
                QTimer::singleShot(10,this,[this,reshow] {
                    reshow->blockSignals(true);
                    qobject_cast<QMenuBar*>(reshow->parent()->parent())->setActiveAction(reshow->menuAction());
