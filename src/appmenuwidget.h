@@ -90,12 +90,15 @@ public:
     QMenuBar *m_menuBar;
     QFileSystemWatcher *watcher;
     void focusMenu();
+signals:
+    void menuAboutToBeImported();
 protected:
     bool event(QEvent *e) override;
     bool eventFilter(QObject *watched, QEvent *event) override; // Make it possible to click on the menu entry for a submenu
 
 private:
     bool m_isSearching=false;
+
     bool isAcceptWindow(WId id);
     void delayUpdateActiveWindow();
     void onActiveWindowChanged();
@@ -106,6 +109,7 @@ private:
     void restoreWindow();
 
 public slots:
+
     void rebuildMenu();
     void findAppsInside(QStringList locationsContainingApps, QMenu *m_systemMenu,  QFileSystemWatcher *watcher);
     void actionAbout();
@@ -130,6 +134,7 @@ private:
 /// For System Main Menu.
 private:
     QMenu *m_systemMenu;
+     bool m_searchMenuOpened=false;
      QMenu *m_searchMenu;
      QList<QAction *> searchResults;
      QMap<QAction*,QString*> filteredActions;

@@ -1,4 +1,4 @@
-    /*
+        /*
  * Copyright (C) 2020 PandaOS Team.
  * Author:     rekols <revenmartin@gmail.com>
  * Portions Copyright (C) 2020-22 Simon Peter.
@@ -21,6 +21,7 @@
 #include "appmenuwidget.h"
 #include "appmenu/menuimporteradaptor.h"
 #include "mainwidget.h"
+#include <chrono>
 #include <QProcess>
 #include <QHBoxLayout>
 #include <QDebug>
@@ -120,7 +121,6 @@ private:
         this->alt = alt;
     }
 };
-
 // Put cursor back in search box if user presses backspace while a menu item is highlighted
 void AppMenuWidget::keyPressEvent(QKeyEvent * event) {
     if(event->key() == Qt::Key_Backspace) {
@@ -239,7 +239,7 @@ void AppMenuWidget::findAppsInside(QStringList locationsContainingApps, QMenu *m
 // TODO: Nested submenus rather than flat ones with '→'
 // This code is similar to the code in the 'launch' command
 {
-        return;
+
     QStringList nameFilter({"*.app", "*.AppDir", "*.desktop", "*.AppImage", "*.appimage"});
     foreach (QString directory, locationsContainingApps) {
         // Shall we process this directory? Only if it contains at least one application, to optimize for speed
@@ -363,10 +363,11 @@ void iterate(const QModelIndex & index, const QAbstractItemModel * model,
              const std::function<int(const QModelIndex&, int depth)>  & fun,
              int depth=0)
 {
-
     if (index.isValid())
-            if(fun(index, depth)>0)
+        if(fun(index, depth)>0) {
             return;
+        }
+
     if ((index.flags() & Qt::ItemNeverHasChildren) || !model->hasChildren(index)) return;
     auto rows = model->rowCount(index);
     auto cols = model->columnCount(index);
@@ -374,6 +375,7 @@ void iterate(const QModelIndex & index, const QAbstractItemModel * model,
         for (int j = 0; j < cols; ++j)
             iterate(model->index(i, j, index), model, fun, depth+1);
 }
+
 AppMenuWidget::AppMenuWidget(QWidget *parent)
     : QWidget(parent),
       m_typingTimer(new QTimer(this))
@@ -382,7 +384,7 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
     // https://github.com/helloSystem/Menu/issues/15
     watcher = new QFileSystemWatcher(this);
     // watcher->connect(watcher, SIGNAL(directoryChanged(QString)), this, SLOT(updateMenu())); // We need a slot that rebuilds the menu
-    connect(watcher, SIGNAL(directoryChanged(QString)), SLOT(rebuildMenu()));                // We need a slot that rebuilds the menu
+   // connect(watcher, SIGNAL(directoryChanged(QString)), SLOT(rebuildMenu()));                // We need a slot that rebuilds the menu
 
     QHBoxLayout *layout = new QHBoxLayout;
     layout->setAlignment(Qt::AlignCenter); // Center QHBoxLayout vertically
@@ -400,22 +402,25 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
     m_searchMenu = new QMenu();
     m_searchMenu->setIcon(QIcon::fromTheme("search-symbolic"));
     std::function<int(QModelIndex idx,int depth)> traverse =[this](QModelIndex idx,int depth) {
-QAction * action =idx.data().value<QAction*>();
-if(action->isVisible() && idx.parent().isValid()) {
-    m_wasVisible.push_back(cmpAction({idx.parent().data().value<QAction*>()->text().toStdString(),idx.data().value<QAction*>()->text().toStdString(),idx.row()}));
+    QAction * action =idx.data().value<QAction*>();
+    action->setShortcutContext(Qt::ApplicationShortcut);
+    if(action->isVisible() && idx.parent().isValid()) {
+        m_wasVisible.push_back(cmpAction({idx.parent().data().value<QAction*>()->text().toStdString(),idx.data().value<QAction*>()->text().toStdString(),idx.row()}));
 
-
-}
-if(action->menu()) {
-            Q_EMIT action->menu()->aboutToShow();
 
     }
-    return 0;
-    };
+    if(action->menu()) {
+        emit action->menu()->aboutToShow();
+
+
+        }
+
+        return 0;
+        };
     std::function<int(QModelIndex idx,int depth)> traverse1 =[this](QModelIndex idx,int depth) {
     QAction * action =idx.data().value<QAction*>();
     if(action->menu()) {
-            Q_EMIT action->menu()->aboutToShow();
+        emit action->menu()->aboutToShow();
 
     }
     return 0;
@@ -426,22 +431,25 @@ if(action->menu()) {
 iterate(QModelIndex(),m_appMenuModel,traverse1);
         searchLineEdit->setFocus();
     });
+connect(qApp, &QApplication::focusWindowChanged,this,[this](QWindow *a) {
 
     // https://github.co    m/helloSystem/Menu/issues/95
-/*
-    connect(qApp, &QApplication::focusWindowChanged, this, [this](QWindow *w) {
-        if(w) {
-            qDebug() << __LINE__ << w<< qApp->focusWindow();
+});
+    connect(qApp, &QApplication::applicationStateChanged, this, [this](Qt::ApplicationState state) {
 
-        }
-        if (!w) { // This is not always true and does always work but never on qt  5.12.8 on ubuntu 20.04 with lxqt //
-qDebug() << __LINE__ << w<< qApp->focusWindow();
+        if(state==Qt::ApplicationActive) {
 
+             m_searchMenuOpened = searchLineEdit->isActiveWindow();
 
 
         }
-            });
-    */
+        if(state==Qt::ApplicationInactive && m_searchMenuOpened) {
+                    searchLineEdit->clear();
+                    emit searchLineEdit->textChanged("");
+                    m_searchMenuOpened=false;
+               }
+      });
+
     setFocusPolicy(Qt::NoFocus);
     // Prepare System menu
     m_systemMenu = new SystemMenu(this); // Using our SystemMenu subclass instead of a QMenu to be able to toggle "About..." when modifier key is pressed
@@ -500,22 +508,20 @@ qDebug() << __LINE__ << w<< qApp->focusWindow();
 
     m_appMenuModel = new AppMenuModel(m_menuBar);
 
-
-  connect(m_appMenuModel,&AppMenuModel::menuImported,this,[this,traverse]{
-m_wasVisible.clear();
-        qDebug() <<__LINE__ << m_appMenuModel->menuAvailable();
-            if(m_appMenuModel->menuAvailable()) {
-
-                qDebug() <<__LINE__ << m_appMenuModel->menuAvailable();
-                m_appMenuModel->menu()->aboutToShow();
-iterate(QModelIndex(),m_appMenuModel,traverse);
+    connect(m_appMenuModel,&AppMenuModel::menuAboutToBeImported,this,&AppMenuWidget::menuAboutToBeImported);
+    connect(m_appMenuModel,&AppMenuModel::menuImported,this,[this,traverse] {
 
 
-    }
-    });
 
+            m_wasVisible.clear();
+             if(m_appMenuModel->menuAvailable()) {
 
-    connect(m_appMenuModel, &AppMenuModel::menuAvailableChanged, this, &AppMenuWidget::updateMenu);
+                QTimer::singleShot(100,this,[this,traverse] {
+                    iterate(QModelIndex(),m_appMenuModel,traverse);
+                });
+        }
+        });
+   connect(m_appMenuModel, &AppMenuModel::menuAvailableChanged, this, &AppMenuWidget::updateMenu);
 
     connect(KWindowSystem::self(), &KWindowSystem::activeWindowChanged, this, &AppMenuWidget::delayUpdateActiveWindow);
     connect(KWindowSystem::self(), static_cast<void (KWindowSystem::*)(WId, NET::Properties, NET::Properties2)>(&KWindowSystem::windowChanged),
@@ -529,7 +535,7 @@ iterate(QModelIndex(),m_appMenuModel,traverse);
 }
 
 void AppMenuWidget::searchEditingDone() {
-     if(m_searchMenu && m_searchMenu->actions().count()>1) {
+    if(m_searchMenu && m_searchMenu->actions().count()>1) {
         searchLineEdit->clearFocus();
         for(QAction *findActivateeCanidcate : m_searchMenu->actions())
             if(!findActivateeCanidcate->isSeparator()) {
@@ -540,7 +546,6 @@ void AppMenuWidget::searchEditingDone() {
 }
 
 void AppMenuWidget::refreshTimer() {
-    qDebug() << __LINE__;
     m_typingTimer->start(300); // https://wiki.qt.io/Delay_action_to_wait_for_user_interaction
 }
 
@@ -643,7 +648,6 @@ void AppMenuWidget::updateActionSearch() {
 
 void AppMenuWidget::searchMenu() {
     QString searchString = searchLineEdit->text();
-    qDebug() << searchString << __LINE__;
     for(QAction *sr: qAsConst(searchResults)) {
         if(m_searchMenu->actions().contains(sr)) {
             m_searchMenu->removeAction(sr);
@@ -659,13 +663,15 @@ void AppMenuWidget::searchMenu() {
                 std::function<int(QModelIndex idx,int depth)> setResultVisbileMbar =[this,searchString](QModelIndex idx,int depth) {
                     QAction * action =idx.data().value<QAction*>();
                     if(searchString.isEmpty()) {
-                        qDebug() <<__LINE__<< m_wasVisible.size();
 
                             if(idx.parent().isValid()) {
                                 std::vector<cmpAction>::iterator it = std::find(m_wasVisible.begin(),m_wasVisible.end(),cmpAction({idx.parent().data().value<QAction*>()->text().toStdString(),idx.data().value<QAction*>()->text().toStdString(),idx.row()}));
                                 bool visible  = it != m_wasVisible.end();
+
+
                                 action->setVisible(visible);
-                                qDebug() << visible << __LINE__ << action->text();
+
+
 
                                 QModelIndex p = idx.parent();
                                 while(p.isValid()) {
@@ -677,6 +683,7 @@ void AppMenuWidget::searchMenu() {
                                 }
 
                             }
+
                             return 0;
                             }
 
@@ -694,8 +701,7 @@ void AppMenuWidget::searchMenu() {
                  if(!searchString.isEmpty() && action->text().contains(searchString,Qt::CaseInsensitive)) {
 
 
-                    qDebug()  << visible << __LINE__;
-                 action->setVisible(true && visible);
+                action->setVisible(true && visible);
 
 
                  QModelIndex p = idx.parent();
@@ -704,7 +710,7 @@ void AppMenuWidget::searchMenu() {
 
                         p.data().value<QAction*>()->setVisible(true);
 
-                        names << p.data().value<QAction*>()->text();
+                        names << p.data().value<QAction*>()->text().replace("&","");
                         p= p.parent();
                  }
                     std::reverse(names.begin(),names.end());
@@ -712,12 +718,12 @@ void AppMenuWidget::searchMenu() {
                     QAction *orig= idx.data().value<QAction*>();
                     if(!orig->menu()) {
                     CloneAction *cpy = new CloneAction(orig);
+
                     cpy->setText(names.join(" → ") + " → " + orig->text());
                     cpy->setShortcut(orig->shortcut());
-                    cpy->setToolTip(orig->toolTip());
-                    cpy->updateMe();
-                    cpy->setShortcutContext(Qt::ApplicationShortcut);
                     orig->setShortcutContext(Qt::WindowShortcut);
+                    cpy->setShortcutContext(Qt::ApplicationShortcut);
+                    cpy->updateMe();
                     searchResults << cpy;
                     connect(cpy,&QAction::triggered,this,[this]{
                         searchLineEdit->setText("");
@@ -732,13 +738,17 @@ void AppMenuWidget::searchMenu() {
 
                     }));
                     m_searchMenu->addAction(cpy);
+
                     }
 
 
-                 }
 
+    }
 
                   else if(!searchString.isEmpty()) {
+                     if(!visible && action->isVisible() && idx.parent().isValid()) {
+                         m_wasVisible.push_back({idx.parent().data().value<QAction*>()->text().toStdString(),idx.data().value<QAction*>()->text().toStdString(),idx.row()});
+                     }
                          action->setVisible(false);
 
                 }
@@ -935,18 +945,18 @@ void AppMenuWidget::rebuildMenu()
 //doesn't work for https://github.com/helloSystem/Menu/issues/16
 //what does this even do??
 void AppMenuWidget::updateMenu() {
-qDebug() <<__LINE__ <<":" <<__FILE__;
 if(!m_appMenuModel->menuAvailable()) {
     int cnt = m_menuBar->actions().count();
     QList<QAction*> remove;
-    for(int i=2;i<cnt;i++)
+    for(int i=2;i<cnt;i++) {
          remove.append(m_menuBar->actions().at(i));
+    }
     for(QAction *r : remove) {
-        m_menuBar->removeAction(r);
+         m_menuBar->removeAction(r);
 
    }
 
-
+emit menuAboutToBeImported(); // misnomer there is no menu
 m_appMenuModel->invalidateMenu();
 }
 }
@@ -1037,7 +1047,6 @@ void AppMenuWidget::onActiveWindowChanged()
 {
 
     if (m_currentWindowID != KWindowSystem::activeWindow()) {
-        qobject_cast<MainWindow*>(this->parent()->parent())->hideApplicationName();
         // TODO: Need to trigger updating the menu here? Sometimes it stays blank after an application has been closed
     }
 

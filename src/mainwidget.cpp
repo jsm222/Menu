@@ -42,7 +42,7 @@ MainWidget::MainWidget(QWidget *parent)
       m_controlCenterLayout(new QHBoxLayout),
       m_dateTimeLayout(new QHBoxLayout),
       m_windowsLayout(new QHBoxLayout),
-      m_appMenuWidget(new AppMenuWidget),
+      m_appMenuWidget(new AppMenuWidget(this)),
       m_pluginManager(new PluginManager(this))
 {
     m_pluginManager->start();

@@ -25,7 +25,6 @@
 
 #include <QX11Info>
 #include <xcb/xcb.h>
-
 #include <QAction>
 #include <QMenu>
 #include <QDBusConnection>
@@ -37,13 +36,41 @@
 #include <QHBoxLayout>
 #include <QDebug>
 #include<QModelIndex>
-
 #include <dbusmenu-qt5/dbusmenuimporter.h>
 
 static const QByteArray s_x11AppMenuServiceNamePropertyName = QByteArrayLiteral("_KDE_NET_WM_APPMENU_SERVICE_NAME");
 static const QByteArray s_x11AppMenuObjectPathPropertyName = QByteArrayLiteral("_KDE_NET_WM_APPMENU_OBJECT_PATH");
 
 static QHash<QByteArray, xcb_atom_t> s_atoms;
+
+
+void HMenu::actionEvent(QActionEvent *e) {
+
+       if(e->type() == QEvent::ActionAdded) {
+           if (qobject_cast<QMenuBar*>(parent())!=nullptr) { // only happens for first level
+               if(e->action()->menu())
+                   qobject_cast<QMenuBar*>(parent())->addMenu(e->action()->menu());
+                   if(m_locale_lang == QLocale::German) {
+                       if(e->action()->text().replace("&","") == "Datei") {
+                            e->action()->setText("Ablage");
+                       }
+                   }
+          }
+
+
+       }
+      if(e->type() == QEvent::ActionRemoved) {
+           if (qobject_cast<QMenuBar*>(parent())!=nullptr) {
+                    qobject_cast<QMenuBar*>(parent())->removeAction(e->action());
+
+       }
+      }
+    QMenu::actionEvent(e);
+}
+
+
+
+
 
 
 
@@ -762,6 +789,7 @@ void AppMenuModel::updateApplicationMenu(const QString &serviceName, const QStri
     m_serviceName = serviceName;
     m_menuObjectPath = menuObjectPath;
     m_serviceWatcher->setWatchedServices(QStringList({m_serviceName}));
+   emit menuAboutToBeImported();
 
 
     HDBusMenuImporter *importer = new HDBusMenuImporter(serviceName, menuObjectPath, DBusMenuImporterType::SYNCHRONOUS);
@@ -769,8 +797,11 @@ void AppMenuModel::updateApplicationMenu(const QString &serviceName, const QStri
     m_importers[serviceName+menuObjectPath]=importer;
     m_importers[serviceName+menuObjectPath]->menu()->setParent(w_parent);
     m_menu = m_importers[serviceName+menuObjectPath]->menu();
-m_menuAvailable = !m_menu.isNull();
+
+setMenuAvailable(!m_menu.isNull());
+
 emit menuImported();
+
 
 
 

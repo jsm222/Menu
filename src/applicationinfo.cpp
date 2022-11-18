@@ -240,6 +240,9 @@ QString ApplicationInfo::pathForWId(unsigned long long winId) {
             return "";
         }
         path = QString::fromLocal8Bit(pargs[0]);
+        procstat_close(prstat);
+        procstat_freeargv(prstat);
+
 #endif
 #if defined(__linux__)
         pid_t pidList[1];
