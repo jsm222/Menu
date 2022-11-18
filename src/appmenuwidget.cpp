@@ -956,7 +956,7 @@ if(!m_appMenuModel->menuAvailable()) {
 
    }
 
-
+emit menuAboutToBeImported(); // misnomer there is no menu
 m_appMenuModel->invalidateMenu();
 }
 }
