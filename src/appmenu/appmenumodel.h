@@ -41,6 +41,7 @@ class QModelIndex;
 class QDBusServiceWatcher;
 class AppMenuModel;
 class MainWindow;
+
 class HMenu :public QMenu {
  Q_OBJECT
 public:
@@ -149,7 +150,7 @@ public:
     void refreshSearch();
 signals:
     void requestActivateIndex(int index);
-
+    void menuAboutToBeImported();
 
 protected:
     bool nativeEventFilter(const QByteArray &eventType, void *message, long int *result) override;

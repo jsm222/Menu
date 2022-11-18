@@ -508,8 +508,8 @@ connect(qApp, &QApplication::focusWindowChanged,this,[this](QWindow *a) {
 
     m_appMenuModel = new AppMenuModel(m_menuBar);
 
-
-  connect(m_appMenuModel,&AppMenuModel::menuImported,this,[this,traverse] {
+    connect(m_appMenuModel,&AppMenuModel::menuAboutToBeImported,this,&AppMenuWidget::menuAboutToBeImported);
+    connect(m_appMenuModel,&AppMenuModel::menuImported,this,[this,traverse] {
 
 
 
@@ -959,7 +959,6 @@ if(!m_appMenuModel->menuAvailable()) {
 
 m_appMenuModel->invalidateMenu();
 }
-
 }
 
 void AppMenuWidget::toggleMaximizeWindow()
@@ -1048,7 +1047,6 @@ void AppMenuWidget::onActiveWindowChanged()
 {
 
     if (m_currentWindowID != KWindowSystem::activeWindow()) {
-        qobject_cast<MainWindow*>(this->parent()->parent())->hideApplicationName();
         // TODO: Need to trigger updating the menu here? Sometimes it stays blank after an application has been closed
     }
 

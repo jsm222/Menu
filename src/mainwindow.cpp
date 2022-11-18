@@ -111,7 +111,7 @@ MainWindow::MainWindow(QWidget *parent)
     //this->activateWindow(); // probono: Ensure that we have the focus when menu is launched so that one can enter text in the search box
     //m_MainWidget->raise(); // probono: Trying to give typing focus to the search box that is in there. Needed? Does not seem tp hurt
 
-    connect(KWindowSystem::self(), &KWindowSystem::activeWindowChanged, this, &MainWindow::hideApplicationName);
+    connect(m_MainWidget->getAppMenuWidget(), &AppMenuWidget::menuAboutToBeImported, this, &MainWindow::hideApplicationName);
 }
 
 MainWindow::~MainWindow()
@@ -267,6 +267,7 @@ QString MainWindow::showApplicationName(const QString &arg)
 
 void MainWindow::hideApplicationName()
 {
+    qDebug()<< __func__;
     MainWindow::applicationStartingLabel->hide();
     m_MainWidget->show();
 }

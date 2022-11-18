@@ -25,7 +25,6 @@
 
 #include <QX11Info>
 #include <xcb/xcb.h>
-
 #include <QAction>
 #include <QMenu>
 #include <QDBusConnection>
@@ -790,6 +789,7 @@ void AppMenuModel::updateApplicationMenu(const QString &serviceName, const QStri
     m_serviceName = serviceName;
     m_menuObjectPath = menuObjectPath;
     m_serviceWatcher->setWatchedServices(QStringList({m_serviceName}));
+   emit menuAboutToBeImported();
 
 
     HDBusMenuImporter *importer = new HDBusMenuImporter(serviceName, menuObjectPath, DBusMenuImporterType::SYNCHRONOUS);
@@ -798,7 +798,7 @@ void AppMenuModel::updateApplicationMenu(const QString &serviceName, const QStri
     m_importers[serviceName+menuObjectPath]->menu()->setParent(w_parent);
     m_menu = m_importers[serviceName+menuObjectPath]->menu();
 
-m_menuAvailable = !m_menu.isNull();
+setMenuAvailable(!m_menu.isNull());
 
 emit menuImported();
 

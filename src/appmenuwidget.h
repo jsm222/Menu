@@ -90,6 +90,8 @@ public:
     QMenuBar *m_menuBar;
     QFileSystemWatcher *watcher;
     void focusMenu();
+signals:
+    void menuAboutToBeImported();
 protected:
     bool event(QEvent *e) override;
     bool eventFilter(QObject *watched, QEvent *event) override; // Make it possible to click on the menu entry for a submenu
@@ -107,6 +109,7 @@ private:
     void restoreWindow();
 
 public slots:
+
     void rebuildMenu();
     void findAppsInside(QStringList locationsContainingApps, QMenu *m_systemMenu,  QFileSystemWatcher *watcher);
     void actionAbout();

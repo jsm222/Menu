@@ -37,6 +37,9 @@ public:
     void loadModule(const QString &pluginName, QHBoxLayout *layout);
     void rebuildSystemMenu();
     void triggerFocusMenu();
+    AppMenuWidget * getAppMenuWidget() { return m_appMenuWidget;}
+signals:
+    void menuAboutToBeImported();
 protected:
     void mouseDoubleClickEvent(QMouseEvent *e) override;
 
