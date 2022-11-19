@@ -451,18 +451,7 @@ void AppMenuModel::onActiveWindowChanged(WId id)
             const QString serviceName = QString::fromUtf8(getWindowPropertyString(id, s_x11AppMenuServiceNamePropertyName));
             const QString menuObjectPath = QString::fromUtf8(getWindowPropertyString(id, s_x11AppMenuObjectPathPropertyName));
 
-            qDebug() << "probono: WM_CLASS" << QString::fromUtf8(getWindowPropertyString(id, QByteArrayLiteral("WM_CLASS"))); // The filename of the binary that opened this window
-            // TODO: Bring Alt-tab like functionality into the menu
-            // Check: Does Alt-tab show the application name behind " - " for most applications? No....!
-            // But WM_CLASS seems to show the application name. Unfortunately, in lowercase... where does it come from? argv[0] apparently.
-            // Is there a way to get a nice name, including proper capitalization?
-            // TODO: Make menu with the names of all windows (better: all applications?)
-            // TODO: Use KWindowSystem raiseWindow to bring it to the front when the menu item is activated
-
-            // We could have the launch command set an environment variable with the nice application name
-            // which we could retrieve here like this on FreeBSD (is there a portable way?):
-            // Get _NET_WM_PID
-            // procstat -e $_NET_WM_PID
+            qDebug() << "probono: WM_CLASS" << QString::fromUtf8(getWindowPropertyString(id, QByteArrayLiteral("WM_CLASS")));
                 qDebug() << serviceName << menuObjectPath << __LINE__ << id;
             if (!serviceName.isEmpty() && !menuObjectPath.isEmpty()) {
                 m_initialApplicationFromWindowId = id;
