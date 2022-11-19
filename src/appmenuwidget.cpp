@@ -1,4 +1,4 @@
-        /*
+/*
  * Copyright (C) 2020 PandaOS Team.
  * Author:     rekols <revenmartin@gmail.com>
  * Portions Copyright (C) 2020-22 Simon Peter.
@@ -126,18 +126,18 @@ void AppMenuWidget::keyPressEvent(QKeyEvent * event) {
     if(event->key() == Qt::Key_Backspace) {
         searchLineEdit->setFocus();
         // FIXME: Wait until searchLineEdit has focus before continuing
-   }
-   QCoreApplication::sendEvent(parent(),event);
+    }
+    QCoreApplication::sendEvent(parent(),event);
 }
 
 void SearchLineEdit::keyPressEvent(QKeyEvent * event) {
     if(event->key() == Qt::Key_Down) {
 
         emit editingFinished();
-   } else {
-    QCoreApplication::sendEvent(parent(),event);
-   }
-   QLineEdit::keyPressEvent(event);
+    } else {
+        QCoreApplication::sendEvent(parent(),event);
+    }
+    QLineEdit::keyPressEvent(event);
 }
 
 class MyLineEditEventFilter : public QObject
@@ -384,7 +384,7 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
     // https://github.com/helloSystem/Menu/issues/15
     watcher = new QFileSystemWatcher(this);
     // watcher->connect(watcher, SIGNAL(directoryChanged(QString)), this, SLOT(updateMenu())); // We need a slot that rebuilds the menu
-   // connect(watcher, SIGNAL(directoryChanged(QString)), SLOT(rebuildMenu()));                // We need a slot that rebuilds the menu
+    // connect(watcher, SIGNAL(directoryChanged(QString)), SLOT(rebuildMenu()));                // We need a slot that rebuilds the menu
 
     QHBoxLayout *layout = new QHBoxLayout;
     layout->setAlignment(Qt::AlignCenter); // Center QHBoxLayout vertically
@@ -402,53 +402,53 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
     m_searchMenu = new QMenu();
     m_searchMenu->setIcon(QIcon::fromTheme("search-symbolic"));
     std::function<int(QModelIndex idx,int depth)> traverse =[this](QModelIndex idx,int depth) {
-    QAction * action =idx.data().value<QAction*>();
-    action->setShortcutContext(Qt::ApplicationShortcut);
-    if(action->isVisible() && idx.parent().isValid()) {
-        m_wasVisible.push_back(cmpAction({idx.parent().data().value<QAction*>()->text().toStdString(),idx.data().value<QAction*>()->text().toStdString(),idx.row()}));
+        QAction * action =idx.data().value<QAction*>();
+        action->setShortcutContext(Qt::ApplicationShortcut);
+        if(action->isVisible() && idx.parent().isValid()) {
+            m_wasVisible.push_back(cmpAction({idx.parent().data().value<QAction*>()->text().toStdString(),idx.data().value<QAction*>()->text().toStdString(),idx.row()}));
 
 
-    }
-    if(action->menu()) {
-        emit action->menu()->aboutToShow();
+        }
+        if(action->menu()) {
+            emit action->menu()->aboutToShow();
 
 
         }
 
         return 0;
-        };
+    };
     std::function<int(QModelIndex idx,int depth)> traverse1 =[this](QModelIndex idx,int depth) {
-    QAction * action =idx.data().value<QAction*>();
-    if(action->menu()) {
-        emit action->menu()->aboutToShow();
+        QAction * action =idx.data().value<QAction*>();
+        if(action->menu()) {
+            emit action->menu()->aboutToShow();
 
-    }
-    return 0;
+        }
+        return 0;
     };
     connect(m_searchMenu,&QMenu::aboutToShow
             ,[this,traverse1]() {
 
-iterate(QModelIndex(),m_appMenuModel,traverse1);
+        iterate(QModelIndex(),m_appMenuModel,traverse1);
         searchLineEdit->setFocus();
     });
-connect(qApp, &QApplication::focusWindowChanged,this,[this](QWindow *a) {
+    connect(qApp, &QApplication::focusWindowChanged,this,[this](QWindow *a) {
 
-    // https://github.co    m/helloSystem/Menu/issues/95
-});
+        // https://github.co    m/helloSystem/Menu/issues/95
+    });
     connect(qApp, &QApplication::applicationStateChanged, this, [this](Qt::ApplicationState state) {
 
         if(state==Qt::ApplicationActive) {
 
-             m_searchMenuOpened = searchLineEdit->isActiveWindow();
+            m_searchMenuOpened = searchLineEdit->isActiveWindow();
 
 
         }
         if(state==Qt::ApplicationInactive && m_searchMenuOpened) {
-                    searchLineEdit->clear();
-                    emit searchLineEdit->textChanged("");
-                    m_searchMenuOpened=false;
-               }
-      });
+            searchLineEdit->clear();
+            emit searchLineEdit->textChanged("");
+            m_searchMenuOpened=false;
+        }
+    });
 
     setFocusPolicy(Qt::NoFocus);
     // Prepare System menu
@@ -513,15 +513,15 @@ connect(qApp, &QApplication::focusWindowChanged,this,[this](QWindow *a) {
 
 
 
-            m_wasVisible.clear();
-             if(m_appMenuModel->menuAvailable()) {
+        m_wasVisible.clear();
+        if(m_appMenuModel->menuAvailable()) {
 
-                QTimer::singleShot(100,this,[this,traverse] {
-                    iterate(QModelIndex(),m_appMenuModel,traverse);
-                });
+            QTimer::singleShot(100,this,[this,traverse] {
+                iterate(QModelIndex(),m_appMenuModel,traverse);
+            });
         }
-        });
-   connect(m_appMenuModel, &AppMenuModel::menuAvailableChanged, this, &AppMenuWidget::updateMenu);
+    });
+    connect(m_appMenuModel, &AppMenuModel::menuAvailableChanged, this, &AppMenuWidget::updateMenu);
 
     connect(KWindowSystem::self(), &KWindowSystem::activeWindowChanged, this, &AppMenuWidget::delayUpdateActiveWindow);
     connect(KWindowSystem::self(), static_cast<void (KWindowSystem::*)(WId, NET::Properties, NET::Properties2)>(&KWindowSystem::windowChanged),
@@ -542,7 +542,7 @@ void AppMenuWidget::searchEditingDone() {
                 m_searchMenu->setActiveAction(findActivateeCanidcate);
                 break;
             }
-            }
+    }
 }
 
 void AppMenuWidget::refreshTimer() {
@@ -551,7 +551,7 @@ void AppMenuWidget::refreshTimer() {
 
 void AppMenuWidget::focusMenu() {
     QMouseEvent event(QEvent::MouseButtonPress,QPoint(0,0),
-    m_menuBar->mapToGlobal(QPoint(0,0)),Qt::LeftButton,0,0);
+                      m_menuBar->mapToGlobal(QPoint(0,0)),Qt::LeftButton,0,0);
     QApplication::sendEvent(m_menuBar,&event);
     searchLineEdit->setFocus();
 }
@@ -660,212 +660,190 @@ void AppMenuWidget::searchMenu() {
     }
 
 
-                std::function<int(QModelIndex idx,int depth)> setResultVisbileMbar =[this,searchString](QModelIndex idx,int depth) {
-                    QAction * action =idx.data().value<QAction*>();
-                    if(searchString.isEmpty()) {
+    std::function<int(QModelIndex idx,int depth)> setResultVisbileMbar =[this,searchString](QModelIndex idx,int depth) {
+        QAction * action =idx.data().value<QAction*>();
+        if(searchString.isEmpty()) {
 
-                            if(idx.parent().isValid()) {
-                                std::vector<cmpAction>::iterator it = std::find(m_wasVisible.begin(),m_wasVisible.end(),cmpAction({idx.parent().data().value<QAction*>()->text().toStdString(),idx.data().value<QAction*>()->text().toStdString(),idx.row()}));
-                                bool visible  = it != m_wasVisible.end();
-
-
-                                action->setVisible(visible);
-
-
-
-                                QModelIndex p = idx.parent();
-                                while(p.isValid()) {
-
-                                       p.data().value<QAction*>()->setVisible(true);
-
-
-                                 p= p.parent();
-                                }
-
-                            }
-
-                            return 0;
-                            }
-
-
-                bool visible = false;
-               if(idx.parent().isValid()) {
-                cmpAction cmp1 ={
-                    idx.parent().data().value<QAction*>()->text().toStdString(),
-                            idx.data().value<QAction*>()->text().toStdString(),
-                            idx.row()
-                };
-                std::vector<cmpAction>::iterator it= std::find(m_wasVisible.begin(),m_wasVisible.end(),cmp1);
-                visible = it!=m_wasVisible.end();
-                }
-                 if(!searchString.isEmpty() && action->text().contains(searchString,Qt::CaseInsensitive)) {
-
-
-                action->setVisible(true && visible);
-
-
-                 QModelIndex p = idx.parent();
-                 QStringList names;
-                 while(p.isValid()) {
-
-                        p.data().value<QAction*>()->setVisible(true);
-
-                        names << p.data().value<QAction*>()->text().replace("&","");
-                        p= p.parent();
-                 }
-                    std::reverse(names.begin(),names.end());
-
-                    QAction *orig= idx.data().value<QAction*>();
-                    if(!orig->menu()) {
-                    CloneAction *cpy = new CloneAction(orig);
-
-                    cpy->setText(names.join(" → ") + " → " + orig->text());
-                    cpy->setShortcut(orig->shortcut());
-                    orig->setShortcutContext(Qt::WindowShortcut);
-                    cpy->setShortcutContext(Qt::ApplicationShortcut);
-                    cpy->updateMe();
-                    searchResults << cpy;
-                    connect(cpy,&QAction::triggered,this,[this]{
-                        searchLineEdit->setText("");
-                        searchLineEdit->textChanged("");
-                        m_searchMenu->close();
-
-                    });
-                    cpy->setDisconnectOnClear(connect(orig,&QAction::triggered,this,[this]{
-                        searchLineEdit->setText("");
-                        searchLineEdit->textChanged("");
-                        m_searchMenu->close();
-
-                    }));
-                    m_searchMenu->addAction(cpy);
-
-                    }
-
-
-
-    }
-
-                  else if(!searchString.isEmpty()) {
-                     if(!visible && action->isVisible() && idx.parent().isValid()) {
-                         m_wasVisible.push_back({idx.parent().data().value<QAction*>()->text().toStdString(),idx.data().value<QAction*>()->text().toStdString(),idx.row()});
-                     }
-                         action->setVisible(false);
-
+            if(idx.parent().isValid()) {
+                std::vector<cmpAction>::iterator it = std::find(m_wasVisible.begin(),m_wasVisible.end(),cmpAction({idx.parent().data().value<QAction*>()->text().toStdString(),idx.data().value<QAction*>()->text().toStdString(),idx.row()}));
+                bool visible  = it != m_wasVisible.end();
+                action->setVisible(visible);
+                QModelIndex p = idx.parent();
+                while(p.isValid()) {
+                    p.data().value<QAction*>()->setVisible(true);
+                    p= p.parent();
                 }
 
-                 return 0;
-                };
-        m_searchMenu->addSeparator();
+            }
+
+            return 0;
+        }
 
 
+        bool visible = false;
+        if(idx.parent().isValid()) {
+            cmpAction cmp1 ={
+                idx.parent().data().value<QAction*>()->text().toStdString(),
+                idx.data().value<QAction*>()->text().toStdString(),
+                idx.row()
+            };
+            std::vector<cmpAction>::iterator it= std::find(m_wasVisible.begin(),m_wasVisible.end(),cmp1);
+            visible = it!=m_wasVisible.end();
+        }
+        if(!searchString.isEmpty() && action->text().contains(searchString,Qt::CaseInsensitive)) {
+            action->setVisible(true && visible);
+            QModelIndex p = idx.parent();
+            QStringList names;
+            while(p.isValid()) {
+                p.data().value<QAction*>()->setVisible(true);
+                names << p.data().value<QAction*>()->text().replace("&","");
+                p= p.parent();
+            }
+            std::reverse(names.begin(),names.end());
 
-        iterate(QModelIndex(),m_appMenuModel,setResultVisbileMbar);
-             m_isSearching=false;
+            QAction *orig= idx.data().value<QAction*>();
+            if(!orig->menu()) {
+                CloneAction *cpy = new CloneAction(orig);
 
+                cpy->setText(names.join(" → ") + " → " + orig->text());
+                cpy->setShortcut(orig->shortcut());
+                orig->setShortcutContext(Qt::WindowShortcut);
+                cpy->setShortcutContext(Qt::ApplicationShortcut);
+                cpy->updateMe();
+                searchResults << cpy;
+                connect(cpy,&QAction::triggered,this,[this]{
+                    searchLineEdit->setText("");
+                    searchLineEdit->textChanged("");
+                    m_searchMenu->close();
 
+                });
+                cpy->setDisconnectOnClear(connect(orig,&QAction::triggered,this,[this]{
+                    searchLineEdit->setText("");
+                    searchLineEdit->textChanged("");
+                    m_searchMenu->close();
 
-    m_searchMenu->addSeparator();
+                }));
+                m_searchMenu->addAction(cpy);
+            }
+        }
 
+        else if(!searchString.isEmpty()) {
+            if(!visible && action->isVisible() && idx.parent().isValid()) {
+                m_wasVisible.push_back({idx.parent().data().value<QAction*>()->text().toStdString(),idx.data().value<QAction*>()->text().toStdString(),idx.row()});
+            }
+            action->setVisible(false);
 
+        }
+
+        return 0;
+    };
+
+    // Prevent separator from ever being directly underneath the search box, because this breaks arrow key nagivation
+    if(m_appMenuModel->filteredActions().count()>0)
+        searchResults << m_searchMenu->addSeparator(); // The items in searchResults get removed when search results change
+
+    iterate(QModelIndex(),m_appMenuModel,setResultVisbileMbar);
+    m_isSearching=false;
+
+    // Prevent separator from ever being directly underneath the search box, because this breaks arrow key nagivation
+    if(m_appMenuModel->filteredActions().count()>0)
+        searchResults << m_searchMenu->addSeparator(); // The items in searchResults get removed when search results change
 
     QList<QMenu*> menus;
     menus << m_systemMenu;
     QStringList names;
 
     for(QMenu * menu : qAsConst(menus)) {
-
         m_appMenuModel->filterMenu(menu,searchString,searchString=="",names);
-
-
     }
-const QStringList keys = m_appMenuModel->filteredActions().keys();
-for(const QString &v : keys) {
-    QAction *orig = m_appMenuModel->filteredActions()[v];
-    CloneAction *cpy = new CloneAction(orig);
-    cpy->setText(v);
-    cpy->setShortcut(orig->shortcut());
-    cpy->setToolTip(orig->toolTip());
-    cpy->updateMe();
-    cpy->setShortcutContext(Qt::ApplicationShortcut);
-    orig->setShortcutContext(Qt::WindowShortcut);
-    searchResults << cpy;
-    connect(cpy,&QAction::triggered,this,[this]{
-        searchLineEdit->setText("");
-        emit searchLineEdit->textChanged("");
-        m_searchMenu->close();
-
-    });
-    cpy->setDisconnectOnClear(connect(orig,&QAction::triggered,this,[this]{
-        searchLineEdit->setText("");
-        emit searchLineEdit->textChanged("");
-        m_searchMenu->close();
-
-    }));
-    m_searchMenu->addAction(cpy);
-    }
-
-
-// probono: Use Baloo API and add baloo search results to the Search menu; see below for a rudimentary non-API version
-QMimeDatabase mimeDatabase;
-if(searchString != "") {
-    // Prevent separator from ever being directly underneath the search box, because this breaks arrow key nagivation
-    if(m_appMenuModel->filteredActions().count()>0)
-        searchResults << m_searchMenu->addSeparator(); // The items in searchResults get removed when search results change
-    Baloo::Query query;
-    query.setSearchString(searchString);
-    query.setLimit(21);
-    Baloo::ResultIterator iter = query.exec();
-    int i=0;
-    bool showMore = false;
-    while (iter.next()) {
-        i++;
-        if(i == query.limit()) {
-            showMore = true;
-            break;
-        }
-        QMimeType mimeType;
-        mimeType = mimeDatabase.mimeTypeForFile(QFileInfo(iter.filePath()));
-        QAction *res = new QAction();
-        res->setText(iter.filePath().split("/").last());
-        res->setToolTip(iter.filePath());
-
-
-        // If there is a thumbnail, show it
-        QString IconCand = Thumbnail(QDir(iter.filePath()).absolutePath(), QCryptographicHash::Md5,Thumbnail::ThumbnailSizeNormal, nullptr).getIconPath();
-        // qDebug() << "#   ############################### thumbnail for" << QDir(iter.filePath()).absolutePath();
-        if(QFileInfo::exists(IconCand) == true) {
-            // qDebug() << "#   Found thumbnail" << IconCand;
-            res->setIcon(QIcon(IconCand));
-        } else {
-            // TODO: Request thumbnail; https://github.com/KDE/kio-extras/blob/master/thumbnail/thumbnail.cpp
-            // qDebug() << "#   Did not find thumbnail" << IconCand << "TODO: Request it from thumbnailer";
-            QIcon icon = QIcon::fromTheme(mimeType.iconName());
-            res->setIcon(icon);
-        }
-
-        res->setIconVisibleInMenu(true);
-        res->setProperty("path", iter.filePath());
-        connect(res,&QAction::triggered,this,[this, res]{
-            openBalooSearchResult(res);
+    const QStringList keys = m_appMenuModel->filteredActions().keys();
+    for(const QString &v : keys) {
+        QAction *orig = m_appMenuModel->filteredActions()[v];
+        CloneAction *cpy = new CloneAction(orig);
+        cpy->setText(v);
+        cpy->setShortcut(orig->shortcut());
+        cpy->setToolTip(orig->toolTip());
+        cpy->updateMe();
+        cpy->setShortcutContext(Qt::ApplicationShortcut);
+        orig->setShortcutContext(Qt::WindowShortcut);
+        searchResults << cpy;
+        connect(cpy,&QAction::triggered,this,[this]{
             searchLineEdit->setText("");
             emit searchLineEdit->textChanged("");
             m_searchMenu->close();
+
         });
+        cpy->setDisconnectOnClear(connect(orig,&QAction::triggered,this,[this]{
+            searchLineEdit->setText("");
+            emit searchLineEdit->textChanged("");
+            m_searchMenu->close();
 
-        m_searchMenu->addAction(res);
-        searchResults << res; // The items in searchResults get removed when search results change
-     }
-
-    if(showMore) {
-        QAction *a = new QAction();
-        searchResults << a; // The items in searchResults get removed when search results change
-        a->setText("...");
-        a->setDisabled(true);
-        m_searchMenu->addAction(a);
+        }));
+        m_searchMenu->addAction(cpy);
     }
-}
 
-// probono: query baloosearch and add baloo search results to the Search menu; see above for an API version
+
+    // probono: Use Baloo API and add baloo search results to the Search menu; see below for a rudimentary non-API version
+    QMimeDatabase mimeDatabase;
+    if(searchString != "") {
+        // Prevent separator from ever being directly underneath the search box, because this breaks arrow key nagivation
+        if(m_appMenuModel->filteredActions().count()>0)
+            searchResults << m_searchMenu->addSeparator(); // The items in searchResults get removed when search results change
+        Baloo::Query query;
+        query.setSearchString(searchString);
+        query.setLimit(21);
+        Baloo::ResultIterator iter = query.exec();
+        int i=0;
+        bool showMore = false;
+        while (iter.next()) {
+            i++;
+            if(i == query.limit()) {
+                showMore = true;
+                break;
+            }
+            QMimeType mimeType;
+            mimeType = mimeDatabase.mimeTypeForFile(QFileInfo(iter.filePath()));
+            QAction *res = new QAction();
+            res->setText(iter.filePath().split("/").last());
+            res->setToolTip(iter.filePath());
+
+
+            // If there is a thumbnail, show it
+            QString IconCand = Thumbnail(QDir(iter.filePath()).absolutePath(), QCryptographicHash::Md5,Thumbnail::ThumbnailSizeNormal, nullptr).getIconPath();
+            // qDebug() << "#   ############################### thumbnail for" << QDir(iter.filePath()).absolutePath();
+            if(QFileInfo::exists(IconCand) == true) {
+                // qDebug() << "#   Found thumbnail" << IconCand;
+                res->setIcon(QIcon(IconCand));
+            } else {
+                // TODO: Request thumbnail; https://github.com/KDE/kio-extras/blob/master/thumbnail/thumbnail.cpp
+                // qDebug() << "#   Did not find thumbnail" << IconCand << "TODO: Request it from thumbnailer";
+                QIcon icon = QIcon::fromTheme(mimeType.iconName());
+                res->setIcon(icon);
+            }
+
+            res->setIconVisibleInMenu(true);
+            res->setProperty("path", iter.filePath());
+            connect(res,&QAction::triggered,this,[this, res]{
+                openBalooSearchResult(res);
+                searchLineEdit->setText("");
+                emit searchLineEdit->textChanged("");
+                m_searchMenu->close();
+            });
+
+            m_searchMenu->addAction(res);
+            searchResults << res; // The items in searchResults get removed when search results change
+        }
+
+        if(showMore) {
+            QAction *a = new QAction();
+            searchResults << a; // The items in searchResults get removed when search results change
+            a->setText("...");
+            a->setDisabled(true);
+            m_searchMenu->addAction(a);
+        }
+    }
+
+    // probono: query baloosearch and add baloo search results to the Search menu; see above for an API version
 #if 0
     QProcess p;
     QString program = "baloosearch";
@@ -920,15 +898,15 @@ int number_of_enabled_actions = 0;
 const QList<QAction*> actions = m_searchMenu->actions();
 for (QAction *a : actions) {
     if(a->isEnabled())
-            number_of_enabled_actions++;
+        number_of_enabled_actions++;
 }
 // qDebug() << "probono: number_of_enabled_actions" << number_of_enabled_actions;
 // QUESITON: Unclear whether it is 2 or 3, depending on whether one menu action or one Baloo search result is there...
 if(number_of_enabled_actions == 2 || ( number_of_enabled_actions == 3 && m_appMenuModel->filteredActions().count()==1)) {
     searchEditingDone();
 } else {
-    auto evt = new QMouseEvent(QEvent::MouseMove, m_menuBar->actionGeometry(m_menuBar->actions().at(0)).center(), Qt::NoButton, Qt::NoButton, Qt::NoModifier);
-    QApplication::postEvent(m_menuBar, evt);
+auto evt = new QMouseEvent(QEvent::MouseMove, m_menuBar->actionGeometry(m_menuBar->actions().at(0)).center(), Qt::NoButton, Qt::NoButton, Qt::NoModifier);
+QApplication::postEvent(m_menuBar, evt);
 }
 
 m_appMenuModel->clearFilteredActions();
@@ -945,20 +923,20 @@ void AppMenuWidget::rebuildMenu()
 //doesn't work for https://github.com/helloSystem/Menu/issues/16
 //what does this even do??
 void AppMenuWidget::updateMenu() {
-if(!m_appMenuModel->menuAvailable()) {
-    int cnt = m_menuBar->actions().count();
-    QList<QAction*> remove;
-    for(int i=2;i<cnt;i++) {
-         remove.append(m_menuBar->actions().at(i));
+    if(!m_appMenuModel->menuAvailable()) {
+        int cnt = m_menuBar->actions().count();
+        QList<QAction*> remove;
+        for(int i=2;i<cnt;i++) {
+            remove.append(m_menuBar->actions().at(i));
+        }
+        for(QAction *r : remove) {
+            m_menuBar->removeAction(r);
+
+        }
+
+        emit menuAboutToBeImported(); // misnomer there is no menu
+        m_appMenuModel->invalidateMenu();
     }
-    for(QAction *r : remove) {
-         m_menuBar->removeAction(r);
-
-   }
-
-emit menuAboutToBeImported(); // misnomer there is no menu
-m_appMenuModel->invalidateMenu();
-}
 }
 
 void AppMenuWidget::toggleMaximizeWindow()
@@ -1164,105 +1142,105 @@ void AppMenuWidget::actionAbout()
 
 
 #if defined(Q_OS_FREEBSD)
-            // On FreeBSD, get information about the machine
-            QProcess p;
-            p.setProgram("kenv");
-            p.setArguments({"-q", "smbios.system.maker"});
-            p.start();
-            p.waitForFinished();
-            QString vendorname(p.readAllStandardOutput());
-            vendorname.replace("\n", "");
-            vendorname = vendorname.trimmed();
-            qDebug() << "vendorname:" << vendorname;
+        // On FreeBSD, get information about the machine
+        QProcess p;
+        p.setProgram("kenv");
+        p.setArguments({"-q", "smbios.system.maker"});
+        p.start();
+        p.waitForFinished();
+        QString vendorname(p.readAllStandardOutput());
+        vendorname.replace("\n", "");
+        vendorname = vendorname.trimmed();
+        qDebug() << "vendorname:" << vendorname;
 
-            p.setArguments({"-q", "smbios.system.product"});
-            p.start();
-            p.waitForFinished();
-            QString productname(p.readAllStandardOutput());
-            productname.replace("\n", "");
-            productname = productname.trimmed();
-            qDebug() << "systemname:" << productname;
-            msgBox->setText("<b>" + vendorname + " " + productname + "</b>");
+        p.setArguments({"-q", "smbios.system.product"});
+        p.start();
+        p.waitForFinished();
+        QString productname(p.readAllStandardOutput());
+        productname.replace("\n", "");
+        productname = productname.trimmed();
+        qDebug() << "systemname:" << productname;
+        msgBox->setText("<b>" + vendorname + " " + productname + "</b>");
 
-            p.setProgram("pkg");
-            p.setArguments({"info", "hello"});
-            p.start();
-            p.waitForFinished();
-            QString operatingsystem(p.readAllStandardOutput());
-            operatingsystem = operatingsystem.split("\n")[0].trimmed();
-            if(operatingsystem != "") {
-                // We are running on helloSystem
-                operatingsystem = operatingsystem.replace("hello-", "helloSystem ").replace("_", " (Build ") + ")";
-            } else {
-                // We are not running on helloSystem (e.g., on FreeBSD + helloDesktop)
-                operatingsystem = "helloDesktop (not running on helloSystem)";
-            }
+        p.setProgram("pkg");
+        p.setArguments({"info", "hello"});
+        p.start();
+        p.waitForFinished();
+        QString operatingsystem(p.readAllStandardOutput());
+        operatingsystem = operatingsystem.split("\n")[0].trimmed();
+        if(operatingsystem != "") {
+            // We are running on helloSystem
+            operatingsystem = operatingsystem.replace("hello-", "helloSystem ").replace("_", " (Build ") + ")";
+        } else {
+            // We are not running on helloSystem (e.g., on FreeBSD + helloDesktop)
+            operatingsystem = "helloDesktop (not running on helloSystem)";
+        }
 
-            p.setProgram("sysctl");
-            p.setArguments({"-n", "hw.model"});
-            p.start();
-            p.waitForFinished();
-            QString cpu(p.readAllStandardOutput());
-            cpu = cpu.trimmed();
-            cpu = cpu.replace("(R)", "®");
-            cpu = cpu.replace("(TM)", "™");
-            qDebug() << "cpu:" << cpu;
+        p.setProgram("sysctl");
+        p.setArguments({"-n", "hw.model"});
+        p.start();
+        p.waitForFinished();
+        QString cpu(p.readAllStandardOutput());
+        cpu = cpu.trimmed();
+        cpu = cpu.replace("(R)", "®");
+        cpu = cpu.replace("(TM)", "™");
+        qDebug() << "cpu:" << cpu;
 
-            p.setArguments({"-n", "hw.realmem"});
-            p.start();
-            p.waitForFinished();
-            QString memory(p.readAllStandardOutput().trimmed());
-            qDebug() << "memory:" << memory;
-            double m = memory.toDouble();
-            m = m/1024/1024/1024;
-            qDebug() << "m:" << m;
+        p.setArguments({"-n", "hw.realmem"});
+        p.start();
+        p.waitForFinished();
+        QString memory(p.readAllStandardOutput().trimmed());
+        qDebug() << "memory:" << memory;
+        double m = memory.toDouble();
+        m = m/1024/1024/1024;
+        qDebug() << "m:" << m;
 
-            p.setProgram("freebsd-version");
-            p.setArguments({"-k"});
-            p.start();
-            p.waitForFinished();
-            QString kernelVersion(p.readAllStandardOutput());
+        p.setProgram("freebsd-version");
+        p.setArguments({"-k"});
+        p.start();
+        p.waitForFinished();
+        QString kernelVersion(p.readAllStandardOutput());
 
-            p.setArguments({"-u"});
-            p.start();
-            p.waitForFinished();
-            QString userlandVersion(p.readAllStandardOutput());
+        p.setArguments({"-u"});
+        p.start();
+        p.waitForFinished();
+        QString userlandVersion(p.readAllStandardOutput());
 
-            QString icon = "/usr/local/share/icons/elementary-xfce/devices/128/computer-hello.png";
+        QString icon = "/usr/local/share/icons/elementary-xfce/devices/128/computer-hello.png";
 
-            // If we found a way to read dmi without needing to be root, we could show a notebook icon for notebooks...
-            // icon = "/usr/local/share/icons/elementary-xfce/devices/128/computer-laptop.png";
+        // If we found a way to read dmi without needing to be root, we could show a notebook icon for notebooks...
+        // icon = "/usr/local/share/icons/elementary-xfce/devices/128/computer-laptop.png";
 
-            // See https://github.com/openwebos/qt/blob/92fde5feca3d792dfd775348ca59127204ab4ac0/tools/qdbus/qdbusviewer/qdbusviewer.cpp#L477 for loading icon from resources
-            QString helloSystemInfo;
-            if(sha != "" && url != "" && build != "") {
-                helloSystemInfo = "</p>helloSystem build: "+ build +" for commit: <a href='" + url + "'>" + sha + "</a></p>";
-            } else if(sha != "" && url != "") {
-                helloSystemInfo = "</p>helloSystem commit: <a href='" + url + "'>" + sha + "</a></p>";
-            }
-            msgBox->setStandardButtons(QMessageBox::Close);
-            // msgBox->setStandardButtons(0); // Remove button. FIXME: This makes it impossible to close the window; why?
-            msgBox->setText("<center><img src=\"file://" + icon + "\"><h3>" + vendorname + " " + productname  + "</h3>" + \
-                            "<p>" + operatingsystem +"</p><small>" + \
-                            "<p>FreeBSD kernel version: " + kernelVersion +"<br>" + \
-                            "FreeBSD userland version: " + userlandVersion + "</p>" + \
-                            "<p>Processor: " + cpu +"<br>" + \
-                            "Memory: " + QString::number(m) +" GiB<br>" + \
-                            helloSystemInfo + \
-                            "<p><a href='file:///COPYRIGHT'>FreeBSD copyright information</a><br>" + \
-                            "Other components are subject to<br>their respective license terms</p>" + \
-                            "</small></center>");
+        // See https://github.com/openwebos/qt/blob/92fde5feca3d792dfd775348ca59127204ab4ac0/tools/qdbus/qdbusviewer/qdbusviewer.cpp#L477 for loading icon from resources
+        QString helloSystemInfo;
+        if(sha != "" && url != "" && build != "") {
+            helloSystemInfo = "</p>helloSystem build: "+ build +" for commit: <a href='" + url + "'>" + sha + "</a></p>";
+        } else if(sha != "" && url != "") {
+            helloSystemInfo = "</p>helloSystem commit: <a href='" + url + "'>" + sha + "</a></p>";
+        }
+        msgBox->setStandardButtons(QMessageBox::Close);
+        // msgBox->setStandardButtons(0); // Remove button. FIXME: This makes it impossible to close the window; why?
+        msgBox->setText("<center><img src=\"file://" + icon + "\"><h3>" + vendorname + " " + productname  + "</h3>" + \
+                        "<p>" + operatingsystem +"</p><small>" + \
+                        "<p>FreeBSD kernel version: " + kernelVersion +"<br>" + \
+                        "FreeBSD userland version: " + userlandVersion + "</p>" + \
+                        "<p>Processor: " + cpu +"<br>" + \
+                        "Memory: " + QString::number(m) +" GiB<br>" + \
+                        helloSystemInfo + \
+                        "<p><a href='file:///COPYRIGHT'>FreeBSD copyright information</a><br>" + \
+                        "Other components are subject to<br>their respective license terms</p>" + \
+                        "</small></center>");
 
 #else
         msgBox->setText(QString("<center><h3>helloDesktop</h3>"
-                        "<p>Running on an unsupported operating system<br>"
-                        "with reduced functionality</p>"
-                        "<small><p>The full desktop experience<br>"
-                        "can best be experienced on helloSystem<br>"
-                        "which helloDesktop is designed for</p>"
-                        ""
-                        "<a href='https://hellosystem.github.io'>https://hellosystem.github.io/</a><br>"
-                        "</small></center>"));
+                                "<p>Running on an unsupported operating system<br>"
+                                "with reduced functionality</p>"
+                                "<small><p>The full desktop experience<br>"
+                                "can best be experienced on helloSystem<br>"
+                                "which helloDesktop is designed for</p>"
+                                ""
+                                "<a href='https://hellosystem.github.io'>https://hellosystem.github.io/</a><br>"
+                                "</small></center>"));
 
 #endif
 

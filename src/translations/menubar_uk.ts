@@ -8,7 +8,7 @@
         <translation type="vanished">Пошук</translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="961"/>
+        <location filename="../appmenuwidget.cpp" line="1110"/>
         <source>About This Computer</source>
         <translation>Про цей Комп&apos;ютер</translation>
     </message>
@@ -21,32 +21,32 @@
         <translation type="vanished">Показати все</translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="401"/>
+        <location filename="../appmenuwidget.cpp" line="456"/>
         <source>System</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="436"/>
+        <location filename="../appmenuwidget.cpp" line="491"/>
         <source>Force Quit Application</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="440"/>
+        <location filename="../appmenuwidget.cpp" line="495"/>
         <source>Restart</source>
         <translation>Перезапустити</translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="442"/>
+        <location filename="../appmenuwidget.cpp" line="497"/>
         <source>Log Out</source>
         <translation>Вийти</translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="444"/>
+        <location filename="../appmenuwidget.cpp" line="499"/>
         <source>Shut Down</source>
         <translation>Вимкнути</translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="928"/>
+        <location filename="../appmenuwidget.cpp" line="1077"/>
         <source>About helloDesktop</source>
         <translation type="unfinished"></translation>
     </message>
@@ -143,13 +143,13 @@
 <context>
     <name>SystemMenu</name>
     <message>
-        <location filename="../appmenuwidget.cpp" line="77"/>
-        <location filename="../appmenuwidget.cpp" line="116"/>
+        <location filename="../appmenuwidget.cpp" line="80"/>
+        <location filename="../appmenuwidget.cpp" line="119"/>
         <source>About This Computer</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="116"/>
+        <location filename="../appmenuwidget.cpp" line="119"/>
         <source>About helloDesktop</source>
         <translation type="unfinished"></translation>
     </message>

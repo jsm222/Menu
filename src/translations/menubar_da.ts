@@ -11,7 +11,7 @@
 <context>
     <name>AppMenuWidget</name>
     <message>
-        <location filename="../appmenuwidget.cpp" line="961"/>
+        <location filename="../appmenuwidget.cpp" line="1110"/>
         <source>About This Computer</source>
         <translation>Om denne computer</translation>
     </message>
@@ -24,32 +24,32 @@
         <translation type="vanished">Gør alle synlige</translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="401"/>
+        <location filename="../appmenuwidget.cpp" line="456"/>
         <source>System</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="436"/>
+        <location filename="../appmenuwidget.cpp" line="491"/>
         <source>Force Quit Application</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="440"/>
+        <location filename="../appmenuwidget.cpp" line="495"/>
         <source>Restart</source>
         <translation>Genstart</translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="442"/>
+        <location filename="../appmenuwidget.cpp" line="497"/>
         <source>Log Out</source>
         <translation>Log ud</translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="444"/>
+        <location filename="../appmenuwidget.cpp" line="499"/>
         <source>Shut Down</source>
         <translation>Luk ned</translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="928"/>
+        <location filename="../appmenuwidget.cpp" line="1077"/>
         <source>About helloDesktop</source>
         <translation type="unfinished"></translation>
     </message>
@@ -139,13 +139,13 @@
 <context>
     <name>SystemMenu</name>
     <message>
-        <location filename="../appmenuwidget.cpp" line="77"/>
-        <location filename="../appmenuwidget.cpp" line="116"/>
+        <location filename="../appmenuwidget.cpp" line="80"/>
+        <location filename="../appmenuwidget.cpp" line="119"/>
         <source>About This Computer</source>
         <translation type="unfinished">Om denne computer</translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="116"/>
+        <location filename="../appmenuwidget.cpp" line="119"/>
         <source>About helloDesktop</source>
         <translation type="unfinished"></translation>
     </message>
