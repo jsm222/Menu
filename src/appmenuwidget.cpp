@@ -1091,14 +1091,12 @@ void AppMenuWidget::actionAbout()
                         "</small></center>");
 
         // Center window on screen
-        msgBox->setFixedWidth(350); // FIXME: Remove hardcoding; but need to be able to center on screen
-        msgBox->setFixedHeight(500); // FIXME: Same
-        QRect screenGeometry = QGuiApplication::screens().constFirst()->geometry();
-        int x = (screenGeometry.width()-msgBox->geometry().width()) / 2;
-        int y = (screenGeometry.height()-msgBox->geometry().height()) / 2;
-        msgBox->move(x, y);
+        QRect rec = QGuiApplication::screenAt(this->pos())->geometry();
+        QSize size = msgBox->sizeHint();
+        QPoint topLeft = QPoint((rec.width() / 2) - (size.width() / 2), (rec.height() / 2) - (size.height() / 2));
+        msgBox->setGeometry(QRect(topLeft, size));
 
-        msgBox->setStyleSheet("QWidget { padding-right: 20px }"); // FIXME: Desperate attempt to get the text really centered
+        msgBox->setStyleSheet("padding-right: 20px"); // FIXME: Desperate attempt to get the text really centered
 
         msgBox->setModal(false);
 
@@ -1245,12 +1243,10 @@ void AppMenuWidget::actionAbout()
 #endif
 
         // Center window on screen
-        // msgBox->setFixedWidth(350); // FIXME: Remove hardcoding; but need to be able to center on screen
-        // msgBox->setFixedHeight(500); // FIXME: Same
-        QRect screenGeometry = QGuiApplication::screens().constFirst()->geometry();
-        int x = (screenGeometry.width()-msgBox->geometry().width()) / 2;
-        int y = (screenGeometry.height()-msgBox->geometry().height()) / 2;
-        msgBox->move(x, y);
+        QRect rec = QGuiApplication::screenAt(this->pos())->geometry();
+        QSize size = msgBox->sizeHint();
+        QPoint topLeft = QPoint((rec.width() / 2) - (size.width() / 2), (rec.height() / 2) - (size.height() / 2));
+        msgBox->setGeometry(QRect(topLeft, size));
 
         msgBox->setStyleSheet("QWidget { padding-right: 20px }"); // FIXME: Desperate attempt to get the text really centered
 
