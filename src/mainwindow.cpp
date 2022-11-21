@@ -34,6 +34,7 @@
 #include <QScreen>
 #include <QMenu>
 #include <QLabel>
+#include <QStorageInfo>
 #include <xcb/xcb.h>
 #include <X11/Xlib.h>
 
@@ -112,11 +113,35 @@ MainWindow::MainWindow(QWidget *parent)
     //m_MainWidget->raise(); // probono: Trying to give typing focus to the search box that is in there. Needed? Does not seem tp hurt
 
     connect(m_MainWidget->getAppMenuWidget(), &AppMenuWidget::menuAboutToBeImported, this, &MainWindow::hideApplicationName);
+
+    // Periodically check if disks are full
+    // We do such checks in Menu because Menu is assumed to be always running
+    // TODO: Further similar system health checks
+    MainWindow::checkDiskSpace();
+    QTimer *checkDiskSpaceTimer = new QTimer(this);
+    checkDiskSpaceTimer->setInterval(1000*60); // Once a minute
+    connect(checkDiskSpaceTimer, &QTimer::timeout, this, &MainWindow::checkDiskSpace);
+    checkDiskSpaceTimer->start();
+
 }
 
 MainWindow::~MainWindow()
 {
 
+}
+
+void MainWindow::checkDiskSpace(){
+    for(const QStorageInfo storage : QStorageInfo::mountedVolumes()){
+        if (storage.isReadOnly() || storage.bytesTotal() < 1024 * 10 || storage.fileSystemType() == "nullfs")
+            continue;
+        float usedSize = float(storage.bytesTotal() - storage.bytesAvailable())/float(storage.bytesTotal());
+        // Warn if any relevant disk is >95% full
+        if(usedSize > 0.95) {
+            QMessageBox::warning(nullptr, storage.rootPath(),
+                                 tr("Your disk '%1' is almost full. %2 percent left." )
+                                 .arg(storage.rootPath()).arg(100 - qRound(usedSize*100)));
+        }
+    }
 }
 
 void MainWindow::paintEvent(QPaintEvent *e)

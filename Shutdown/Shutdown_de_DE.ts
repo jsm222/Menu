@@ -81,7 +81,7 @@
     <message>
         <location filename="mainwindow.ui" line="49"/>
         <location filename="../build/Shutdown/Shutdown_autogen/include/ui_mainwindow.h" line="103"/>
-        <location filename="../src/mainwindow.cpp" line="49"/>
+        <location filename="../src/mainwindow.cpp" line="50"/>
         <source>Log Out</source>
         <translation type="unfinished"></translation>
     </message>
@@ -116,8 +116,13 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="50"/>
+        <location filename="../src/mainwindow.cpp" line="51"/>
         <source>About This Computer</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/mainwindow.cpp" line="139"/>
+        <source>Your disk &apos;%1&apos; is almost full. %2 percent left.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
