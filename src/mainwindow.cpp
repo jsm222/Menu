@@ -227,6 +227,10 @@ QString MainWindow::showApplicationName(const QString &arg)
 {
     qDebug() << "showApplicationName" << arg << "got called";
 
+    if(arg == "Filer"){
+        return QString("showApplicationName(\"%1\") ignored for Filer").arg(arg); // Return to calling application via D-Bus
+    }
+
     // Find out whether we already have a window open from this application;
     // in which case we don't show the application name
     bool alreadyRunningApp = false;
