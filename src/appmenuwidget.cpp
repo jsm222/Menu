@@ -322,15 +322,49 @@ void AppMenuWidget::findAppsInside(QStringList locationsContainingApps, QMenu *m
             }
             else if (file.fileName().endsWith(".desktop")) {
                 // .desktop file
-                qDebug() << "# Found" << file.fileName() << "TODO: Parse it for Exec=";
+                qDebug() << "# Found" << file.fileName();
                 QFileInfo fi(file.fileName());
                 QString base = fi.completeBaseName(); // baseName() gets it wrong e.g., when there are dots in version numbers
                 QStringList executableAndArgs = {fi.absoluteFilePath()};
-                QAction *action = submenu->addAction(base);
-                action->setToolTip("TODO: Convert " + file.absoluteFilePath() + " to an .app bundle");
-                action->setProperty("path", file.absoluteFilePath());
-                action->setDisabled(true); // As a reminder that we consider those legacy and encourage people to swtich
-                // Finding the icon file is much more involved with XDG than with our simplified .app bundles, so it is not implemented here
+                QSettings desktopFile(file.absoluteFilePath(), QSettings::IniFormat);
+                QString noDisplayCand = desktopFile.value("Desktop Entry/NoDisplay").toString();
+                if(noDisplayCand != "true") {
+                    QString name = desktopFile.value("Desktop Entry/Name").toString();
+                    QString IconCand = desktopFile.value("Desktop Entry/Icon").toString();
+                    if(name.isEmpty())
+                        name = base;
+                    QAction *action = submenu->addAction(name);
+                    // Finding the icon file is way too involved with XDG, but we are not implementing all edge cases
+                    // If you were doubting that XDG standards are overly complex, here is the proof...
+                    action->setIcon(QIcon::fromTheme(IconCand));
+                    QStringList iconSuffixes = {"", ".png", ".xpm", ".jpg", ".svg", ".icns"};
+                    if(IconCand.contains("/")) {
+                        if(QFileInfo::exists(IconCand)){
+                            action->setIcon(QIcon(IconCand));
+                        }
+                    } else if(QFileInfo("/usr/local/share/" + IconCand + "/icons/" + IconCand + ".png").exists()){
+                        for(const QString iconSuffix : iconSuffixes) {
+                        action->setIcon(QIcon("/usr/local/share/" + IconCand + "/icons/" + IconCand + iconSuffix));
+                        }
+                    } else {
+                        for(const QString iconSuffix : iconSuffixes) {
+                            for (QString pixmapsPath : QStandardPaths::standardLocations(QStandardPaths::GenericDataLocation)) {
+                                QString iconCandFile = pixmapsPath + "/pixmaps/" + IconCand + iconSuffix;
+                                qDebug() << iconCandFile;
+                                if (QFileInfo::exists(iconCandFile)){
+                                    qDebug() << "Found!";
+                                    action->setIcon(QIcon(iconCandFile));
+                                }
+                            }
+                        }
+                    }
+
+                    action->setIconVisibleInMenu(true); // So that an icon is shown even though the theme sets Qt::AA_DontShowIconsInMenus
+                    // action->setToolTip("TODO: Convert " + file.absoluteFilePath() + " to an .app bundle");
+                    action->setProperty("path", file.absoluteFilePath());
+                    // action->setDisabled(true); // As a reminder that we consider those legacy and encourage people to swtich
+                }
+
             }
             else if (file.fileName().endsWith(".AppImage") || file.fileName().endsWith(".appimage")) {
                 // .desktop file
