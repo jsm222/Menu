@@ -58,6 +58,7 @@ public:
         Passive, Active, NeedsAttention
     };
 
+    QImage convertToGrayScale(const QImage &srcImage);
 public slots:
     void newIcon();
     void newAttentionIcon();

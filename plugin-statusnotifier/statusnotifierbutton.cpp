@@ -105,6 +105,24 @@ void StatusNotifierButton::newAttentionIcon()
     });
 }
 
+QImage StatusNotifierButton::convertToGrayScale(const QImage &srcImage) {
+     // Convert to 32bit pixel format
+     QImage dstImage = srcImage.convertToFormat(srcImage.hasAlphaChannel() ?
+              QImage::Format_ARGB32 : QImage::Format_RGB32);
+
+     unsigned int *data = (unsigned int*)dstImage.bits();
+     int pixelCount = dstImage.width() * dstImage.height();
+
+     // Convert each pixel to grayscale
+     for(int i = 0; i < pixelCount; ++i) {
+        int val = qGray(*data);
+        *data = qRgba(val, val, val, qAlpha(*data));
+        ++data;
+     }
+
+     return dstImage;
+  }
+
 void StatusNotifierButton::refetchIcon(Status status, const QString& themePath)
 {
     QString nameProperty, pixmapProperty;
@@ -128,15 +146,19 @@ void StatusNotifierButton::refetchIcon(Status status, const QString& themePath)
         QIcon nextIcon;
         if (!iconName.isEmpty())
         {
-            if (QIcon::hasThemeIcon(iconName))
-                nextIcon = QIcon::fromTheme(iconName);
+            if (QIcon::hasThemeIcon(iconName)){
+                // nextIcon = QIcon::fromTheme(iconName);
+                nextIcon.addPixmap(QPixmap::fromImage(convertToGrayScale(QIcon::fromTheme(iconName).pixmap(16, 16).toImage())));
+
+            }
             else
             {
                 QDir themeDir(themePath);
                 if (themeDir.exists())
                 {
                     if (themeDir.exists(iconName + QStringLiteral(".png")))
-                        nextIcon.addFile(themeDir.filePath(iconName + QStringLiteral(".png")));
+                        // nextIcon.addFile(themeDir.filePath(iconName + QStringLiteral(".png")));
+                        nextIcon.addPixmap(QPixmap::fromImage(convertToGrayScale(QImage(themeDir.filePath(iconName + QStringLiteral(".png"))))));
 
                     if (themeDir.cd(QStringLiteral("hicolor")) || (themeDir.cd(QStringLiteral("icons")) && themeDir.cd(QStringLiteral("hicolor"))))
                     {
@@ -148,7 +170,9 @@ void StatusNotifierButton::refetchIcon(Status status, const QString& themePath)
                             {
                                 QString file = themeDir.absolutePath() + QLatin1Char('/') + dir + QLatin1Char('/') + innerDir + QLatin1Char('/') + iconName + QStringLiteral(".png");
                                 if (QFile::exists(file))
-                                    nextIcon.addFile(file);
+                                    // nextIcon.addFile(file);
+                                    nextIcon.addPixmap(QPixmap::fromImage(convertToGrayScale(QImage(file))));
+
                             }
                         }
                     }
@@ -190,7 +214,7 @@ void StatusNotifierButton::refetchIcon(Status status, const QString& themePath)
                         for (const uchar *src = image.constBits(); src < end; src += 4, dest += 4)
                             qToUnaligned(qToBigEndian<quint32>(qFromUnaligned<quint32>(src)), dest);
 
-                        nextIcon.addPixmap(QPixmap::fromImage(image));
+                        nextIcon.addPixmap(QPixmap::fromImage(convertToGrayScale(image)));
                     }
                 }
 
