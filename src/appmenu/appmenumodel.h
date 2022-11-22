@@ -65,9 +65,16 @@ public:
 
     }
 
+    /* Workaround for e.g., Falkon History menu
+     * This leads to flickering menus; the alternative below is most likely
+     * not the correct solution, but it does remove the flicker and it does allow
+     * one to see the History menu in Falkon; the correct fix would probably be be
+     * something like this but with a check to see whether the mouse is actually
+     * still in the same menu at the time when the reshow happens
+     * https://github.com/helloSystem/Menu/issues/117
     QMenu *createMenu(QWidget *parent) override {
         HMenu * menu = new HMenu(parent);
-        /* make some workarounds for focus loss which  calls closeAllPoupus(); */
+        // Make some workarounds for focus loss which  calls closeAllPoupus();
         if(parent && qobject_cast<QMenuBar*>(parent->parent())) {
             connect(menu,&QMenu::aboutToShow,this,[this]{
                qobject_cast<HMenu*>(sender())->lastOpened = std::chrono::high_resolution_clock::now();
@@ -80,17 +87,23 @@ public:
                    reshow->blockSignals(true);
                    qobject_cast<QMenuBar*>(reshow->parent()->parent())->setActiveAction(reshow->menuAction());
                    reshow->blockSignals(false);
-
-
                });
             }
-
             });
-
         }
         return menu;
     }
+    */
 
+    QMenu *createMenu(QWidget *parent) override {
+        HMenu * menu = new HMenu(parent);
+        // Workaround for e.g., Falkon History menu: focus loss which calls closeAllPoupus(); FIXME: Do proper fix
+        // https://github.com/helloSystem/Menu/issues/117
+        connect(menu,&QMenu::aboutToShow,this,[this]{
+            qobject_cast<HMenu*>(sender())->blockSignals(true);
+        });
+        return menu;
+    }
 
 };
 class AppMenuModel : public QAbstractItemModel, public QAbstractNativeEventFilter
