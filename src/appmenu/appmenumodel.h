@@ -1,4 +1,4 @@
-    /******************************************************************
+/******************************************************************
  * Copyright 2016 Chinmoy Ranjan Pradhan <chinmoyrp65@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
@@ -54,6 +54,7 @@ protected:
      void actionEvent(QActionEvent *e) override;
 private:
      QLocale::Language m_locale_lang;
+
 };
 class HDBusMenuImporter : public DBusMenuImporter
 {
@@ -62,48 +63,55 @@ public:
     : DBusMenuImporter(service, path, type,parent)
 
     {
+        m_reshowTimer = new QTimer();
 
+        connect(m_reshowTimer,&QTimer::timeout,this,[this] {
+        if(recent) {
+                    recent->blockSignals(true);
+                    qDebug() << "reshow" <<__LINE__ <<recent->title();
+
+
+                    qobject_cast<QMenuBar*>(recent->parent()->parent())->setActiveAction(recent->menuAction());
+                    recent->blockSignals(false);
+                    recent=nullptr;
+        }
+
+
+
+    });
     }
 
-    /* Workaround for e.g., Falkon History menu
-     * This leads to flickering menus; the alternative below is most likely
-     * not the correct solution, but it does remove the flicker and it does allow
-     * one to see the History menu in Falkon; the correct fix would probably be be
-     * something like this but with a check to see whether the mouse is actually
-     * still in the same menu at the time when the reshow happens
-     * https://github.com/helloSystem/Menu/issues/117
+    /* Workaround for e.g., Falkon History menu */
     QMenu *createMenu(QWidget *parent) override {
         HMenu * menu = new HMenu(parent);
         // Make some workarounds for focus loss which  calls closeAllPoupus();
         if(parent && qobject_cast<QMenuBar*>(parent->parent())) {
-            connect(menu,&QMenu::aboutToShow,this,[this]{
-               qobject_cast<HMenu*>(sender())->lastOpened = std::chrono::high_resolution_clock::now();
+            connect(menu,&QMenu::aboutToShow,this,[this] {
+                recent = qobject_cast<HMenu*>(sender());
+                qobject_cast<HMenu*>(sender())->lastOpened = std::chrono::high_resolution_clock::now();
+                m_reshowTimer->stop();
+
             });
-            connect(menu,&QMenu::aboutToHide,this,[this]{
+            connect(menu,&QMenu::aboutToHide,this,[this] {
                 HMenu *reshow = qobject_cast<HMenu*>(sender());
+
+                m_reshowTimer->setSingleShot(true);
+                m_reshowTimer->setInterval(100); //if you show another menu within 100ms the reshow action is canceled.
                 std::chrono::duration<double,std::milli> dur = std::chrono::high_resolution_clock::now()-reshow->lastOpened;
-                if(dur.count()<250) {
-               QTimer::singleShot(10,this,[this,reshow] {
-                   reshow->blockSignals(true);
-                   qobject_cast<QMenuBar*>(reshow->parent()->parent())->setActiveAction(reshow->menuAction());
-                   reshow->blockSignals(false);
-               });
-            }
+
+
+
+
+            if(dur.count()<350) //start reshow timer on fastly reclosed menus
+                    m_reshowTimer->start();
             });
         }
         return menu;
     }
-    */
 
-    QMenu *createMenu(QWidget *parent) override {
-        HMenu * menu = new HMenu(parent);
-        // Workaround for e.g., Falkon History menu: focus loss which calls closeAllPoupus(); FIXME: Do proper fix
-        // https://github.com/helloSystem/Menu/issues/117
-        connect(menu,&QMenu::aboutToShow,this,[this]{
-            qobject_cast<HMenu*>(sender())->blockSignals(true);
-        });
-        return menu;
-    }
+public:
+    QTimer *m_reshowTimer;
+    HMenu* recent;
 
 };
 class AppMenuModel : public QAbstractItemModel, public QAbstractNativeEventFilter
