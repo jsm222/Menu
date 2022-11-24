@@ -344,7 +344,7 @@ void AppMenuWidget::findAppsInside(QStringList locationsContainingApps, QMenu *m
                         }
                     } else if(QFileInfo("/usr/local/share/" + IconCand + "/icons/" + IconCand + ".png").exists()){
                         for(const QString iconSuffix : iconSuffixes) {
-                        action->setIcon(QIcon("/usr/local/share/" + IconCand + "/icons/" + IconCand + iconSuffix));
+                            action->setIcon(QIcon("/usr/local/share/" + IconCand + "/icons/" + IconCand + iconSuffix));
                         }
                     } else {
                         for(const QString iconSuffix : iconSuffixes) {
@@ -877,8 +877,9 @@ void AppMenuWidget::searchMenu() {
         }
     }
 
+/*
     // probono: query baloosearch and add baloo search results to the Search menu; see above for an API version
-#if 0
+
     QProcess p;
     QString program = "baloosearch";
     QStringList arguments;
@@ -924,28 +925,26 @@ void AppMenuWidget::searchMenu() {
             m_searchMenu->addAction(a);
         }
     }
-}
-#endif
+*/
 
-// If there is only one search result, select it
-int number_of_enabled_actions = 0;
-const QList<QAction*> actions = m_searchMenu->actions();
-for (QAction *a : actions) {
-    if(a->isEnabled())
-        number_of_enabled_actions++;
-}
-// qDebug() << "probono: number_of_enabled_actions" << number_of_enabled_actions;
-// QUESITON: Unclear whether it is 2 or 3, depending on whether one menu action or one Baloo search result is there...
-if(number_of_enabled_actions == 2 || ( number_of_enabled_actions == 3 && m_appMenuModel->filteredActions().count()==1)) {
-    searchEditingDone();
-} else {
-auto evt = new QMouseEvent(QEvent::MouseMove, m_menuBar->actionGeometry(m_menuBar->actions().at(0)).center(), Qt::NoButton, Qt::NoButton, Qt::NoModifier);
-QApplication::postEvent(m_menuBar, evt);
-}
-
-m_appMenuModel->clearFilteredActions();
-
-
+    // If there is only one search result, select it
+    int number_of_enabled_actions = 0;
+    const QList<QAction*> actions = m_searchMenu->actions();
+    for (QAction *a : actions) {
+        if(a->isEnabled())
+            number_of_enabled_actions++;
+    }
+    qDebug() << "probono: number_of_enabled_actions" << number_of_enabled_actions;
+    // QUESITON: Unclear whether it is 2 or 3, depending on whether one menu action or one Baloo search result is there...
+    if(number_of_enabled_actions == 2 || ( number_of_enabled_actions == 3 && m_appMenuModel->filteredActions().count()==1)) {
+        QKeyEvent *event = new QKeyEvent(QEvent::KeyPress, Qt::Key_Down, Qt::NoModifier);
+        // searchEditingDone();
+        QCoreApplication::sendEvent(searchLineEdit, event);
+    } else {
+        auto evt = new QMouseEvent(QEvent::MouseMove, m_menuBar->actionGeometry(m_menuBar->actions().at(0)).center(), Qt::NoButton, Qt::NoButton, Qt::NoModifier);
+        QApplication::postEvent(m_menuBar, evt);
+    }
+    m_appMenuModel->clearFilteredActions();
 }
 
 void AppMenuWidget::rebuildMenu()
