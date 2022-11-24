@@ -131,9 +131,9 @@ void AppMenuWidget::keyPressEvent(QKeyEvent * event) {
 }
 
 void SearchLineEdit::keyPressEvent(QKeyEvent * event) {
-    if(event->key() == Qt::Key_Down) {
-
+    if(event->key() == Qt::Key_Down || event->key() == Qt::Key_Up) {
         emit editingFinished();
+        QCoreApplication::sendEvent(parent(),event);
     } else {
         QCoreApplication::sendEvent(parent(),event);
     }
