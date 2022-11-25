@@ -772,16 +772,12 @@ void AppMenuWidget::searchMenu() {
         return 0;
     };
 
-    // Prevent separator from ever being directly underneath the search box, because this breaks arrow key nagivation
-    if(m_appMenuModel->filteredActions().count()>0)
-        searchResults << m_searchMenu->addSeparator(); // The items in searchResults get removed when search results change
+    searchResults << m_searchMenu->addSeparator(); // The items in searchResults get removed when search results change
 
     iterate(QModelIndex(),m_appMenuModel,setResultVisbileMbar);
     m_isSearching=false;
 
-    // Prevent separator from ever being directly underneath the search box, because this breaks arrow key nagivation
-    if(m_appMenuModel->filteredActions().count()>0)
-        searchResults << m_searchMenu->addSeparator(); // The items in searchResults get removed when search results change
+    searchResults << m_searchMenu->addSeparator(); // The items in searchResults get removed when search results change
 
     QList<QMenu*> menus;
     menus << m_systemMenu;
@@ -820,9 +816,7 @@ void AppMenuWidget::searchMenu() {
     // probono: Use Baloo API and add baloo search results to the Search menu; see below for a rudimentary non-API version
     QMimeDatabase mimeDatabase;
     if(searchString != "") {
-        // Prevent separator from ever being directly underneath the search box, because this breaks arrow key nagivation
-        if(m_appMenuModel->filteredActions().count()>0)
-            searchResults << m_searchMenu->addSeparator(); // The items in searchResults get removed when search results change
+        searchResults << m_searchMenu->addSeparator(); // The items in searchResults get removed when search results change
         Baloo::Query query;
         query.setSearchString(searchString);
         query.setLimit(21);
