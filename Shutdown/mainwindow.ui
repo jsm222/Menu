@@ -20,7 +20,10 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string> </string>
+   <string/>
+  </property>
+  <property name="windowIcon">
+   <iconset theme="exit"/>
   </property>
   <property name="unifiedTitleAndToolBarOnMac">
    <bool>false</bool>
