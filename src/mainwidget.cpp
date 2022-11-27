@@ -64,7 +64,7 @@ MainWidget::MainWidget(QWidget *parent)
     windowsWidget->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Expanding); // Naming is counterintuitive. "Maximum" keeps its size to a minimum! Need "Expanding" in y direction so that font will be centered
     m_windowsLayout->setMargin(0);
 
-    m_controlCenterLayout->setSpacing(10);
+    m_controlCenterLayout->setSpacing(6);
 
     QHBoxLayout *layout = new QHBoxLayout;
     layout->setAlignment(Qt::AlignCenter); // Center QHBoxLayout vertically
@@ -72,10 +72,10 @@ MainWidget::MainWidget(QWidget *parent)
     layout->addWidget(m_appMenuWidget); // Main menu including Action Search
 
     layout->addWidget(statusnotifierWidget); // Tray applications
-    layout->addSpacing(10);
+    layout->addSpacing(6);
 
     layout->addWidget(dateTimeWidget);
-    // layout->addSpacing(10);
+    // layout->addSpacing(6);
 
     layout->addWidget(windowsWidget);
     // layout->addSpacing(5); // Right edge of the screen
