@@ -250,7 +250,7 @@ void AppMenuWidget::findAppsInside(QStringList locationsContainingApps, QMenu *m
         int numberOfAppsInDirectory = dir.entryList(nameFilter).length();
         QMenu *submenu;
 
-        if(directory.endsWith(".app") == false && directory.endsWith(".AppDir") == false && numberOfAppsInDirectory > 0) {
+        if(directory.toLower().endsWith(".app") == false && directory.toLower().endsWith(".AppDir") == false && numberOfAppsInDirectory > 0) {
             // qDebug() << "# Descending into" << directory;
             QStringList locationsToBeChecked = {directory};
             // submenu = m_systemMenu->addMenu(base); // TODO: Use this once we have nested submenus rather than flat ones with '→'
@@ -259,7 +259,11 @@ void AppMenuWidget::findAppsInside(QStringList locationsContainingApps, QMenu *m
 
             // https://github.com/helloSystem/Menu/issues/15
             // probono: Watch this directory for changes and if we detect any, rebuild the menu
-            watcher->addPath(directory);
+            // probono: Prevent crashes due to no longer existing directories
+            if (!watcher->directories().contains(directory) && QFileInfo(directory).isDir()) {
+                qDebug() << "Start watching" << directory;
+                watcher->addPath(directory);
+            }
 
             submenu->setToolTip(directory);
             submenu->setTitle(directory.remove(0, 1).replace("/", " → "));
@@ -414,11 +418,11 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
     : QWidget(parent),
       m_typingTimer(new QTimer(this))
 {
-    // probono: Reload menu when something changed in a watched directory; FIXME: This is not functional yet
+    // probono: Reload menu when something changed in a watched directory
     // https://github.com/helloSystem/Menu/issues/15
     watcher = new QFileSystemWatcher(this);
-    // watcher->connect(watcher, SIGNAL(directoryChanged(QString)), this, SLOT(updateMenu())); // We need a slot that rebuilds the menu
-    // connect(watcher, SIGNAL(directoryChanged(QString)), SLOT(rebuildMenu()));                // We need a slot that rebuilds the menu
+
+    connect(watcher, SIGNAL(directoryChanged(QString)), SLOT(rebuildMenu()));
 
     QHBoxLayout *layout = new QHBoxLayout;
     layout->setAlignment(Qt::AlignCenter); // Center QHBoxLayout vertically
@@ -942,9 +946,10 @@ void AppMenuWidget::searchMenu() {
 }
 
 void AppMenuWidget::rebuildMenu()
-{
+{   qDebug() << "AppMenuWidget::rebuildMenu() called";
+    watcher->removePaths(watcher->directories()); // probono: Prevent crashes due to no longer existing directories
     qobject_cast<MainWidget*>(parent())->rebuildSystemMenu();
-    qDebug() << "AppMenuWidget::rebuildMenu() called";
+
 }
 
 //doesn't work for https://github.com/helloSystem/Menu/issues/16
