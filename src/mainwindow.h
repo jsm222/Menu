@@ -35,7 +35,7 @@ public:
 
 public slots:
     QString showApplicationName(const QString &arg);
-    void hideApplicationName();
+    void stopShowingApplicationName();
 
 protected:
     void paintEvent(QPaintEvent *e) override;

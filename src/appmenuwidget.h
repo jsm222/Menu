@@ -98,7 +98,7 @@ protected:
 
 private:
     bool m_isSearching=false;
-
+    QStringList watchedLocations;
     bool isAcceptWindow(WId id);
     void delayUpdateActiveWindow();
     void onActiveWindowChanged();
@@ -111,7 +111,7 @@ private:
 public slots:
 
     void rebuildMenu();
-    void findAppsInside(QStringList locationsContainingApps, QMenu *m_systemMenu,  QFileSystemWatcher *watcher);
+    void findAppsInside(QStringList locationsContainingApps);
     void actionAbout();
     void actionLaunch(QAction *action);
     void openBalooSearchResult(QAction *action);
@@ -133,7 +133,7 @@ private:
 
 /// For System Main Menu.
 private:
-    QMenu *m_systemMenu;
+     QMenu *m_systemMenu;
      bool m_searchMenuOpened=false;
      QMenu *m_searchMenu;
      QList<QAction *> searchResults;

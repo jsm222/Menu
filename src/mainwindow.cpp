@@ -112,7 +112,9 @@ MainWindow::MainWindow(QWidget *parent)
     //this->activateWindow(); // probono: Ensure that we have the focus when menu is launched so that one can enter text in the search box
     //m_MainWidget->raise(); // probono: Trying to give typing focus to the search box that is in there. Needed? Does not seem tp hurt
 
-    connect(m_MainWidget->getAppMenuWidget(), &AppMenuWidget::menuAboutToBeImported, this, &MainWindow::hideApplicationName);
+    connect(m_MainWidget->getAppMenuWidget(), &AppMenuWidget::menuAboutToBeImported, this, &MainWindow::stopShowingApplicationName);
+    // probono: The following is also needed, since the above does not work reliably enough all the time
+    connect(KWindowSystem::self(), &KWindowSystem::activeWindowChanged, this, &MainWindow::stopShowingApplicationName);
 
     // Periodically check if disks are full
     // We do such checks in Menu because Menu is assumed to be always running
@@ -287,14 +289,14 @@ QString MainWindow::showApplicationName(const QString &arg)
         applicationStartingLabel->setText(arg.split("/").last());
         applicationStartingLabel->show();
         // applicationStartingLabel->setVisible(true);
-        QTimer::singleShot(30000, this, SLOT(hideApplicationName()));
+        QTimer::singleShot(30000, this, SLOT(stopShowingApplicationName()));
         return QString("showApplicationName(\"%1\") got executed").arg(arg); // Return to calling application via D-Bus
     } else {
         return QString("showApplicationName(\"%1\") ignored, an application at this path is already running").arg(arg); // Return to calling application via D-Bus
     }
 }
 
-void MainWindow::hideApplicationName()
+void MainWindow::stopShowingApplicationName()
 {
     qDebug()<< __func__;
     MainWindow::applicationStartingLabel->hide();

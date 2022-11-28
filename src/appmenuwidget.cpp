@@ -80,7 +80,6 @@ public:
         qCmdAbout(tr("About This Computer")),
         alt(false)
     {
-        connect(&qCmdAbout, SIGNAL(triggered()), this, SLOT(AppMenuWidget::actionAbout()));
         addAction(&qCmdAbout);
     }
 protected:
@@ -234,7 +233,7 @@ public:
     }
 };
 
-void AppMenuWidget::findAppsInside(QStringList locationsContainingApps, QMenu *m_systemMenu, QFileSystemWatcher *watcher)
+void AppMenuWidget::findAppsInside(QStringList locationsContainingApps)
 // probono: Check locationsContainingApps for applications and add them to the m_systemMenu.
 // TODO: Nested submenus rather than flat ones with '→'
 // This code is similar to the code in the 'launch' command
@@ -259,10 +258,18 @@ void AppMenuWidget::findAppsInside(QStringList locationsContainingApps, QMenu *m
 
             // https://github.com/helloSystem/Menu/issues/15
             // probono: Watch this directory for changes and if we detect any, rebuild the menu
-            // probono: Prevent crashes due to no longer existing directories
-            if (!watcher->directories().contains(directory) && QFileInfo(directory).isDir()) {
+            if (!watchedLocations.contains(directory) && QFileInfo(directory).isDir()) {
                 qDebug() << "Start watching" << directory;
-                watcher->addPath(directory);
+                watchedLocations.append(directory);
+                // probono: Without the next two lines, we get crashes
+                // when we open a watched directory. Qt bug?
+                watcher->~QFileSystemWatcher(); // probono: This is a crash workaround
+                watcher = new QFileSystemWatcher(); // probono: This is a crash workaround
+                QStringList failedToWatch = watcher->addPaths(watchedLocations);
+                if(failedToWatch.length() > 0) {
+                    qDebug() << "failedToWatch! Now a crash is imminent?";
+                    qDebug() << "failedToWatch:" << failedToWatch;
+                }
             }
 
             submenu->setToolTip(directory);
@@ -392,7 +399,7 @@ void AppMenuWidget::findAppsInside(QStringList locationsContainingApps, QMenu *m
             else if (locationsContainingApps.contains(candidate) == false && file.isDir() && candidate.endsWith("/..") == false && candidate.endsWith("/.") == false && candidate.endsWith(".app") == false && candidate.endsWith(".AppDir") == false) {
                 // qDebug() << "# Found" << file.fileName() << ", a directory that is not an .app bundle nor an .AppDir";
                 QStringList locationsToBeChecked({candidate});
-                findAppsInside(locationsToBeChecked, m_systemMenu, watcher);
+                findAppsInside(locationsToBeChecked);
             }
         }
     }
@@ -416,12 +423,11 @@ void iterate(const QModelIndex & index, const QAbstractItemModel * model,
 
 AppMenuWidget::AppMenuWidget(QWidget *parent)
     : QWidget(parent),
+      watcher(new QFileSystemWatcher(this)),
       m_typingTimer(new QTimer(this))
 {
     // probono: Reload menu when something changed in a watched directory
     // https://github.com/helloSystem/Menu/issues/15
-    watcher = new QFileSystemWatcher(this);
-
     connect(watcher, SIGNAL(directoryChanged(QString)), SLOT(rebuildMenu()));
 
     QHBoxLayout *layout = new QHBoxLayout;
@@ -524,7 +530,7 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
     locationsContainingApps.append(QDir::homePath() + "/.bin");
     locationsContainingApps.append("/Applications");
     locationsContainingApps.removeDuplicates(); // Make unique
-    findAppsInside(locationsContainingApps, m_systemMenu, watcher);
+    findAppsInside(locationsContainingApps);
     m_systemMenu->addSeparator();
     QAction *forceQuitAction = m_systemMenu->addAction(tr("Force Quit Application"));
     connect(forceQuitAction, SIGNAL(triggered()), this, SLOT(actionForceQuit()));
@@ -947,7 +953,6 @@ void AppMenuWidget::searchMenu() {
 
 void AppMenuWidget::rebuildMenu()
 {   qDebug() << "AppMenuWidget::rebuildMenu() called";
-    watcher->removePaths(watcher->directories()); // probono: Prevent crashes due to no longer existing directories
     qobject_cast<MainWidget*>(parent())->rebuildSystemMenu();
 
 }
