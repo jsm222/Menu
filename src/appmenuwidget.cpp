@@ -1376,8 +1376,14 @@ void AppMenuWidget::actionLaunch(QAction *action)
     // Setting a busy cursor in this way seems only to affect the own application's windows
     // rather than the full screen, which is why it is not suitable for this application
     // QApplication::setOverrideCursor(Qt::WaitCursor);
-    QStringList pathToBeLaunched = {action->property("path").toString()};
-    QProcess::startDetached("launch", pathToBeLaunched);
+    QString pathToBeLaunched = action->property("path").toString();
+    if (QApplication::keyboardModifiers()){
+        // Just show the file in the file manager when a modifier key is pressed
+        QDBusInterface interface("org.freedesktop.FileManager1", "/org/freedesktop/FileManager1", "org.freedesktop.FileManager1");
+        interface.call(QDBus::NoBlock, "ShowItems", QStringList({QUrl::fromLocalFile(pathToBeLaunched).toEncoded()}), ""); // Need URL here!
+    } else {
+        QProcess::startDetached("launch", {pathToBeLaunched});
+    }
 }
 
 // probono: When a modifier key is held down, then just show the item in Filer;
@@ -1385,18 +1391,19 @@ void AppMenuWidget::actionLaunch(QAction *action)
 void AppMenuWidget::openBalooSearchResult(QAction *action)
 {
     QString pathToBeLaunched = action->property("path").toString();
-    // TODO: Maybe just show the file in the file manager when a modifier key is pressed?
-    QProcess p;
     if (QApplication::keyboardModifiers()){
-        p.setProgram("gdbus");
-        // probono: Am I the only one who finds the next line utterly overcomplicated to "tell Filer to show pathToBeLaunched"?
-        p.setArguments({ "call", "--session", "--dest", "org.freedesktop.FileManager1", "--object-path", "/org/freedesktop/FileManager1", "--method", "org.freedesktop.FileManager1.ShowItems", "[\"file:///" + pathToBeLaunched + "\"]", "\"\"" });
-        p.startDetached();
+        // Just show the file in the file manager when a modifier key is pressed
+        QDBusInterface interface("org.freedesktop.FileManager1", "/org/freedesktop/FileManager1", "org.freedesktop.FileManager1");
+        interface.call(QDBus::NoBlock, "ShowItems", QStringList({QUrl::fromLocalFile(pathToBeLaunched).toEncoded()}), ""); // Need URL here!
     } else {
+        QProcess p;
         p.setArguments({pathToBeLaunched});
         if(pathToBeLaunched.endsWith(".app") || pathToBeLaunched.endsWith(".AppDir") || pathToBeLaunched.endsWith(".AppImage")) {
             p.setProgram("launch");
             p.startDetached();
+        } else if (QFileInfo(pathToBeLaunched).isDir()) {
+            QDBusInterface interface("org.freedesktop.FileManager1", "/org/freedesktop/FileManager1", "org.freedesktop.FileManager1");
+            interface.call(QDBus::NoBlock, "launchFiles", pathToBeLaunched, QStringList({pathToBeLaunched}), false); // No URL here!
         } else {
             p.setProgram("open");
             p.startDetached();

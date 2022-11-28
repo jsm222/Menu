@@ -8,8 +8,10 @@
 #include <QFileInfo>
 #include <QDir>
 #include <QImageReader>
+#include <QShortcut>
 #include <KF5/KWindowSystem/KWindowSystem>
 #include <QtDBus/QDBusConnection>
+#include <QtDBus/QDBusInterface>
 
 #include "../src/applicationinfo.h"
 
@@ -133,6 +135,16 @@ void WindowsWidget::updateWindows()
         for (WId cand_id : winIds){
             KWindowSystem::unminimizeWindow(cand_id);
         }
+    });
+
+    // Show Overview
+    QAction *showOverviewAction = m_menu->addAction(tr("Overview"));
+    // showOverviewAction->setShortcut(QKeySequence("Shift+Ctrl+Space")); // Why does this not work? Possibly set up this in system-wide shortcuts
+    // showOverviewAction->setShortcutContext(Qt::ApplicationShortcut); // Why does this not work?
+    connect(showOverviewAction, &QAction::triggered, this, [showOverviewAction, id, this]() {
+        qDebug() << __func__;
+        QDBusInterface interface("org.kde.kglobalaccel", "/component/kwin", "org.kde.kglobalaccel.Component");
+        interface.call(QDBus::NoBlock, "invokeShortcut", "ShowDesktopGrid");
     });
 
     m_menu->addSeparator();
