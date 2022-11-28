@@ -565,6 +565,7 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
             });
         }
     });
+    connect(m_appMenuModel, &AppMenuModel::menuAvailableChanged, this, &AppMenuWidget::updateMenu);
 
     connect(KWindowSystem::self(), &KWindowSystem::activeWindowChanged, this, &AppMenuWidget::delayUpdateActiveWindow);
     connect(KWindowSystem::self(), static_cast<void (KWindowSystem::*)(WId, NET::Properties, NET::Properties2)>(&KWindowSystem::windowChanged),
@@ -954,6 +955,25 @@ void AppMenuWidget::rebuildMenu()
 {   qDebug() << "AppMenuWidget::rebuildMenu() called";
     qobject_cast<MainWidget*>(parent())->rebuildSystemMenu();
 
+}
+
+//doesn't work for https://github.com/helloSystem/Menu/issues/16
+//what does this even do??
+void AppMenuWidget::updateMenu() {
+    if(!m_appMenuModel->menuAvailable()) {
+        int cnt = m_menuBar->actions().count();
+        QList<QAction*> remove;
+        for(int i=2;i<cnt;i++) {
+            remove.append(m_menuBar->actions().at(i));
+        }
+        for(QAction *r : remove) {
+            m_menuBar->removeAction(r);
+
+        }
+
+        emit menuAboutToBeImported(); // misnomer there is no menu
+        m_appMenuModel->invalidateMenu();
+    }
 }
 
 void AppMenuWidget::toggleMaximizeWindow()

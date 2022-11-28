@@ -36,20 +36,7 @@
 #include <QHBoxLayout>
 #include <QDebug>
 #include<QModelIndex>
-#include <QWindow>
 #include <dbusmenu-qt5/dbusmenuimporter.h>
-#include <sys/types.h>
-#include <NETWM>
-#include <appmenuwidget.h>
-#include <signal.h>
-
-#include <xcb/xtest.h>
-#include <QProcess>
-#include <QX11Info>
-#include <X11/XKBlib.h>
-#include <X11/keysym.h>
-#include <X11/keysymdef.h>
-#include <xcb/xcb_keysyms.h>
 
 static const QByteArray s_x11AppMenuServiceNamePropertyName = QByteArrayLiteral("_KDE_NET_WM_APPMENU_SERVICE_NAME");
 static const QByteArray s_x11AppMenuObjectPathPropertyName = QByteArrayLiteral("_KDE_NET_WM_APPMENU_OBJECT_PATH");
@@ -238,99 +225,6 @@ bool AppMenuModel::menuAvailable() const
 
 void AppMenuModel::setMenuAvailable(bool set)
 {
-    qDebug() << "AppMenuModel::setMenuAvailable:" << set;
-
-    // probono: If no menus are available, we insert fallback ones
-    // Not entirely sure whether this is the right place
-    // to hook this functionality in
-    if (!set){
-        qDebug() << "No menus are available. Insert fallback ones";
-
-        QMenuBar * menuBar = qobject_cast<QMenuBar*>(w_parent);/*m_importers[serviceName+menuObjectPath]->menu()->parent());*/
-
-        // menuBar->setUpdatesEnabled(false); // probono: Decrease flicker; does not seem to work?
-
-        // Remove existing menus (from previous application)
-        int cnt = menuBar->actions().count();
-        QList<QAction*> remove;
-        for(int i=2;i<cnt;i++)
-            remove.append(menuBar->actions().at(i));
-        for(QAction *r : remove) {
-            menuBar->removeAction(r);
-        }
-
-        // Add fallback menus
-        // for applications that did not send menus
-        WId winId = KWindowSystem::activeWindow();
-        KWindowInfo info(winId, NET::WMPid | NET::WMWindowType);
-        QMenu *fallbackFileMenu = this->m_menu->addMenu(tr("File"));
-        QAction *closeAction = new QAction(tr("Close"));
-        closeAction->setShortcut(QKeySequence("Ctrl+W"));
-        connect(closeAction, &QAction::triggered, [=]() {
-            NETRootInfo(QX11Info::connection(), NET::CloseWindow).closeWindowRequest(winId);
-        });
-        fallbackFileMenu->addAction(closeAction);
-        fallbackFileMenu->addSeparator();
-        QAction *quitAction = new QAction(tr("Quit"));
-        quitAction->setShortcut(QKeySequence("Ctrl+Q"));
-        connect(quitAction, &QAction::triggered, [=]() {
-          kill(info.pid(),SIGINT);
-        });
-
-        fallbackFileMenu->addAction(quitAction);
-
-        QMenu *fallbackEditMenu = m_menu->addMenu(tr("Edit"));
-        QAction *undoAction = new QAction(tr("Undo"));
-        undoAction->setShortcut(QKeySequence("Ctrl+Z"));
-        connect(undoAction, &QAction::triggered, [=]() {
-            QProcess::startDetached("xdotool", {"getactivewindow", "key", "ctrl+c"});
-            /* FIXME:
-             * This would be the better way, but getting: undefined symbol: xcb_key_symbols_get_keycode
-            xcb_connection_t *c = QX11Info::connection();
-            const xcb_window_t w = QX11Info::appRootWindow();
-            const Display *dpy = XOpenDisplay(NULL);
-            const xcb_keysym_t sym_z = XStringToKeysym("z");
-            const xcb_keysym_t sym_x = XStringToKeysym("x");
-            const xcb_keysym_t sym_c = XStringToKeysym("c");
-            const xcb_keysym_t sym_v = XStringToKeysym("v");
-            constexpr xcb_keysym_t ctrl = 0xffe3;
-            xcb_key_symbols_t *syms = xcb_key_symbols_alloc(c);
-            auto getCode = [syms](int code) {
-                xcb_keycode_t *keyCodes = xcb_key_symbols_get_keycode(syms, code);
-                const xcb_keycode_t ret = keyCodes[0];
-                free(keyCodes);
-                return ret;
-            };
-            xcb_test_fake_input(c, XCB_KEY_PRESS, getCode(ctrl), XCB_CURRENT_TIME, XCB_NONE, 0, 0, 0);
-            xcb_test_fake_input(c, XCB_KEY_PRESS, getCode(sym_c), XCB_CURRENT_TIME, XCB_NONE, 0, 0, 0);
-            xcb_test_fake_input(c, XCB_KEY_RELEASE, getCode(sym_c), XCB_CURRENT_TIME, XCB_NONE, 0, 0, 0);
-            xcb_test_fake_input(c, XCB_KEY_RELEASE, getCode(ctrl), XCB_CURRENT_TIME, XCB_NONE, 0, 0, 0);
-            xcb_flush(c);
-            */
-        });
-        fallbackEditMenu->addAction(undoAction);
-        fallbackEditMenu->addSeparator();
-        QAction *cutAction = new QAction(tr("Cut"));
-        cutAction->setShortcut(QKeySequence("Ctrl+X"));
-        connect(cutAction, &QAction::triggered, [=]() {
-            QProcess::startDetached("xdotool", {"getactivewindow", "key", "ctrl+x"});
-        });
-        QAction *copyAction = new QAction(tr("Copy"));
-        copyAction->setShortcut(QKeySequence("Ctrl+C"));
-        connect(copyAction, &QAction::triggered, [=]() {
-            QProcess::startDetached("xdotool", {"getactivewindow", "key", "ctrl+c"});
-        });
-        QAction *pasteAction = new QAction(tr("Paste"));
-        pasteAction->setShortcut(QKeySequence("Ctrl+V"));
-        connect(pasteAction, &QAction::triggered, [=]() {
-            QProcess::startDetached("xdotool", {"getactivewindow", "key", "ctrl+v"});
-        });
-        fallbackEditMenu->addAction(cutAction);
-        fallbackEditMenu->addAction(copyAction);
-        fallbackEditMenu->addAction(pasteAction);
-
-        // menuBar->setUpdatesEnabled(true); // probono: Decrease flicker; does not seem to work?
-    }
 
     if (m_menuAvailable != set) {
         m_menuAvailable = set;
@@ -898,6 +792,9 @@ void AppMenuModel::updateApplicationMenu(const QString &serviceName, const QStri
 setMenuAvailable(!m_menu.isNull());
 
 emit menuImported();
+
+
+
 
 }
 
