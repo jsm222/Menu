@@ -109,7 +109,6 @@ private:
     void restoreWindow();
 
 public slots:
-
     void rebuildMenu();
     void findAppsInside(QStringList locationsContainingApps);
     void actionAbout();
