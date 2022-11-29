@@ -12,6 +12,7 @@
 #include <KF5/KWindowSystem/KWindowSystem>
 #include <QtDBus/QDBusConnection>
 #include <QtDBus/QDBusInterface>
+#include <kglobalaccel.h>
 
 #include "../src/applicationinfo.h"
 
@@ -102,13 +103,10 @@ void WindowsWidget::updateWindows()
 
     // Hide all windows of the process of the frontmost app
     // NOTE: We need to ensure that the keyboard shortcut is not already taken by .config/lxqt/globalkeyshortcuts.conf
-    // if we want to use this here. But it seems like the shortcut set on this action never gets used?
-    // So we may need to make a tiny "hide_application" command line tool?
-    // Or register a GLOBAL shortcut in Qt?
     WId id = KWindowSystem::activeWindow();
     QAction *hideAction = m_menu->addAction(tr("Hide %1").arg(ai->applicationNiceNameForWId(id)));
-    hideAction->setShortcut(QKeySequence("Ctrl+H"));
-
+    hideAction->setObjectName("Hide"); // Needed for KGlobalAccel global shortcut; becomes visible in kglobalshortcutsrc
+    KGlobalAccel::self()->setShortcut(hideAction, {QKeySequence("Ctrl+H")}, KGlobalAccel::NoAutoloading); // Set global shortcut; this also becomes editable in kglobalshortcutsrc
     connect(hideAction, &QAction::triggered, this, [hideAction, id, this]() {
         KWindowSystem::minimizeWindow(id);
         KWindowInfo info(id, NET::WMPid);
@@ -119,28 +117,34 @@ void WindowsWidget::updateWindows()
                 KWindowSystem::minimizeWindow(cand_id);
         }
     });
+    hideAction->setShortcut(QKeySequence(KGlobalAccel::self()->globalShortcut(qApp->applicationName(), hideAction->objectName()).value(0))); // Show the shortcut on the menu item
 
     // Hide others
     QAction *hideOthersAction = m_menu->addAction(tr("Hide Others"));
-    // hideOthersAction->setShortcut(QKeySequence("Shift+Alt+H"));
+    hideOthersAction->setObjectName("Hide Others"); // Needed for KGlobalAccel global shortcut; becomes visible in kglobalshortcutsrc
+    KGlobalAccel::self()->setShortcut(hideOthersAction, {QKeySequence("Meta+Ctrl+H")}, KGlobalAccel::NoAutoloading); // Set global shortcut; this also becomes editable in kglobalshortcutsrc
     connect(hideOthersAction, &QAction::triggered, this, [hideOthersAction, id, this]() {
         hideOthers(id);
     });
+    hideOthersAction->setShortcut(QKeySequence(KGlobalAccel::self()->globalShortcut(qApp->applicationName(), hideOthersAction->objectName()).value(0))); // Show the shortcut on the menu item
 
     // Show all
     QAction *showAllAction = m_menu->addAction(tr("Show All"));
-    // showAllAction->setShortcut(QKeySequence("Shift+Ctrl+H"));
+    showAllAction->setObjectName("Show All"); // Needed for KGlobalAccel global shortcut; becomes visible in kglobalshortcutsrc
+    KGlobalAccel::self()->setShortcut(showAllAction, {QKeySequence("Shift+Ctrl+H")}, KGlobalAccel::Autoloading); // Set global shortcut; this also becomes editable in kglobalshortcutsrc
     connect(showAllAction, &QAction::triggered, this, [showAllAction, id, this]() {
         const QList<WId> winIds = KWindowSystem::windows();
         for (WId cand_id : winIds){
             KWindowSystem::unminimizeWindow(cand_id);
         }
     });
+    showAllAction->setShortcut(QKeySequence(KGlobalAccel::self()->globalShortcut(qApp->applicationName(), showAllAction->objectName()).value(0))); // Show the shortcut on the menu item
+
 
     // Show Overview
     QAction *showOverviewAction = m_menu->addAction(tr("Overview"));
-    // showOverviewAction->setShortcut(QKeySequence("Shift+Ctrl+Space")); // Why does this not work? Possibly set up this in system-wide shortcuts
-    // showOverviewAction->setShortcutContext(Qt::ApplicationShortcut); // Why does this not work?
+    // Get the system-wide shortcut from in KGlobalAccel kglobalshortcutsrc so that we can display it on the menu item
+    showOverviewAction->setShortcut(KGlobalAccel::self()->globalShortcut(QStringLiteral("kwin"), QStringLiteral("ShowDesktopGrid")).value(0));
     connect(showOverviewAction, &QAction::triggered, this, [showOverviewAction, id, this]() {
         qDebug() << __func__;
         QDBusInterface interface("org.kde.kglobalaccel", "/component/kwin", "org.kde.kglobalaccel.Component");
@@ -271,9 +275,33 @@ void WindowsWidget::updateWindows()
 
     m_menu->addSeparator();
 
+    // Zoom In
+    QAction *zoomInAction = m_menu->addAction(tr("Zoom In"));
+    // Get the system-wide shortcut from in KGlobalAccel kglobalshortcutsrc so that we can display it on the menu item
+    zoomInAction->setShortcut(KGlobalAccel::self()->globalShortcut(QStringLiteral("kwin"), QStringLiteral("view_zoom_in")).value(0));
+    connect(zoomInAction, &QAction::triggered, this, [zoomInAction, id, this]() {
+        qDebug() << __func__;
+        QDBusInterface interface("org.kde.kglobalaccel", "/component/kwin", "org.kde.kglobalaccel.Component");
+        interface.call(QDBus::NoBlock, "invokeShortcut", "view_zoom_in");
+    });
+
+    // Zoom Out
+    QAction *zoomOutAction = m_menu->addAction(tr("Zoom Out"));
+    // Get the system-wide shortcut from in KGlobalAccel kglobalshortcutsrc so that we can display it on the menu item
+    zoomOutAction->setShortcut(KGlobalAccel::self()->globalShortcut(QStringLiteral("kwin"), QStringLiteral("view_zoom_out")).value(0));
+    connect(zoomOutAction, &QAction::triggered, this, [zoomOutAction, id, this]() {
+        qDebug() << __func__;
+        QDBusInterface interface("org.kde.kglobalaccel", "/component/kwin", "org.kde.kglobalaccel.Component");
+        interface.call(QDBus::NoBlock, "invokeShortcut", "view_zoom_out");
+    });
+
+    m_menu->addSeparator();
+
     // Show all
     QAction *fullscreenAction = m_menu->addAction(tr("Full Screen"));
     // TODO: Need a way to undo this...
+    // Get the system-wide shortcut from in KGlobalAccel kglobalshortcutsrc so that we can display it on the menu item
+    fullscreenAction->setShortcut(KGlobalAccel::self()->globalShortcut(QStringLiteral("kwin"), QStringLiteral("Window Fullscreen")).value(0));
     connect(fullscreenAction, &QAction::triggered, this, [fullscreenAction, id, this]() {
         KWindowSystem::setState(id, KWindowSystem::FullScreen);
     });

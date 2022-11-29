@@ -57,6 +57,7 @@
 #include <KF5/KWindowSystem/KWindowSystem>
 #include <KF5/KWindowSystem/KWindowInfo>
 #include <KF5/KWindowSystem/NETWM>
+#include <kglobalaccel.h>
 
 #if defined(Q_OS_FREEBSD)
 #include <magic.h>
@@ -64,6 +65,7 @@
 #include <sys/extattr.h>
 #endif
 
+#include <QKeySequence>
 #include <signal.h>
 
 #include "mainwindow.h"
@@ -522,6 +524,19 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
     connect(m_systemMenu->actions().constFirst(), SIGNAL(triggered()), this, SLOT(actionAbout()));
 
     m_systemMenu->addSeparator();
+
+    // Search menu item, so that we have a place to show the shortcut in the menu (discoverability!)
+    QAction *searchAction = m_systemMenu->addAction(tr("Search"));
+    searchAction->setObjectName("Search"); // Needed for KGlobalAccel global shortcut; becomes visible in kglobalshortcutsrc
+    KGlobalAccel::self()->setShortcut(searchAction, {QKeySequence("Ctrl+Space")}, KGlobalAccel::NoAutoloading); // Set global shortcut; this also becomes editable in kglobalshortcutsrc
+    connect(searchAction, &QAction::triggered, this, [searchAction, parent, this]() {
+        qobject_cast<MainWidget*>(parent)->triggerFocusMenu();
+    });
+
+    searchAction->setShortcut(QKeySequence(KGlobalAccel::self()->globalShortcut(qApp->applicationName(), searchAction->objectName()).value(0))); // Show the shortcut on the menu item
+
+    m_systemMenu->addSeparator();
+
 
     // Add submenus with applications to the System menu
     QStringList locationsContainingApps = {};

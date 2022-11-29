@@ -64,6 +64,7 @@ add_dependencies(${CMAKE_PROJECT_NAME} resources)
 
 find_package(Qt5 COMPONENTS Network REQUIRED)  # probono: For qtsingleapplication
 find_package(dbusmenu-qt5 REQUIRED)
+find_package(KF5GlobalAccel REQUIRED)
 
 target_include_directories(${TARGET} PUBLIC ${dbusmenu-qt5_INCLUDE_DIRS})
 
@@ -76,6 +77,7 @@ target_link_libraries(${TARGET}
     KF5::DBusAddons
     KF5::WindowSystem
     KF5::Baloo
+    KF5::GlobalAccel
     ${X11_LIBRARIES}
     ${XCOMPOSITE_LDFLAGS}
     ${XDAMAGE_LIBRARIES}
