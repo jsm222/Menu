@@ -35,6 +35,7 @@
 #include <QMenu>
 #include <QLabel>
 #include <QStorageInfo>
+#include <QProcessEnvironment>
 #include <xcb/xcb.h>
 #include <X11/Xlib.h>
 
@@ -116,6 +117,8 @@ MainWindow::MainWindow(QWidget *parent)
     // probono: The following is also needed, since the above does not work reliably enough all the time
     connect(KWindowSystem::self(), &KWindowSystem::activeWindowChanged, this, &MainWindow::stopShowingApplicationName);
 
+    // probono: Check system requirements and inform users if they are not met but let them continue
+
     // Periodically check if disks are full
     // We do such checks in Menu because Menu is assumed to be always running
     // TODO: Further similar system health checks
@@ -124,6 +127,48 @@ MainWindow::MainWindow(QWidget *parent)
     checkDiskSpaceTimer->setInterval(1000*60); // Once a minute
     connect(checkDiskSpaceTimer, &QTimer::timeout, this, &MainWindow::checkDiskSpace);
     checkDiskSpaceTimer->start();
+
+    // Warn if SUDO_ASKPASS environment variable is missing
+    if(! QProcessEnvironment().systemEnvironment().contains("SUDO_ASKPASS")) {
+        QMessageBox::warning(nullptr, " ",
+                             tr("The SUDO_ASKPASS environment variable is missing. The system is not configured correctly."));
+    }
+
+    // Warn if UBUNTU_MENUPROXY environment variable is missing or not set to "1"
+    if(! QProcessEnvironment().systemEnvironment().contains("UBUNTU_MENUPROXY")) {
+        QMessageBox::warning(nullptr, " ",
+                             tr("The UBUNTU_MENUPROXY environment variable is missing. The system is not configured correctly."));
+    } else if (QProcessEnvironment().systemEnvironment().value("UBUNTU_MENUPROXY") != "1") {
+        QMessageBox::warning(nullptr, " ",
+                             tr("The UBUNTU_MENUPROXY environment variable is not set to \"1\". The system is not configured correctly."));
+    }
+
+    // Warn if GTK_MODULES environment variable is missing or does not contain "appmenu-gtk-module"
+    if(! QProcessEnvironment().systemEnvironment().contains("GTK_MODULES")) {
+        QMessageBox::warning(nullptr, " ",
+                             tr("The GTK_MODULES environment variable is missing. The system is not configured correctly."));
+    } else if (! QProcessEnvironment().systemEnvironment().value("GTK_MODULES").contains("appmenu-gtk-module")) {
+        QMessageBox::warning(nullptr, " ",
+                             tr("The GTK_MODULES environment variable does not contain \"appmenu-gtk-module\". The system is not configured correctly."));
+    }
+
+    // Warn if QT_QPA_PLATFORMTHEME environment variable is missing or not set to "panda"
+    if(! QProcessEnvironment().systemEnvironment().contains("QT_QPA_PLATFORMTHEME")) {
+        QMessageBox::warning(nullptr, " ",
+                             tr("The QT_QPA_PLATFORMTHEME environment variable is missing. The system is not configured correctly."));
+    } else if (! QProcessEnvironment().systemEnvironment().value("QT_QPA_PLATFORMTHEME").contains("panda")) {
+        QMessageBox::warning(nullptr, " ",
+                             tr("The QT_QPA_PLATFORMTHEME environment variable does not contain \"panda\". The system is not configured correctly."));
+    }
+
+    // Warn if XDG_SESSION_TYPE environment variable is missing or not set to "x11"
+    if(! QProcessEnvironment().systemEnvironment().contains("XDG_SESSION_TYPE")) {
+        QMessageBox::warning(nullptr, " ",
+                             tr("The XDG_SESSION_TYPE environment variable is missing. The system is not configured correctly."));
+    } else if (QProcessEnvironment().systemEnvironment().value("XDG_SESSION_TYPE") != "x11") {
+        QMessageBox::warning(nullptr, " ",
+                             tr("The XDG_SESSION_TYPE environment variable is not set to \"x11\". The system is not configured correctly."));
+    }
 
 }
 
@@ -195,6 +240,13 @@ void MainWindow::initSize()
     // probono: Set background gradient
     // Commenting this out because possibly this interferes with theming via a QSS file via QtPlugin?
     // this->setStyleSheet( "MainWindow { background-color: QLinearGradient( x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #fff, stop: 0.1 #eee, stop: 0.39 #eee, stop: 0.4 #ddd, stop: 1 #eee); }");
+
+    // Warn if screen is too small
+    // NOTE: 640x480 is relatively arbitrary, but we don't want people abuse Menu for mobile screens
+    if(primaryRect.width() < 640 || primaryRect.height() < 480) {
+        QMessageBox::warning(nullptr, " ",
+                             tr("Screen resolution is below the minimum system requirement of 640x480 pixels."));
+    }
 }
 
 void MainWindow::setStrutPartial()

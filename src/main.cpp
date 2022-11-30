@@ -103,22 +103,21 @@ int main(int argc, char **argv)
 
     //set up a signal for SIGUSR1
     signal(SIGUSR1, rebuildSystemMenuSignalHandler);
-QTimer delayedSearchFocus;
-delayedSearchFocus.setSingleShot(true);
-delayedSearchFocus.setInterval(200);
-QObject::connect(&delayedSearchFocus,&QTimer::timeout,&w,[&w]() {
-w.m_MainWidget->triggerFocusMenu();
-});
+    QTimer delayedSearchFocus;
+    delayedSearchFocus.setSingleShot(true);
+    delayedSearchFocus.setInterval(200);
+    QObject::connect(&delayedSearchFocus,&QTimer::timeout,&w,[&w]() {
+        w.m_MainWidget->triggerFocusMenu();
+    });
     QObject::connect(&instance, &QtSingleApplication::messageReceived,
-             [&delayedSearchFocus]() {
-                delayedSearchFocus.start();
-});
-
+                     [&delayedSearchFocus]() {
+        delayedSearchFocus.start();
+    });
 
     if (!QDBusConnection::sessionBus().isConnected()) {
         fprintf(stderr, "Cannot connect to the D-Bus session bus.\n"
-                "To start it, run:\n"
-                "\teval `dbus-launch --auto-syntax`\n");
+                        "To start it, run:\n"
+                        "\teval `dbus-launch --auto-syntax`\n");
         return 1;
     }
 
