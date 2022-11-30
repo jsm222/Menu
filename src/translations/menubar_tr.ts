@@ -130,7 +130,7 @@
         <location filename="../../Shutdown/mainwindow.ui" line="56"/>
         <location filename="../../build/Shutdown/Shutdown_autogen/include/ui_mainwindow.h" line="104"/>
         <source>Cancel</source>
-        <translation>İptal</translation>
+        <translation>Vazgeç</translation>
     </message>
     <message>
         <location filename="../../Shutdown/mainwindow.ui" line="59"/>
@@ -153,7 +153,7 @@
     <message>
         <location filename="../mainwindow.cpp" line="51"/>
         <source>About This Computer</source>
-        <translation>Bu Bilgisayar Hakkında</translation>
+        <translation>Bu bilgisayar hakkında</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="139"/>
