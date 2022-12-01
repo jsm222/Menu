@@ -658,7 +658,7 @@ bool AppMenuModel::filterMenu(QMenu* searchMenu,QString searchString,bool includ
                     }
                         }
 
-            m_visibleActions[names.join(" → ") + " → " + action->text()]=action;
+            m_visibleActions[names.join(" ▸ ") + " ▸ " + action->text()]=action;
             }
       } else if(qobject_cast<QWidgetAction*>(action) != nullptr && action->text()==QString("")) {
 
@@ -703,7 +703,7 @@ void AppMenuModel::readMenuActions(QMenu* menu,QStringList names) {
         if(!actionName.isEmpty() && action->isEnabled() &&   action->menu()==NULL) {
 
 
-        actionName = names.join(" → ") + " → " + actionName;
+        actionName = names.join(" ▸ ") + " ▸ " + actionName;
 
 
 

@@ -239,7 +239,7 @@ public:
 
 void AppMenuWidget::findAppsInside(QStringList locationsContainingApps)
 // probono: Check locationsContainingApps for applications and add them to the m_systemMenu.
-// TODO: Nested submenus rather than flat ones with '→'
+// TODO: Nested submenus rather than flat ones with '▸'
 // This code is similar to the code in the 'launch' command
 {
 
@@ -277,7 +277,7 @@ void AppMenuWidget::findAppsInside(QStringList locationsContainingApps)
             }
 
             submenu->setToolTip(directory);
-            submenu->setTitle(directory.remove(0, 1).replace("/", " → "));
+            submenu->setTitle(directory.remove(0, 1).replace("/", " ▸ "));
             submenu->setToolTipsVisible(true); // Seems to be needed here, too, so that the submenu items show their correct tooltips?
             // Make it possible to open the directory that contains the app by clicking on the submenu itself
             submenu->installEventFilter(this);
@@ -766,7 +766,7 @@ void AppMenuWidget::searchMenu() {
             if(!orig->menu()) {
                 CloneAction *cpy = new CloneAction(orig);
 
-                cpy->setText(names.join(" → ") + " → " + orig->text());
+                cpy->setText(names.join(" ▸ ") + " ▸ " + orig->text());
                 cpy->setShortcut(orig->shortcut());
                 orig->setShortcutContext(Qt::WindowShortcut);
                 cpy->setShortcutContext(Qt::ApplicationShortcut);
