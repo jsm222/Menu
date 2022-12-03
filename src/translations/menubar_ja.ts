@@ -242,12 +242,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="189"/>
+        <location filename="../mainwindow.cpp" line="191"/>
         <source>Your disk &apos;%1&apos; is almost full. %2 percent left.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="253"/>
+        <location filename="../mainwindow.cpp" line="284"/>
         <source>Screen resolution is below the minimum system requirement of 640x480 pixels.</source>
         <translation type="unfinished"></translation>
     </message>

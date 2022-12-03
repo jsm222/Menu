@@ -48,7 +48,7 @@ private:
 private:
     QWidget *m_fakeWidget;
     QLabel *applicationStartingLabel;
-    void checkDiskSpace();
+    void checkPeriodically();
 };
 
 #endif // MAINWINDOW_H

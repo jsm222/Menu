@@ -120,14 +120,14 @@ MainWindow::MainWindow(QWidget *parent)
 
     // probono: Check system requirements and inform users if they are not met but let them continue
 
-    // Periodically check if disks are full
+    // Periodically check if disks are full and similar things
     // We do such checks in Menu because Menu is assumed to be always running
     // TODO: Further similar system health checks
-    MainWindow::checkDiskSpace();
-    QTimer *checkDiskSpaceTimer = new QTimer(this);
-    checkDiskSpaceTimer->setInterval(1000*60); // Once a minute
-    connect(checkDiskSpaceTimer, &QTimer::timeout, this, &MainWindow::checkDiskSpace);
-    checkDiskSpaceTimer->start();
+    MainWindow::checkPeriodically();
+    QTimer *periodicalCheckTimer = new QTimer(this);
+    periodicalCheckTimer->setInterval(1000*60); // Once a minute
+    connect(periodicalCheckTimer, &QTimer::timeout, this, &MainWindow::checkPeriodically);
+    periodicalCheckTimer->start();
 
     // Warn if SUDO_ASKPASS environment variable is missing
     if(! QProcessEnvironment().systemEnvironment().contains("SUDO_ASKPASS")) {
@@ -178,7 +178,9 @@ MainWindow::~MainWindow()
 
 }
 
-void MainWindow::checkDiskSpace(){
+void MainWindow::checkPeriodically(){
+
+    // Check free disk space
     for(const QStorageInfo storage : QStorageInfo::mountedVolumes()){
         if (storage.isReadOnly() || storage.bytesTotal() < 1024 * 10 || storage.fileSystemType() == "nullfs")
             continue;
@@ -190,6 +192,35 @@ void MainWindow::checkDiskSpace(){
                                  .arg(storage.rootPath()).arg(100 - qRound(usedSize*100)));
         }
     }
+
+    /*
+     * Check the output of the process to determine the status of the Baloo indexer
+     * TODO: Check this only if the Baloo indexer was running when Menu started
+     * and show an error message only once if it goes away.
+     * Maybe this can be done more efficiently by checking whether baloo_file
+     * is still a running process.
+    QProcess process;
+    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+    env.insert("LANG", "C");
+    process.setProcessEnvironment(env);
+    process.setProgram("balooctl");
+    process.setArguments({"status"});
+    process.start();
+    process.waitForFinished();
+    QByteArray output = process.readAllStandardOutput();
+    if (output.contains("Indexing")) {
+        qDebug() << "Baloo indexer is indexing";
+    } else if (output.contains("Suspended")) {
+        qDebug() << "Baloo indexer is suspended";
+    } else if (output.contains("is running")) {
+        qDebug() << "Baloo indexer is running";
+    } else {
+        qDebug() << "Baloo indexer is in an unknown state";
+        QMessageBox::warning(nullptr, " ",
+                             tr("The filesystem indexer is not running."));
+
+    }
+    */
 }
 
 void MainWindow::paintEvent(QPaintEvent *e)
