@@ -94,6 +94,7 @@ MainWindow::MainWindow(QWidget *parent)
     initSize();
 
     //subscribe to changes on our display like if we change the screen resolution, orientation etc..
+    connect(qApp->primaryScreen(), &QScreen::geometryChanged, this, &MainWindow::checkSize);
     connect(qApp->primaryScreen(), &QScreen::geometryChanged, this, &MainWindow::initSize);
     connect(qApp->primaryScreen(), &QScreen::orientationChanged, this, &MainWindow::initSize);
     connect(qApp->primaryScreen(), &QScreen::virtualGeometryChanged, this, &MainWindow::initSize);
@@ -240,7 +241,11 @@ void MainWindow::initSize()
     // probono: Set background gradient
     // Commenting this out because possibly this interferes with theming via a QSS file via QtPlugin?
     // this->setStyleSheet( "MainWindow { background-color: QLinearGradient( x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #fff, stop: 0.1 #eee, stop: 0.39 #eee, stop: 0.4 #ddd, stop: 1 #eee); }");
+}
 
+void MainWindow::checkSize()
+{
+    QRect primaryRect = qApp->primaryScreen()->geometry();
     // Warn if screen is too small
     // NOTE: 640x480 is relatively arbitrary, but we don't want people abuse Menu for mobile screens
     if(primaryRect.width() < 640 || primaryRect.height() < 480) {

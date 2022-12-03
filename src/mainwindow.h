@@ -42,6 +42,7 @@ protected:
 
 private:
     void initSize();
+    void checkSize();
     void setStrutPartial();
 
 private:
