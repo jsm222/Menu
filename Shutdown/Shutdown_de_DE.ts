@@ -4,82 +4,82 @@
 <context>
     <name>AppMenuWidget</name>
     <message>
-        <location filename="../src/appmenuwidget.cpp" line="504"/>
+        <location filename="../src/appmenuwidget.cpp" line="505"/>
         <source>System</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/appmenuwidget.cpp" line="529"/>
+        <location filename="../src/appmenuwidget.cpp" line="530"/>
         <source>Search</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/appmenuwidget.cpp" line="552"/>
+        <location filename="../src/appmenuwidget.cpp" line="553"/>
         <source>Force Quit Application</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/appmenuwidget.cpp" line="556"/>
+        <location filename="../src/appmenuwidget.cpp" line="557"/>
         <source>Restart</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/appmenuwidget.cpp" line="558"/>
+        <location filename="../src/appmenuwidget.cpp" line="559"/>
         <source>Log Out</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/appmenuwidget.cpp" line="560"/>
+        <location filename="../src/appmenuwidget.cpp" line="561"/>
         <source>Shut Down</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/appmenuwidget.cpp" line="1000"/>
+        <location filename="../src/appmenuwidget.cpp" line="1001"/>
         <source>File</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/appmenuwidget.cpp" line="1001"/>
+        <location filename="../src/appmenuwidget.cpp" line="1002"/>
         <source>Close</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/appmenuwidget.cpp" line="1008"/>
+        <location filename="../src/appmenuwidget.cpp" line="1009"/>
         <source>Quit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/appmenuwidget.cpp" line="1016"/>
+        <location filename="../src/appmenuwidget.cpp" line="1017"/>
         <source>Edit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/appmenuwidget.cpp" line="1017"/>
+        <location filename="../src/appmenuwidget.cpp" line="1018"/>
         <source>Undo</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/appmenuwidget.cpp" line="1047"/>
+        <location filename="../src/appmenuwidget.cpp" line="1048"/>
         <source>Cut</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/appmenuwidget.cpp" line="1052"/>
+        <location filename="../src/appmenuwidget.cpp" line="1053"/>
         <source>Copy</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/appmenuwidget.cpp" line="1057"/>
+        <location filename="../src/appmenuwidget.cpp" line="1058"/>
         <source>Paste</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/appmenuwidget.cpp" line="1206"/>
+        <location filename="../src/appmenuwidget.cpp" line="1207"/>
         <source>About helloDesktop</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/appmenuwidget.cpp" line="1237"/>
+        <location filename="../src/appmenuwidget.cpp" line="1238"/>
         <source>About This Computer</source>
         <translation type="unfinished"></translation>
     </message>
@@ -224,13 +224,13 @@
 <context>
     <name>SystemMenu</name>
     <message>
-        <location filename="../src/appmenuwidget.cpp" line="84"/>
-        <location filename="../src/appmenuwidget.cpp" line="122"/>
+        <location filename="../src/appmenuwidget.cpp" line="85"/>
+        <location filename="../src/appmenuwidget.cpp" line="123"/>
         <source>About This Computer</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/appmenuwidget.cpp" line="122"/>
+        <location filename="../src/appmenuwidget.cpp" line="123"/>
         <source>About helloDesktop</source>
         <translation type="unfinished"></translation>
     </message>

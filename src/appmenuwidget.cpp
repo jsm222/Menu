@@ -58,6 +58,7 @@
 #include <KF5/KWindowSystem/KWindowInfo>
 #include <KF5/KWindowSystem/NETWM>
 #include <kglobalaccel.h>
+#include <cmath>
 
 #if defined(Q_OS_FREEBSD)
 #include <magic.h>
@@ -1318,9 +1319,10 @@ void AppMenuWidget::actionAbout()
         p.waitForFinished();
         QString memory(p.readAllStandardOutput().trimmed());
         qDebug() << "memory:" << memory;
-        double m = memory.toDouble();
+        float m = memory.toFloat();
         m = m/1024/1024/1024;
-        qDebug() << "m:" << m;
+        float roundedMem = round(m * 100.0) / 100.0; // Round to 2 digits
+        qDebug() << "roundedMem:" << roundedMem;
 
         p.setProgram("freebsd-version");
         p.setArguments({"-k"});
@@ -1352,7 +1354,7 @@ void AppMenuWidget::actionAbout()
                         "<p>FreeBSD kernel version: " + kernelVersion +"<br>" + \
                         "FreeBSD userland version: " + userlandVersion + "</p>" + \
                         "<p>Processor: " + cpu +"<br>" + \
-                        "Memory: " + QString::number(m) +" GiB<br>" + \
+                        "Memory: " + QString::number(roundedMem) +" GiB<br>" + \
                         helloSystemInfo + \
                         "<p><a href='file:///COPYRIGHT'>FreeBSD copyright information</a><br>" + \
                         "Other components are subject to<br>their respective license terms</p>" + \
