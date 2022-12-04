@@ -31,7 +31,7 @@
     <message>
         <location filename="../appmenuwidget.cpp" line="530"/>
         <source>Search</source>
-        <translation type="unfinished">Filtrilo Serĉo</translation>
+        <translation>Serĉi</translation>
     </message>
     <message>
         <location filename="../appmenuwidget.cpp" line="553"/>
