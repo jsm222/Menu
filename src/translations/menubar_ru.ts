@@ -11,7 +11,7 @@
     <message>
         <location filename="../appmenuwidget.cpp" line="1235"/>
         <source>About This Computer</source>
-        <translation>Про этот Компьютер</translation>
+        <translation>О компьютере</translation>
     </message>
     <message>
         <source>Hide all</source>
