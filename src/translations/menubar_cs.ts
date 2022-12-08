@@ -9,7 +9,7 @@
         <translation>Vyhledávání</translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="1238"/>
+        <location filename="../appmenuwidget.cpp" line="1235"/>
         <source>About This Computer</source>
         <translation>O tomto počítači</translation>
     </message>
@@ -47,47 +47,47 @@
         <translation>Vypnutí</translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="1001"/>
+        <location filename="../appmenuwidget.cpp" line="1000"/>
         <source>File</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="1002"/>
+        <location filename="../appmenuwidget.cpp" line="1001"/>
         <source>Close</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="1009"/>
+        <location filename="../appmenuwidget.cpp" line="1008"/>
         <source>Quit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="1017"/>
+        <location filename="../appmenuwidget.cpp" line="1016"/>
         <source>Edit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="1018"/>
+        <location filename="../appmenuwidget.cpp" line="1017"/>
         <source>Undo</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="1048"/>
+        <location filename="../appmenuwidget.cpp" line="1047"/>
         <source>Cut</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="1053"/>
+        <location filename="../appmenuwidget.cpp" line="1052"/>
         <source>Copy</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="1058"/>
+        <location filename="../appmenuwidget.cpp" line="1057"/>
         <source>Paste</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="1207"/>
+        <location filename="../appmenuwidget.cpp" line="1204"/>
         <source>About helloDesktop</source>
         <translation type="unfinished"></translation>
     </message>
