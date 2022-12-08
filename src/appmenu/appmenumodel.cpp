@@ -71,11 +71,6 @@ void HMenu::actionEvent(QActionEvent *e) {
 }
 
 
-
-
-
-
-
 AppMenuModel::AppMenuModel(QObject *parent)
     : QAbstractItemModel(parent),
       m_serviceWatcher(new QDBusServiceWatcher(this))
@@ -163,10 +158,6 @@ int AppMenuModel::columnCount(const QModelIndex &parent) const {
 }
 QModelIndex AppMenuModel::parent(const QModelIndex &index) const
 {
-
-
-
-
 
 
     if (!index.isValid())

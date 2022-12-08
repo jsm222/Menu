@@ -979,7 +979,6 @@ void AppMenuWidget::updateMenu() {
         // This clears the menu in case it has no entries
         // probono: If no menus are available, we insert fallback ones
 
-        m_menuBar->setUpdatesEnabled(false); // probono: Decrease flicker?
         int cnt = m_menuBar->actions().count();
         QList<QAction*> remove;
         for(int i=2;i<cnt;i++) {
@@ -1063,8 +1062,6 @@ void AppMenuWidget::updateMenu() {
         fallbackEditMenu->addAction(cutAction);
         fallbackEditMenu->addAction(copyAction);
         fallbackEditMenu->addAction(pasteAction);
-
-        m_menuBar->setUpdatesEnabled(true); // probono: Decrease flicker?
     }
 }
 
