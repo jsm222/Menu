@@ -120,7 +120,7 @@
     <message>
         <location filename="../../plugin-volume/controlwidget.cpp" line="25"/>
         <source>Current volume</source>
-        <translation>Nivel actual</translation>
+        <translation>Volumen actual</translation>
     </message>
 </context>
 <context>
@@ -154,13 +154,13 @@
         <location filename="../../Shutdown/mainwindow.ui" line="62"/>
         <location filename="../../build/Shutdown/Shutdown_autogen/include/ui_mainwindow.h" line="109"/>
         <source>Esc</source>
-        <translation>Salir</translation>
+        <translation>Esc</translation>
     </message>
     <message>
         <location filename="../../Shutdown/mainwindow.ui" line="94"/>
         <location filename="../../build/Shutdown/Shutdown_autogen/include/ui_mainwindow.h" line="112"/>
         <source>Are you sure you want to shut down your computer now?</source>
-        <translation>¿Está seguro de que quiere apagar el equipo?</translation>
+        <translation>¿Estás seguro de que quieres apagar tu ordebador ahora?</translation>
     </message>
     <message>
         <location filename="../../Shutdown/mainwindow.ui" line="113"/>
