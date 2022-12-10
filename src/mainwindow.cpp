@@ -186,7 +186,7 @@ void MainWindow::checkPeriodically(){
             continue;
         float usedSize = float(storage.bytesTotal() - storage.bytesAvailable())/float(storage.bytesTotal());
         // Warn if any relevant disk is >95% full
-        if(usedSize > 0.95) {
+        if((usedSize > 0.95) && storage.fileSystemType() != "unionfs" ) {
             QMessageBox::warning(nullptr, storage.rootPath(),
                                  tr("Your disk '%1' is almost full. %2 percent left." )
                                  .arg(storage.rootPath()).arg(100 - qRound(usedSize*100)));
