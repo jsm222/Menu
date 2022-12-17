@@ -93,7 +93,7 @@ void VolumeWidget::toggleMute()
 {
     QDBusInterface iface(Service, ObjectPath, Interface, QDBusConnection::sessionBus(), this);
     if (iface.isValid()) {
-        iface.call("toggleMute");
+        iface.call(QDBus::NoBlock, "toggleMute");
         initUI();
     }
 }
@@ -102,7 +102,7 @@ void VolumeWidget::handleSliderValueChanged(int value)
 {
     QDBusInterface iface(Service, ObjectPath, Interface, QDBusConnection::sessionBus(), this);
     if (iface.isValid()) {
-        iface.call("setVolume", QVariant::fromValue(value));
+        iface.call(QDBus::NoBlock, "setVolume", QVariant::fromValue(value));
         initUI();
     }
 }

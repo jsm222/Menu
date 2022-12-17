@@ -90,7 +90,7 @@ void StatusNotifierWidget::itemAdded(QString serviceAndPath)
         if (! iface.isValid()) {
             printf("D-Bus interface not valid\n");
         } else {
-            iface.call("stopShowingApplicationName");
+            iface.call(QDBus::NoBlock, "stopShowingApplicationName");
         }
     }
 }
