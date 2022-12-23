@@ -40,17 +40,18 @@
 #include <QDBusServiceWatcher>
 #include <QGuiApplication>
 #include <QTimer>
+#include <QMutex>
 #include <QWidgetAction>
 #include <QHBoxLayout>
 #include <QDebug>
 #include<QModelIndex>
 #include <dbusmenu-qt5/dbusmenuimporter.h>
 
+QMutex mutex;
 static const QByteArray s_x11AppMenuServiceNamePropertyName = QByteArrayLiteral("_KDE_NET_WM_APPMENU_SERVICE_NAME");
 static const QByteArray s_x11AppMenuObjectPathPropertyName = QByteArrayLiteral("_KDE_NET_WM_APPMENU_OBJECT_PATH");
 
 static QHash<QByteArray, xcb_atom_t> s_atoms;
-
 
 void HMenu::actionEvent(QActionEvent *e) {
     if(e->type() == QEvent::ActionAdded) {
@@ -380,6 +381,7 @@ void AppMenuModel::onActiveWindowChanged(WId id)
 
                 if(m_serviceName == serviceName &&
                         m_menuObjectPath == menuObjectPath) {
+                    m_pending_service[m_serviceName]=true;
                     updateApplicationMenu(m_serviceName, m_menuObjectPath);
                 }else {
                     m_initialApplicationFromWindowId = -1;
@@ -453,7 +455,10 @@ void AppMenuModel::onActiveWindowChanged(WId id)
             qDebug() << serviceName << menuObjectPath << __LINE__ << id;
             if (!serviceName.isEmpty() && !menuObjectPath.isEmpty()) {
                 m_initialApplicationFromWindowId = id;
+                mutex.lock();
+                m_pending_service[m_serviceName]=true;
                 updateApplicationMenu(serviceName, menuObjectPath);
+                mutex.unlock();
                 return true;
             }
 
@@ -756,7 +761,10 @@ void AppMenuModel::refreshSearch() {
 
 void AppMenuModel::updateApplicationMenu(const QString &serviceName, const QString &menuObjectPath)
 {
-
+    if(m_pending_service[serviceName] && m_serviceName == serviceName) {
+        qDebug() << "Skipping" << serviceName << menuObjectPath <<"switching too fast";
+        return;
+    }
     QMenuBar * menuBar = qobject_cast<QMenuBar*>(w_parent);/*m_importers[serviceName+menuObjectPath]->menu()->parent());*/
     int cnt = menuBar->actions().count();
     QList<QAction*> remove;
@@ -784,7 +792,7 @@ void AppMenuModel::updateApplicationMenu(const QString &serviceName, const QStri
 
     setMenuAvailable(!m_menu.isNull());
 
-    emit menuImported();
+    emit menuImported(serviceName);
 }
 
 void AppMenuModel::updateSearch() {

@@ -571,7 +571,8 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
     m_appMenuModel = new AppMenuModel(m_menuBar);
 
     connect(m_appMenuModel,&AppMenuModel::menuAboutToBeImported,this,&AppMenuWidget::menuAboutToBeImported);
-    connect(m_appMenuModel,&AppMenuModel::menuImported,this,[this,traverse] {
+    connect(m_appMenuModel,&AppMenuModel::menuImported,this,[this,traverse](QString serviceName) {
+
 
 
 
@@ -582,6 +583,7 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
                 iterate(QModelIndex(),m_appMenuModel,traverse);
             });
         }
+        m_appMenuModel->m_pending_service[serviceName]=false;
     });
     connect(m_appMenuModel, &AppMenuModel::menuAvailableChanged, this, &AppMenuWidget::updateMenu);
 

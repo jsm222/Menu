@@ -162,6 +162,7 @@ public:
         MenuRole = Qt::UserRole + 1, // TODO this should be Qt::DisplayRole
         ActionRole
     };
+    QHash<QString,bool> m_pending_service;
 
     QAction *findParent(QAction * child,QAction *root) const ;
     /**
@@ -352,7 +353,7 @@ private Q_SLOTS:
 signals:
     void menuAvailableChanged();
     void modelNeedsUpdate();
-    void menuImported();
+    void menuImported(QString serviceName);
     void firstLevelParsed();
     void filterByActiveChanged();
     void filterChildrenChanged();

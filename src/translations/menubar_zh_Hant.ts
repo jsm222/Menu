@@ -32,7 +32,7 @@
         <translation>搜尋</translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="1235"/>
+        <location filename="../appmenuwidget.cpp" line="1237"/>
         <source>About This Computer</source>
         <translation>關於這台電腦</translation>
     </message>
@@ -70,47 +70,47 @@
         <translation>關機</translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="1000"/>
+        <location filename="../appmenuwidget.cpp" line="1002"/>
         <source>File</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="1001"/>
+        <location filename="../appmenuwidget.cpp" line="1003"/>
         <source>Close</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="1008"/>
+        <location filename="../appmenuwidget.cpp" line="1010"/>
         <source>Quit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="1016"/>
+        <location filename="../appmenuwidget.cpp" line="1018"/>
         <source>Edit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="1017"/>
+        <location filename="../appmenuwidget.cpp" line="1019"/>
         <source>Undo</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="1047"/>
+        <location filename="../appmenuwidget.cpp" line="1049"/>
         <source>Cut</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="1052"/>
+        <location filename="../appmenuwidget.cpp" line="1054"/>
         <source>Copy</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="1057"/>
+        <location filename="../appmenuwidget.cpp" line="1059"/>
         <source>Paste</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../appmenuwidget.cpp" line="1204"/>
+        <location filename="../appmenuwidget.cpp" line="1206"/>
         <source>About helloDesktop</source>
         <translation type="unfinished"></translation>
     </message>
