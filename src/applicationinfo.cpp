@@ -11,13 +11,13 @@
 #include <limits.h>
 
 #include <sys/socket.h>
-#include <sys/sysctl.h>
 #include <sys/param.h>
 #include <sys/queue.h>
 #include <sys/user.h>
 #include <QDir>
 #include <fcntl.h>
 #if defined(__FreeBSD__)
+#include <sys/sysctl.h>
 #include <libprocstat.h>
 #endif
 #if defined(__linux__)

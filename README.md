@@ -19,7 +19,7 @@ On FreeBSD-based LIVEstep:
 On Alpine Linux:
 
 ```
-apk add --no-cache qt5-qtbase-dev kwindowsystem-dev qt5-qttools-dev kdbusaddons-dev baloo-dev xcb-util-wm-dev libdbusmenu-qt-dev git cmake musl-dev alpine-sdk clang
+apk add --no-cache qt5-qtbase-dev kwindowsystem-dev qt5-qttools-dev kdbusaddons-dev baloo-dev xcb-util-wm-dev libdbusmenu-qt-dev procps-dev git cmake musl-dev alpine-sdk clang
 ```
 
 On Arch Linux:
