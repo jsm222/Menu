@@ -532,6 +532,7 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
     KGlobalAccel::self()->setShortcut(searchAction, {QKeySequence("Ctrl+Space")}, KGlobalAccel::NoAutoloading); // Set global shortcut; this also becomes editable in kglobalshortcutsrc
     connect(searchAction, &QAction::triggered, this, [searchAction, parent, this]() {
         qobject_cast<MainWidget*>(parent)->triggerFocusMenu();
+        emit menuAboutToBeImported(); // Stop showing application name upon Command+Space; this gets stopShowingApplicationName called
     });
 
     searchAction->setShortcut(QKeySequence(KGlobalAccel::self()->globalShortcut(qApp->applicationName(), searchAction->objectName()).value(0))); // Show the shortcut on the menu item
