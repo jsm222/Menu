@@ -763,7 +763,6 @@ void AppMenuModel::updateApplicationMenu(const QString &serviceName, const QStri
 {
     if(m_pending_service[serviceName] && m_serviceName == serviceName) {
         qDebug() << "Skipping" << serviceName << menuObjectPath <<"switching too fast";
-        return;
     }
     QMenuBar * menuBar = qobject_cast<QMenuBar*>(w_parent);/*m_importers[serviceName+menuObjectPath]->menu()->parent());*/
     int cnt = menuBar->actions().count();
