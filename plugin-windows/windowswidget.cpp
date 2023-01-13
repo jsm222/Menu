@@ -297,6 +297,38 @@ void WindowsWidget::updateWindows()
 
     m_menu->addSeparator();
 
+    if (QFileInfo::exists("/dev/backlight/")){
+
+        // TODO: Systems other than FreeBSD; especially Linux
+
+        // Reduce brightness
+        QAction *reduceBrightnessAction = m_menu->addAction(tr("Reduce brightness"));
+        reduceBrightnessAction->setObjectName("Reduce Brightness"); // Needed for KGlobalAccel global shortcut; becomes visible in kglobalshortcutsrc
+        KGlobalAccel::self()->setShortcut(reduceBrightnessAction, {QKeySequence("XF86MonBrightnessDown")}, KGlobalAccel::NoAutoloading); // Set global shortcut; this also becomes editable in kglobalshortcutsrc
+        connect(reduceBrightnessAction, &QAction::triggered, this, [reduceBrightnessAction, id, this]() {
+            qDebug() << __func__;
+            QProcess *p = new QProcess();
+            p->setProgram("backlight");
+            p->setArguments({"decr"});
+            p->startDetached();
+        });
+
+        // Increase brightness
+        QAction *increaseBrightnessAction = m_menu->addAction(tr("Increase brightness"));
+        increaseBrightnessAction->setObjectName("Increase Brightness"); // Needed for KGlobalAccel global shortcut; becomes visible in kglobalshortcutsrc
+        KGlobalAccel::self()->setShortcut(increaseBrightnessAction, {QKeySequence("XF86MonBrightnessUp")}, KGlobalAccel::NoAutoloading); // Set global shortcut; this also becomes editable in kglobalshortcutsrc
+        connect(increaseBrightnessAction, &QAction::triggered, this, [increaseBrightnessAction, id, this]() {
+            qDebug() << __func__;
+            QProcess *p = new QProcess();
+            p->setProgram("backlight");
+            p->setArguments({"incr"});
+            p->startDetached();
+        });
+
+        m_menu->addSeparator();
+    
+    }
+
     // Show all
     QAction *fullscreenAction = m_menu->addAction(tr("Full Screen"));
     // TODO: Need a way to undo this...

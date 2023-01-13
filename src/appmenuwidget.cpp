@@ -555,6 +555,22 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
     connect(forceQuitAction, SIGNAL(triggered()), this, SLOT(actionForceQuit()));
     forceQuitAction->setShortcut(QKeySequence(Qt::CTRL | Qt::ALT | Qt::Key_Escape));
     m_systemMenu->addSeparator();
+
+    /*
+    // Sleep
+    QAction *sleepAction = m_systemMenu->addAction(tr("Sleep"));
+    sleepAction->setObjectName("Sleep"); // Needed for KGlobalAccel global shortcut; becomes visible in kglobalshortcutsrc
+    // KGlobalAccel::self()->setShortcut(sleepAction, {QKeySequence("...")}, KGlobalAccel::NoAutoloading); // Set global shortcut; this also becomes editable in kglobalshortcutsrc
+    connect(sleepAction, &QAction::triggered, this, [sleepAction, this]() {
+        qDebug() << __func__;
+        QProcess *p = new QProcess();
+        p->setProgram("zzz");
+        p->setArguments({});
+        p->startDetached();
+    });
+    m_systemMenu->addSeparator();
+    */
+
     QAction *restartAction = m_systemMenu->addAction(tr("Restart"));
     connect(restartAction, SIGNAL(triggered()), this, SLOT(actionLogout()));
     QAction *logoutAction = m_systemMenu->addAction(tr("Log Out"));
