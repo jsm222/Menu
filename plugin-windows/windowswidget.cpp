@@ -301,27 +301,42 @@ void WindowsWidget::updateWindows()
 
         // TODO: Systems other than FreeBSD; especially Linux
 
-        // Reduce brightness
-        QAction *reduceBrightnessAction = m_menu->addAction(tr("Reduce brightness"));
-        reduceBrightnessAction->setObjectName("Reduce Brightness"); // Needed for KGlobalAccel global shortcut; becomes visible in kglobalshortcutsrc
-        KGlobalAccel::self()->setShortcut(reduceBrightnessAction, {QKeySequence("XF86XK_MonBrightnessDown")}, KGlobalAccel::NoAutoloading); // Set global shortcut; this also becomes editable in kglobalshortcutsrc
-        connect(reduceBrightnessAction, &QAction::triggered, this, [reduceBrightnessAction, id, this]() {
-            qDebug() << __func__;
-            QProcess *p = new QProcess();
-            p->setProgram("backlight");
-            p->setArguments({"decr"});
-            p->startDetached();
-        });
+        /*
+        QAction* globalAction = actionCollection->addAction(QLatin1String("Increase Screen Brightness"));
+        globalAction->setText(i18nc("@action:inmenu Global shortcut", "Increase Screen Brightness"));
+        KGlobalAccel::setGlobalShortcut(globalAction, Qt::Key_MonBrightnessUp);
+        connect(globalAction, SIGNAL(triggered(bool)), SLOT(increaseBrightness()));
 
-        // Increase brightness
-        QAction *increaseBrightnessAction = m_menu->addAction(tr("Increase brightness"));
-        increaseBrightnessAction->setObjectName("Increase Brightness"); // Needed for KGlobalAccel global shortcut; becomes visible in kglobalshortcutsrc
-        KGlobalAccel::self()->setShortcut(increaseBrightnessAction, {QKeySequence("XF86XK_MonBrightnessUp")}, KGlobalAccel::NoAutoloading); // Set global shortcut; this also becomes editable in kglobalshortcutsrc
+        globalAction = actionCollection->addAction(QLatin1String("Decrease Screen Brightness"));
+        globalAction->setText(i18nc("@action:inmenu Global shortcut", "Decrease Screen Brightness"));
+        KGlobalAccel::setGlobalShortcut(globalAction, Qt::Key_MonBrightnessDown);
+        connect(globalAction, SIGNAL(triggered(bool)), SLOT(decreaseBrightness()));
+        */
+
+
+        // Increase Screen Brightness
+        QAction *increaseBrightnessAction = m_menu->addAction(tr("Increase Screen Brightness"));
+        increaseBrightnessAction->setObjectName("Increase Screen Brightness"); // Needed for KGlobalAccel global shortcut; becomes visible in kglobalshortcutsrc
+        KGlobalAccel::self()->setShortcut(increaseBrightnessAction, {Qt::Key_MonBrightnessUp}, KGlobalAccel::NoAutoloading); // Set global shortcut; this also becomes editable in kglobalshortcutsrc
+        KGlobalAccel::setGlobalShortcut(increaseBrightnessAction, Qt::Key_MonBrightnessUp);
         connect(increaseBrightnessAction, &QAction::triggered, this, [increaseBrightnessAction, id, this]() {
             qDebug() << __func__;
             QProcess *p = new QProcess();
             p->setProgram("backlight");
             p->setArguments({"incr"});
+            p->startDetached();
+        });
+
+        // Decrease Screen Brightness
+        QAction *decreaseBrightnessAction = m_menu->addAction(tr("Decrease Screen Brightness"));
+        decreaseBrightnessAction->setObjectName("Decrease Screen Brightness"); // Needed for KGlobalAccel global shortcut; becomes visible in kglobalshortcutsrc
+        KGlobalAccel::self()->setShortcut(decreaseBrightnessAction, {Qt::Key_MonBrightnessDown}, KGlobalAccel::NoAutoloading); // Set global shortcut; this also becomes editable in kglobalshortcutsrc
+        KGlobalAccel::setGlobalShortcut(decreaseBrightnessAction, Qt::Key_MonBrightnessDown);
+        connect(decreaseBrightnessAction, &QAction::triggered, this, [decreaseBrightnessAction, id, this]() {
+            qDebug() << __func__;
+            QProcess *p = new QProcess();
+            p->setProgram("backlight");
+            p->setArguments({"decr"});
             p->startDetached();
         });
 
