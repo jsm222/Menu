@@ -176,4 +176,15 @@ private:
     void keyPressEvent(QKeyEvent * event) override;
 };
 
+class AboutDialog : public QDialog
+{
+    QLabel *_imageLabel, *_textLabel;
+    QPushButton *_hardwareProbeButton;
+    QVBoxLayout *_layout;
+
+public:
+    AboutDialog(QWidget *parent);
+    ~AboutDialog();
+};
+
 #endif // APPMENUWIDGET_H
