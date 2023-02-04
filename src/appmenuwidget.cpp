@@ -1035,7 +1035,7 @@ void AppMenuWidget::updateMenu() {
         QAction *undoAction = new QAction(tr("Undo"));
         undoAction->setShortcut(QKeySequence("Ctrl+Z"));
         connect(undoAction, &QAction::triggered, [=]() {
-            QProcess::startDetached("xdotool", {"getactivewindow", "key", "ctrl+c"});
+            QProcess::startDetached("xdotool", {"getactivewindow", "key", "ctrl+z"});
             /* FIXME:
                   * This would be the better way, but getting: undefined symbol: xcb_key_symbols_get_keycode
                  xcb_connection_t *c = QX11Info::connection();
