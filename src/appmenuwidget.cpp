@@ -1550,12 +1550,27 @@ AboutDialog::AboutDialog(QWidget *parent) : QDialog(parent)
             helloSystemInfo = "</p>helloSystem commit: <a href='" + url + "'>" + sha + "</a></p>";
         }
 
+        QString gpu = tr("Unknown");
+        // The following works on FreeBSD with initgfx
+        QFile file("/var/log/Xorg.0.log");
+        if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            QTextStream in(&file);
+            while (!in.atEnd()) {
+                QString line = in.readLine();
+                if (line.contains("-->Device")) {
+                    gpu = line.split('"')[1];
+                }
+            }
+            file.close();
+        }
+
         _imageLabel->setPixmap(QPixmap(icon));
         _textLabel->setText("<center><h3>" + vendorname + " " + productname  + "</h3>" + \
                             "<p>" + operatingsystem +"</p><small>" + \
                             "<p>FreeBSD kernel version: " + kernelVersion +"<br>" + \
                             "FreeBSD userland version: " + userlandVersion + "</p>" + \
                             "<p>Processor: " + cpu +"<br>" + \
+                            "Graphics: " + gpu +"<br>" + \
                             "Memory: " + QString::number(roundedMem) +" GiB<br>" + \
                             helloSystemInfo + \
                             "<p><a href='file:///COPYRIGHT'>FreeBSD copyright information</a><br>" + \
