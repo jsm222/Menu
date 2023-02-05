@@ -592,9 +592,6 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
     connect(m_appMenuModel,&AppMenuModel::menuAboutToBeImported,this,&AppMenuWidget::menuAboutToBeImported);
     connect(m_appMenuModel,&AppMenuModel::menuImported,this,[this,traverse](QString serviceName) {
 
-
-
-
         m_wasVisible.clear();
         if(m_appMenuModel->menuAvailable()) {
 
@@ -742,6 +739,105 @@ void AppMenuWidget::searchMenu() {
         }
     }
 
+    QMimeDatabase mimeDatabase;
+
+    // If the search first word is found on the $PATH, use it like a launcher does
+    // TODO: Only do this if we have NOT found applications with the same name
+
+    // Check whether it is on the $PATH and is executable
+    if(searchString != "") {
+        QString command= searchString.split(" ").first();
+        QString pathEnv = getenv("PATH");
+        QStringList directories = pathEnv.split(":");
+        bool found = false;
+        for (const QString &directory : directories) {
+            QFile file(directory + "/" + command);
+            if (file.exists() && (file.permissions() & QFileDevice::ExeUser)) {
+                found = true;
+                break;
+            }
+        }
+
+        if (found) {
+            qDebug() << command << "found on the $PATH";
+
+            m_searchMenu->addSeparator();
+
+            QAction *res = new QAction();
+            res->setText(searchString);
+            res->setToolTip(searchString);
+            QIcon icon = QIcon::fromTheme("terminal");
+            res->setIcon(icon);
+            res->setIconVisibleInMenu(true);
+            res->setProperty("path", searchString);
+            connect(res,&QAction::triggered,this,[this, res]{
+                QProcess p;
+                p.setProgram("launch");
+                QString path = res->property("path").toString();
+                QStringList arguments = QProcess::splitCommand(path);
+                arguments.prepend("-e");
+                arguments.prepend("QTerminal"); // FIXME: Would be nice to keep it open; https://github.com/lxqt/qterminal/issues/1030
+                qDebug() << "Executing:" << p.program(), p.arguments();
+                p.setArguments(arguments);
+                p.startDetached();
+                searchLineEdit->setText("");
+                emit searchLineEdit->textChanged("");
+                m_searchMenu->close();
+            });
+
+            m_searchMenu->addAction(res);
+            searchResults << res; // The items in searchResults get removed when search results change
+        }
+    }
+
+
+    // If the search starts with "/", then see whether we have a path there
+    if(searchString.startsWith("/") || searchString.startsWith("~")){
+
+        m_searchMenu->addSeparator();
+
+        searchString.replace("~", QDir::homePath());
+
+        if(QFileInfo::exists(searchString) == true) {
+            QMimeType mimeType;
+            mimeType = mimeDatabase.mimeTypeForFile(QFileInfo(searchString));
+            QAction *res = new QAction();
+            res->setText(searchString);
+            res->setToolTip(searchString);
+            QIcon icon = QIcon::fromTheme(mimeType.iconName());
+            res->setIcon(icon);
+            res->setIconVisibleInMenu(true);
+            res->setProperty("path", searchString);
+            connect(res,&QAction::triggered,this,[this, res]{
+                openPath(res);
+                searchLineEdit->setText("");
+                emit searchLineEdit->textChanged("");
+                m_searchMenu->close();
+            });
+
+            m_searchMenu->addAction(res);
+            searchResults << res; // The items in searchResults get removed when search results change
+        }
+
+        // FIXME: Trying to populate the menu with paths that start with what has been entered. This is not working yet. Why?
+        // Note that the completer is working; we can see a popup for a split-second coming from the completer, but it gets
+        // covered by our search results menu quickly. We want to put the search results into this menu insteadf of the
+        // popup drawn by the completer. How?
+        auto completer = new QCompleter(this);
+        QFileSystemModel *fsModel = new QFileSystemModel(completer);
+        fsModel->setFilter(QDir::Dirs|QDir::Drives|QDir::NoDotAndDotDot|QDir::AllDirs); // Only directories, no files
+        completer->setModel(fsModel);
+        fsModel->setRootPath(QString());
+        searchLineEdit->setCompleter(completer);
+        for (int i = 0; i < fsModel->rowCount(); ++i) {
+            QModelIndex index = fsModel->index(i, 0);
+            QString text = fsModel->data(index, Qt::DisplayRole).toString();
+            QAction *action = new QAction(text, this);
+            m_searchMenu->addAction(action);
+        }
+
+        return; // Don't show any other results in this case
+    }
 
     std::function<int(QModelIndex idx,int depth)> setResultVisbileMbar =[this,searchString](QModelIndex idx,int depth) {
         QAction * action =idx.data().value<QAction*>();
@@ -861,50 +957,7 @@ void AppMenuWidget::searchMenu() {
         m_searchMenu->addAction(cpy);
     }
 
-    // probono: If the search starts with "/", then see whether we have a path there
-    QMimeDatabase mimeDatabase;
-    if(searchString.startsWith("/") || searchString.startsWith("~")){
 
-        searchString.replace("~", QDir::homePath());
-
-        if(QFileInfo::exists(searchString) == true) {
-            QMimeType mimeType;
-            mimeType = mimeDatabase.mimeTypeForFile(QFileInfo(searchString));
-            QAction *res = new QAction();
-            res->setText(searchString);
-            res->setToolTip(searchString);
-            QIcon icon = QIcon::fromTheme(mimeType.iconName());
-            res->setIcon(icon);
-            res->setIconVisibleInMenu(true);
-            res->setProperty("path", searchString);
-            connect(res,&QAction::triggered,this,[this, res]{
-                openPath(res);
-                searchLineEdit->setText("");
-                emit searchLineEdit->textChanged("");
-                m_searchMenu->close();
-            });
-
-            m_searchMenu->addAction(res);
-            searchResults << res; // The items in searchResults get removed when search results change
-        }
-
-        // FIXME: Trying to populate the menu with paths that start with what has been entered. This is not working yet. Why?
-        // Note that the completer is working; we can see a popup for a split-second coming from the completer, but it gets
-        // covered by our search results menu quickly. We want to put the search results into this menu insteadf of the
-        // popup drawn by the completer. How?
-        auto completer = new QCompleter(this);
-        QFileSystemModel *fsModel = new QFileSystemModel(completer);
-        fsModel->setFilter(QDir::Dirs|QDir::Drives|QDir::NoDotAndDotDot|QDir::AllDirs); // Only directories, no files
-        completer->setModel(fsModel);
-        fsModel->setRootPath(QString());
-        searchLineEdit->setCompleter(completer);
-        for (int i = 0; i < fsModel->rowCount(); ++i) {
-            QModelIndex index = fsModel->index(i, 0);
-            QString text = fsModel->data(index, Qt::DisplayRole).toString();
-            QAction *action = new QAction(text, this);
-            m_searchMenu->addAction(action);
-        }
-    }
 
     // probono: Use Baloo API and add baloo search results to the Search menu; see below for a rudimentary non-API version
     if(searchString != "" && ! searchString.startsWith("/")) {
