@@ -109,12 +109,11 @@ private:
     void restoreWindow();
 
 public slots:
-
     void rebuildMenu();
     void findAppsInside(QStringList locationsContainingApps);
     void actionAbout();
     void actionLaunch(QAction *action);
-    void openBalooSearchResult(QAction *action);
+    void openPath(QAction *action);
     // void actionDisplays();
     // void actionShortcuts();
     // void actionSound();

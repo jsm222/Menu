@@ -43,6 +43,7 @@
 #include <QObject>
 #include <QSharedPointer>
 #include <QStandardPaths>
+#include <QCompleter>
 #include <QMouseEvent>
 #include <QTimer>
 #include <QComboBox>
@@ -66,6 +67,7 @@
 #include <sys/extattr.h>
 #endif
 
+#include <QFileSystemModel>
 #include <QKeySequence>
 #include <signal.h>
 
@@ -859,10 +861,53 @@ void AppMenuWidget::searchMenu() {
         m_searchMenu->addAction(cpy);
     }
 
+    // probono: If the search starts with "/", then see whether we have a path there
+    QMimeDatabase mimeDatabase;
+    if(searchString.startsWith("/") || searchString.startsWith("~")){
+
+        searchString.replace("~", QDir::homePath());
+
+        if(QFileInfo::exists(searchString) == true) {
+            QMimeType mimeType;
+            mimeType = mimeDatabase.mimeTypeForFile(QFileInfo(searchString));
+            QAction *res = new QAction();
+            res->setText(searchString);
+            res->setToolTip(searchString);
+            QIcon icon = QIcon::fromTheme(mimeType.iconName());
+            res->setIcon(icon);
+            res->setIconVisibleInMenu(true);
+            res->setProperty("path", searchString);
+            connect(res,&QAction::triggered,this,[this, res]{
+                openPath(res);
+                searchLineEdit->setText("");
+                emit searchLineEdit->textChanged("");
+                m_searchMenu->close();
+            });
+
+            m_searchMenu->addAction(res);
+            searchResults << res; // The items in searchResults get removed when search results change
+        }
+
+        // FIXME: Trying to populate the menu with paths that start with what has been entered. This is not working yet. Why?
+        // Note that the completer is working; we can see a popup for a split-second coming from the completer, but it gets
+        // covered by our search results menu quickly. We want to put the search results into this menu insteadf of the
+        // popup drawn by the completer. How?
+        auto completer = new QCompleter(this);
+        QFileSystemModel *fsModel = new QFileSystemModel(completer);
+        fsModel->setFilter(QDir::Dirs|QDir::Drives|QDir::NoDotAndDotDot|QDir::AllDirs); // Only directories, no files
+        completer->setModel(fsModel);
+        fsModel->setRootPath(QString());
+        searchLineEdit->setCompleter(completer);
+        for (int i = 0; i < fsModel->rowCount(); ++i) {
+            QModelIndex index = fsModel->index(i, 0);
+            QString text = fsModel->data(index, Qt::DisplayRole).toString();
+            QAction *action = new QAction(text, this);
+            m_searchMenu->addAction(action);
+        }
+    }
 
     // probono: Use Baloo API and add baloo search results to the Search menu; see below for a rudimentary non-API version
-    QMimeDatabase mimeDatabase;
-    if(searchString != "") {
+    if(searchString != "" && ! searchString.startsWith("/")) {
         searchResults << m_searchMenu->addSeparator(); // The items in searchResults get removed when search results change
         Baloo::Query query;
         query.setSearchString(searchString);
@@ -899,7 +944,7 @@ void AppMenuWidget::searchMenu() {
             res->setIconVisibleInMenu(true);
             res->setProperty("path", iter.filePath());
             connect(res,&QAction::triggered,this,[this, res]{
-                openBalooSearchResult(res);
+                openPath(res);
                 searchLineEdit->setText("");
                 emit searchLineEdit->textChanged("");
                 m_searchMenu->close();
@@ -1244,7 +1289,7 @@ void AppMenuWidget::actionLaunch(QAction *action)
 
 // probono: When a modifier key is held down, then just show the item in Filer;
 // otherwise launch it if it is an application bundle, or open it if it is not
-void AppMenuWidget::openBalooSearchResult(QAction *action)
+void AppMenuWidget::openPath(QAction *action)
 {
     QString pathToBeLaunched = action->property("path").toString();
     if (QApplication::keyboardModifiers()){
