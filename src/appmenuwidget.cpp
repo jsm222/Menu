@@ -742,14 +742,45 @@ void AppMenuWidget::searchMenu() {
     QMimeDatabase mimeDatabase;
 
     // Only initialize fscompleter if searhcstring hints a path;
-    if(searchString == "/" || searchString == "~") {
-      searchString.replace("~", QDir::homePath());
-      auto completer = new QCompleter(this);
-      QFileSystemModel *fsModel = new QFileSystemModel(completer);
-      fsModel->setFilter(QDir::Dirs|QDir::Drives|QDir::NoDotAndDotDot|QDir::AllDirs); // Only directories, no files
-      completer->setModel(fsModel);
-      fsModel->setRootPath(QString());
-      searchLineEdit->setCompleter(completer);
+if(searchString.startsWith( "/") || searchString == "~") {
+
+   if(searchString == "~") {
+
+
+      searchLineEdit->setText(QDir::homePath()+"/");
+      searchLineEdit->textChanged(QDir::homePath()+"/");
+      return;
+        }
+QString dirPath = searchString.mid(0,searchString.lastIndexOf("/")+1);
+
+
+      qDebug() << dirPath << __LINE__;
+      if(QFileInfo(dirPath).isDir()) {
+
+      QFileInfo fInfo = QFileInfo(dirPath);
+      if (fInfo.exists() && fInfo.isDir()) {
+          QDir dir(dirPath);
+          foreach(QFileInfo info, dir.entryInfoList(QDir::NoDotAndDotDot | QDir::AllDirs ))
+              {
+                  if (info.isFile())
+                  {
+                      //do something
+                  }
+                  if (info.isDir())
+                  {
+                      if(info.fileName().startsWith(searchString.mid(searchString.lastIndexOf("/"),-1).remove(0,1))) {
+                          QAction *dirAct = new QAction(info.fileName());
+                          m_searchMenu->addAction(dirAct);
+                          searchResults << dirAct;
+                      }
+                  }
+              }
+          }
+
+      }
+
+
+return;
     }
     // If the search first word is found on the $PATH, use it like a launcher does
     // TODO: Only do this if we have NOT found applications with the same name
