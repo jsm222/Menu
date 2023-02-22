@@ -741,6 +741,16 @@ void AppMenuWidget::searchMenu() {
 
     QMimeDatabase mimeDatabase;
 
+    // Only initialize fscompleter if searhcstring hints a path;
+    if(searchString == "/" || searchString == "~") {
+      searchString.replace("~", QDir::homePath());
+      auto completer = new QCompleter(this);
+      QFileSystemModel *fsModel = new QFileSystemModel(completer);
+      fsModel->setFilter(QDir::Dirs|QDir::Drives|QDir::NoDotAndDotDot|QDir::AllDirs); // Only directories, no files
+      completer->setModel(fsModel);
+      fsModel->setRootPath(QString());
+      searchLineEdit->setCompleter(completer);
+    }
     // If the search first word is found on the $PATH, use it like a launcher does
     // TODO: Only do this if we have NOT found applications with the same name
 
@@ -810,6 +820,7 @@ void AppMenuWidget::searchMenu() {
             res->setProperty("path", searchString);
             connect(res,&QAction::triggered,this,[this, res]{
                 openPath(res);
+		qDebug() << res <<__LINE__;
                 searchLineEdit->setText("");
                 emit searchLineEdit->textChanged("");
                 m_searchMenu->close();
@@ -819,22 +830,6 @@ void AppMenuWidget::searchMenu() {
             searchResults << res; // The items in searchResults get removed when search results change
         }
 
-        // FIXME: Trying to populate the menu with paths that start with what has been entered. This is not working yet. Why?
-        // Note that the completer is working; we can see a popup for a split-second coming from the completer, but it gets
-        // covered by our search results menu quickly. We want to put the search results into this menu insteadf of the
-        // popup drawn by the completer. How?
-        auto completer = new QCompleter(this);
-        QFileSystemModel *fsModel = new QFileSystemModel(completer);
-        fsModel->setFilter(QDir::Dirs|QDir::Drives|QDir::NoDotAndDotDot|QDir::AllDirs); // Only directories, no files
-        completer->setModel(fsModel);
-        fsModel->setRootPath(QString());
-        searchLineEdit->setCompleter(completer);
-        for (int i = 0; i < fsModel->rowCount(); ++i) {
-            QModelIndex index = fsModel->index(i, 0);
-            QString text = fsModel->data(index, Qt::DisplayRole).toString();
-            QAction *action = new QAction(text, this);
-            m_searchMenu->addAction(action);
-        }
 
         return; // Don't show any other results in this case
     }
