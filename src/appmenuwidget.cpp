@@ -742,43 +742,46 @@ void AppMenuWidget::searchMenu() {
     QMimeDatabase mimeDatabase;
 
     // Only initialize fscompleter if searhcstring hints a path;
-if(searchString.startsWith( "/") || searchString == "~") {
+    if(searchString.startsWith( "/") || searchString == "~") {
 
-   if(searchString == "~") {
-
-
+    if(searchString == "~") {
       searchLineEdit->setText(QDir::homePath()+"/");
       searchLineEdit->textChanged(QDir::homePath()+"/");
       return;
-        }
-QString dirPath = searchString.mid(0,searchString.lastIndexOf("/")+1);
+    }
 
-
+    QString dirPath = searchString.mid(0,searchString.lastIndexOf("/")+1);
       qDebug() << dirPath << __LINE__;
       if(QFileInfo(dirPath).isDir()) {
 
       QFileInfo fInfo = QFileInfo(dirPath);
       if (fInfo.exists() && fInfo.isDir()) {
           QDir dir(dirPath);
+          m_searchMenu->addSeparator();
           foreach(QFileInfo info, dir.entryInfoList(QDir::NoDotAndDotDot | QDir::AllDirs ))
               {
-                  if (info.isFile())
-                  {
-                      //do something
-                  }
                   if (info.isDir())
                   {
                       if(info.fileName().startsWith(searchString.mid(searchString.lastIndexOf("/"),-1).remove(0,1))) {
-                          QAction *dirAct = new QAction(info.fileName());
-                          m_searchMenu->addAction(dirAct);
-                          searchResults << dirAct;
+                          QAction *res = new QAction(info.fileName());
+                          // Folder icon
+                          QIcon icon = QIcon::fromTheme("folder");
+                             res->setIcon(icon);
+                        res->setIconVisibleInMenu(true);
+                        res->setProperty("path", info.filePath());
+                        connect(res,&QAction::triggered,this,[this, res]{
+                            openPath(res);
+                            searchLineEdit->setText("");
+                            emit searchLineEdit->textChanged("");
+                            m_searchMenu->close();
+                        });
+                          m_searchMenu->addAction(res);
+                          searchResults << res;
                       }
                   }
               }
           }
-
       }
-
 
 return;
     }
