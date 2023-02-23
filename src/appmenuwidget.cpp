@@ -1155,6 +1155,7 @@ void AppMenuWidget::updateMenu() {
         quitAction->setShortcut(QKeySequence("Ctrl+Q"));
         connect(quitAction, &QAction::triggered, [=]() {
             kill(info.pid(),SIGINT);
+            NETRootInfo(QX11Info::connection(), NET::CloseWindow).closeWindowRequest(KX11Extras::activeWindow()); // In case the application does not react to SIGINT
         });
 
         fallbackFileMenu->addAction(quitAction);
