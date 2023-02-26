@@ -423,7 +423,6 @@ void AppMenuWidget::findAppsInside(QStringList locationsContainingApps)
             submenu->setToolTipsVisible(true); // Seems to be needed here, too, so that the submenu items show their correct tooltips?
             // Make it possible to open the directory that contains the app by clicking on the submenu itself
             submenu->installEventFilter(this);
-            connect(submenu, SIGNAL(triggered(QAction*)), SLOT(actionLaunch(QAction*)));
         } else {
             continue;
         }
@@ -1046,7 +1045,7 @@ return;
             res->setText(iter.filePath().split("/").last());
             res->setToolTip(iter.filePath());
 
-            // If it is an application, show the icon
+            // If it is an application, add it to the menu using the application's icon
             if(iter.filePath().toLower().endsWith(".desktop") || iter.filePath().toLower().endsWith(".app") || iter.filePath().toLower().endsWith(".appdir") || iter.filePath().toLower().endsWith(".appimage")) {
                 addAppToMenu(iter.filePath(), m_searchMenu);
                 continue;
