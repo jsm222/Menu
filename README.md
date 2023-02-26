@@ -1,4 +1,4 @@
-# Menu [![Build Status](https://api.cirrus-ci.com/github/helloSystem/Menu.svg)](https://cirrus-ci.com/github/helloSystem/Menu) [![Translation status](https://hosted.weblate.org/widgets/hellosystem/-/menu/svg-badge.svg)](https://hosted.weblate.org/engage/hellosystem/)
+# Menu [![Build Status](https://api.cirrus-ci.com/github/helloSystem/Menu.svg)](https://cirrus-ci.com/github/helloSystem/Menu) [![Translation status](https://hosted.weblate.org/widgets/hellosystem/-/menu/svg-badge.svg)](https://hosted.weblate.org/engage/hellosystem/) [![Help Wanted Issues](https://img.shields.io/github/issues/helloSystem/Menu/help%20wanted)](https://github.com/helloSystem/Menu/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22)
 
 ![](Menubar.png)
 
