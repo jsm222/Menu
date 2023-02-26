@@ -140,6 +140,7 @@ private:
     void integrateSystemMenu(QMenuBar*);
     void searchEditingDone();
     void refreshTimer();
+    void addAppToMenu(QString candidate, QMenu *submenu);
 
 private:
 

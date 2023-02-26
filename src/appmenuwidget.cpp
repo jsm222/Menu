@@ -240,6 +240,145 @@ public:
     }
 };
 
+void AppMenuWidget::addAppToMenu(QString candidate, QMenu *submenu)
+{
+           // qDebug() << "probono: Processing" << candidate;
+            QString nameWithoutSuffix = QFileInfo(QDir(candidate).canonicalPath()).completeBaseName(); // baseName() gets it wrong e.g., when there are dots in version numbers; dereference symlink to candidate
+            QFileInfo file(candidate);
+            if (file.fileName().endsWith(".app")){
+                QString AppCand = QDir(candidate).canonicalPath() + "/" + nameWithoutSuffix; // Dereference symlink to candidate
+                // qDebug() << "################### Checking" << AppCand;
+                if(QFileInfo::exists(AppCand) == true) {
+                    // qDebug() << "# Found" << AppCand;
+                    QFileInfo fi(file.fileName());
+                    QString base = fi.completeBaseName();  // The name of the .app directory without suffix // baseName() gets it wrong e.g., when there are dots in version numbers
+                    QAction *action = submenu->addAction(base);
+                    connect(action,&QAction::triggered,this,[this, action]{
+                        actionLaunch(action);
+                        searchLineEdit->setText("");
+                        emit searchLineEdit->textChanged("");
+                        m_searchMenu->close();
+                    });
+                    searchResults << action; // The items in searchResults get removed when search results change
+                    action->setToolTip(file.absoluteFilePath());
+                    action->setProperty("path", file.absoluteFilePath());
+                    QString IconCand = QDir(candidate).canonicalPath() + "/Resources/" + nameWithoutSuffix + ".png";
+                    if(QFileInfo::exists(IconCand) == true) {
+                        // qDebug() << "#   Found icon" << IconCand;
+                        action->setIcon(QIcon(IconCand));
+                        action->setIconVisibleInMenu(true); // So that an icon is shown even though the theme sets Qt::AA_DontShowIconsInMenus
+                    }
+                }
+            }
+            else if (file.fileName().endsWith(".AppDir")) {
+                QString AppCand = QDir(candidate).canonicalPath() + "/" + "AppRun";
+                // qDebug() << "################### Checking" << AppCand;
+                if(QFileInfo::exists(AppCand) == true){
+                    // qDebug() << "# Found" << AppCand;
+                    QFileInfo fi(file.fileName());
+                    QString base = fi.completeBaseName(); // baseName() gets it wrong e.g., when there are dots in version numbers
+                    QStringList executableAndArgs = {AppCand};
+                    QAction *action = submenu->addAction(base);
+                    connect(action,&QAction::triggered,this,[this, action]{
+                        actionLaunch(action);
+                        searchLineEdit->setText("");
+                        emit searchLineEdit->textChanged("");
+                        m_searchMenu->close();
+                    });
+                    searchResults << action; // The items in searchResults get removed when search results change                   
+                    action->setToolTip(file.absoluteFilePath());
+                    action->setProperty("path", file.absoluteFilePath());
+                    QString IconCand = QDir(candidate).canonicalPath() + "/.DirIcon";
+                    if(QFileInfo::exists(IconCand) == true) {
+                        // qDebug() << "#   Found icon" << IconCand;
+                        action->setIcon(QIcon(IconCand));
+                        action->setIconVisibleInMenu(true); // So that an icon is shown even though the theme sets Qt::AA_DontShowIconsInMenus
+                    }
+                }
+            }
+            else if (file.fileName().endsWith(".desktop")) {
+                // .desktop file
+                qDebug() << "# Found" << file.fileName();
+                QFileInfo fi(file.fileName());
+                QString base = fi.completeBaseName(); // baseName() gets it wrong e.g., when there are dots in version numbers
+                QStringList executableAndArgs = {fi.absoluteFilePath()};
+                QSettings desktopFile(file.absoluteFilePath(), QSettings::IniFormat);
+                QString noDisplayCand = desktopFile.value("Desktop Entry/NoDisplay").toString();
+                if(noDisplayCand != "true") {
+                    QString name = desktopFile.value("Desktop Entry/Name").toString();
+                    QString IconCand = desktopFile.value("Desktop Entry/Icon").toString();
+                    if(name.isEmpty())
+                        name = base;
+                    QAction *action = submenu->addAction(name);
+                    connect(action,&QAction::triggered,this,[this, action]{
+                        actionLaunch(action);
+                        searchLineEdit->setText("");
+                        emit searchLineEdit->textChanged("");
+                        m_searchMenu->close();
+                    });
+                    searchResults << action; // The items in searchResults get removed when search results change
+                    // Finding the icon file is way too involved with XDG, but we are not implementing all edge cases
+                    // If you were doubting that XDG standards are overly complex, here is the proof...
+                    action->setIcon(QIcon::fromTheme(IconCand));
+                    QStringList iconSuffixes = {"", ".png", ".xpm", ".jpg", ".svg", ".icns"};
+                    if(IconCand.contains("/")) {
+                        if(QFileInfo::exists(IconCand)){
+                            action->setIcon(QIcon(IconCand));
+                        }
+                    } else if(QFileInfo("/usr/local/share/" + IconCand + "/icons/" + IconCand + ".png").exists()){
+                        for(const QString iconSuffix : iconSuffixes) {
+                            action->setIcon(QIcon("/usr/local/share/" + IconCand + "/icons/" + IconCand + iconSuffix));
+                        }
+                    } else {
+                        for(const QString iconSuffix : iconSuffixes) {
+                            for (QString pixmapsPath : QStandardPaths::standardLocations(QStandardPaths::GenericDataLocation)) {
+                                QString iconCandFile = pixmapsPath + "/pixmaps/" + IconCand + iconSuffix;
+                                qDebug() << iconCandFile;
+                                if (QFileInfo::exists(iconCandFile)){
+                                    qDebug() << "Found!";
+                                    action->setIcon(QIcon(iconCandFile));
+                                }
+                            }
+                        }
+                    }
+
+                    action->setIconVisibleInMenu(true); // So that an icon is shown even though the theme sets Qt::AA_DontShowIconsInMenus
+                    action->setToolTip(file.absoluteFilePath());
+                    action->setProperty("path", file.absoluteFilePath());
+                    // action->setDisabled(true); // As a reminder that we consider those legacy and encourage people to swtich
+                }
+
+            }
+            else if (file.fileName().endsWith(".AppImage") || file.fileName().endsWith(".appimage")) {
+                // .desktop file
+                // qDebug() << "# Found" << file.fileName();
+                QFileInfo fi(file.fileName());
+                QString base = fi.completeBaseName(); // baseName() gets it wrong e.g., when there are dots in version numbers
+                QStringList executableAndArgs = {fi.absoluteFilePath()};
+                QAction *action = submenu->addAction(base);
+                connect(action,&QAction::triggered,this,[this, action]{
+                    actionLaunch(action);
+                    searchLineEdit->setText("");
+                    emit searchLineEdit->textChanged("");
+                    m_searchMenu->close();
+                });
+                searchResults << action; // The items in searchResults get removed when search results change
+                action->setToolTip(file.absoluteFilePath());
+                action->setProperty("path", file.absoluteFilePath());
+                QString IconCand = Thumbnail(QDir(candidate).absolutePath(), QCryptographicHash::Md5,Thumbnail::ThumbnailSizeNormal, nullptr).getIconPath();
+                // qDebug() << "#   ############################### thumbnail for" << QDir(candidate).absolutePath();
+                if(QFileInfo::exists(IconCand) == true) {
+                    // qDebug() << "#   Found thumbnail" << IconCand;
+                    action->setIcon(QIcon(IconCand));
+                    action->setIconVisibleInMenu(true); // So that an icon is shown even though the theme sets Qt::AA_DontShowIconsInMenus
+                } else {
+                    // TODO: Request thumbnail; https://github.com/KDE/kio-extras/blob/master/thumbnail/thumbnail.cpp
+                    // qDebug() << "#   Did not find thumbnail" << IconCand << "TODO: Request it from thumbnailer";
+                }
+            }
+
+}
+
 void AppMenuWidget::findAppsInside(QStringList locationsContainingApps)
 // probono: Check locationsContainingApps for applications and add them to the m_systemMenu.
 // TODO: Nested submenus rather than flat ones with '▸'
@@ -298,115 +437,13 @@ void AppMenuWidget::findAppsInside(QStringList locationsContainingApps)
             if (candidate.endsWith("/Autostart") == true) {
                 continue;
             }
-            // qDebug() << "probono: Processing" << candidate;
-            QString nameWithoutSuffix = QFileInfo(QDir(candidate).canonicalPath()).completeBaseName(); // baseName() gets it wrong e.g., when there are dots in version numbers; dereference symlink to candidate
             QFileInfo file(candidate);
-            if (file.fileName().endsWith(".app")){
-                QString AppCand = QDir(candidate).canonicalPath() + "/" + nameWithoutSuffix; // Dereference symlink to candidate
-                // qDebug() << "################### Checking" << AppCand;
-                if(QFileInfo::exists(AppCand) == true) {
-                    // qDebug() << "# Found" << AppCand;
-                    QFileInfo fi(file.fileName());
-                    QString base = fi.completeBaseName();  // The name of the .app directory without suffix // baseName() gets it wrong e.g., when there are dots in version numbers
-                    QAction *action = submenu->addAction(base);
-                    action->setToolTip(file.absoluteFilePath());
-                    action->setProperty("path", file.absoluteFilePath());
-                    QString IconCand = QDir(candidate).canonicalPath() + "/Resources/" + nameWithoutSuffix + ".png";
-                    if(QFileInfo::exists(IconCand) == true) {
-                        // qDebug() << "#   Found icon" << IconCand;
-                        action->setIcon(QIcon(IconCand));
-                        action->setIconVisibleInMenu(true); // So that an icon is shown even though the theme sets Qt::AA_DontShowIconsInMenus
-                    }
-                }
-            }
-            else if (file.fileName().endsWith(".AppDir")) {
-                QString AppCand = QDir(candidate).canonicalPath() + "/" + "AppRun";
-                // qDebug() << "################### Checking" << AppCand;
-                if(QFileInfo::exists(AppCand) == true){
-                    // qDebug() << "# Found" << AppCand;
-                    QFileInfo fi(file.fileName());
-                    QString base = fi.completeBaseName(); // baseName() gets it wrong e.g., when there are dots in version numbers
-                    QStringList executableAndArgs = {AppCand};
-                    QAction *action = submenu->addAction(base);
-                    action->setToolTip(file.absoluteFilePath());
-                    action->setProperty("path", file.absoluteFilePath());
-                    QString IconCand = QDir(candidate).canonicalPath() + "/.DirIcon";
-                    if(QFileInfo::exists(IconCand) == true) {
-                        // qDebug() << "#   Found icon" << IconCand;
-                        action->setIcon(QIcon(IconCand));
-                        action->setIconVisibleInMenu(true); // So that an icon is shown even though the theme sets Qt::AA_DontShowIconsInMenus
-                    }
-                }
-            }
-            else if (file.fileName().endsWith(".desktop")) {
-                // .desktop file
-                qDebug() << "# Found" << file.fileName();
-                QFileInfo fi(file.fileName());
-                QString base = fi.completeBaseName(); // baseName() gets it wrong e.g., when there are dots in version numbers
-                QStringList executableAndArgs = {fi.absoluteFilePath()};
-                QSettings desktopFile(file.absoluteFilePath(), QSettings::IniFormat);
-                QString noDisplayCand = desktopFile.value("Desktop Entry/NoDisplay").toString();
-                if(noDisplayCand != "true") {
-                    QString name = desktopFile.value("Desktop Entry/Name").toString();
-                    QString IconCand = desktopFile.value("Desktop Entry/Icon").toString();
-                    if(name.isEmpty())
-                        name = base;
-                    QAction *action = submenu->addAction(name);
-                    // Finding the icon file is way too involved with XDG, but we are not implementing all edge cases
-                    // If you were doubting that XDG standards are overly complex, here is the proof...
-                    action->setIcon(QIcon::fromTheme(IconCand));
-                    QStringList iconSuffixes = {"", ".png", ".xpm", ".jpg", ".svg", ".icns"};
-                    if(IconCand.contains("/")) {
-                        if(QFileInfo::exists(IconCand)){
-                            action->setIcon(QIcon(IconCand));
-                        }
-                    } else if(QFileInfo("/usr/local/share/" + IconCand + "/icons/" + IconCand + ".png").exists()){
-                        for(const QString iconSuffix : iconSuffixes) {
-                            action->setIcon(QIcon("/usr/local/share/" + IconCand + "/icons/" + IconCand + iconSuffix));
-                        }
-                    } else {
-                        for(const QString iconSuffix : iconSuffixes) {
-                            for (QString pixmapsPath : QStandardPaths::standardLocations(QStandardPaths::GenericDataLocation)) {
-                                QString iconCandFile = pixmapsPath + "/pixmaps/" + IconCand + iconSuffix;
-                                qDebug() << iconCandFile;
-                                if (QFileInfo::exists(iconCandFile)){
-                                    qDebug() << "Found!";
-                                    action->setIcon(QIcon(iconCandFile));
-                                }
-                            }
-                        }
-                    }
-
-                    action->setIconVisibleInMenu(true); // So that an icon is shown even though the theme sets Qt::AA_DontShowIconsInMenus
-                    // action->setToolTip("TODO: Convert " + file.absoluteFilePath() + " to an .app bundle");
-                    action->setProperty("path", file.absoluteFilePath());
-                    // action->setDisabled(true); // As a reminder that we consider those legacy and encourage people to swtich
-                }
-
-            }
-            else if (file.fileName().endsWith(".AppImage") || file.fileName().endsWith(".appimage")) {
-                // .desktop file
-                // qDebug() << "# Found" << file.fileName();
-                QFileInfo fi(file.fileName());
-                QString base = fi.completeBaseName(); // baseName() gets it wrong e.g., when there are dots in version numbers
-                QStringList executableAndArgs = {fi.absoluteFilePath()};
-                QAction *action = submenu->addAction(base);
-                action->setProperty("path", file.absoluteFilePath());
-                QString IconCand = Thumbnail(QDir(candidate).absolutePath(), QCryptographicHash::Md5,Thumbnail::ThumbnailSizeNormal, nullptr).getIconPath();
-                // qDebug() << "#   ############################### thumbnail for" << QDir(candidate).absolutePath();
-                if(QFileInfo::exists(IconCand) == true) {
-                    // qDebug() << "#   Found thumbnail" << IconCand;
-                    action->setIcon(QIcon(IconCand));
-                    action->setIconVisibleInMenu(true); // So that an icon is shown even though the theme sets Qt::AA_DontShowIconsInMenus
-                } else {
-                    // TODO: Request thumbnail; https://github.com/KDE/kio-extras/blob/master/thumbnail/thumbnail.cpp
-                    // qDebug() << "#   Did not find thumbnail" << IconCand << "TODO: Request it from thumbnailer";
-                }
-            }
-            else if (locationsContainingApps.contains(candidate) == false && file.isDir() && candidate.endsWith("/..") == false && candidate.endsWith("/.") == false && candidate.endsWith(".app") == false && candidate.endsWith(".AppDir") == false) {
+            if (locationsContainingApps.contains(candidate) == false && file.isDir() && candidate.endsWith("/..") == false && candidate.endsWith("/.") == false && candidate.endsWith(".app") == false && candidate.endsWith(".AppDir") == false) {
                 // qDebug() << "# Found" << file.fileName() << ", a directory that is not an .app bundle nor an .AppDir";
                 QStringList locationsToBeChecked({candidate});
                 findAppsInside(locationsToBeChecked);
+            } else {
+                addAppToMenu(candidate, submenu);
             }
         }
     }
@@ -1009,7 +1046,12 @@ return;
             res->setText(iter.filePath().split("/").last());
             res->setToolTip(iter.filePath());
 
-
+            // If it is an application, show the icon
+            if(iter.filePath().toLower().endsWith(".desktop") || iter.filePath().toLower().endsWith(".app") || iter.filePath().toLower().endsWith(".appdir") || iter.filePath().toLower().endsWith(".appimage")) {
+                addAppToMenu(iter.filePath(), m_searchMenu);
+                continue;
+            }
+            
             // If there is a thumbnail, show it
             QString IconCand = Thumbnail(QDir(iter.filePath()).absolutePath(), QCryptographicHash::Md5,Thumbnail::ThumbnailSizeNormal, nullptr).getIconPath();
             // qDebug() << "#   ############################### thumbnail for" << QDir(iter.filePath()).absolutePath();
