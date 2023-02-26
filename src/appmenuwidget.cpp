@@ -1146,16 +1146,26 @@ void AppMenuWidget::updateMenu() {
         QMenu *fallbackFileMenu = this->m_menuBar->addMenu(tr("File"));
         QAction *closeAction = new QAction(tr("Close"));
         closeAction->setShortcut(QKeySequence("Ctrl+W"));
+        closeAction->setObjectName("close");
+        // Register as a global shortcut that cannot be overridden by the application
+        KGlobalAccel::self()->setShortcut(closeAction, QList<QKeySequence>(), KGlobalAccel::NoAutoloading);
         connect(closeAction, &QAction::triggered, [=]() {
-            NETRootInfo(QX11Info::connection(), NET::CloseWindow).closeWindowRequest(KX11Extras::activeWindow());
+            // Simulate sending Alt+F4 to the application
+            QKeyEvent *event = new QKeyEvent(QEvent::KeyPress, Qt::Key_F4, Qt::AltModifier);
+            QCoreApplication::sendEvent(QApplication::focusWidget(), event);
         });
         fallbackFileMenu->addAction(closeAction);
         fallbackFileMenu->addSeparator();
         QAction *quitAction = new QAction(tr("Quit"));
         quitAction->setShortcut(QKeySequence("Ctrl+Q"));
+        quitAction->setObjectName("quit");
+        // Register as a global shortcut that cannot be overridden by the application
+        KGlobalAccel::self()->setShortcut(quitAction, QList<QKeySequence>(), KGlobalAccel::NoAutoloading);
         connect(quitAction, &QAction::triggered, [=]() {
+            QWidget *w = QApplication::focusWidget();
             kill(info.pid(),SIGINT);
-            NETRootInfo(QX11Info::connection(), NET::CloseWindow).closeWindowRequest(KX11Extras::activeWindow()); // In case the application does not react to SIGINT
+            QKeyEvent *event = new QKeyEvent(QEvent::KeyPress, Qt::Key_F4, Qt::AltModifier);
+            QCoreApplication::sendEvent(w, event);
         });
 
         fallbackFileMenu->addAction(quitAction);
@@ -1543,8 +1553,6 @@ AboutDialog::AboutDialog(QWidget *parent) : QDialog(parent)
     });
     _hardwareProbeButton->setEnabled(QFile::exists("/Applications/Utilities/Hardware Probe.app"));
 
-    QString icon = "/usr/local/share/icons/elementary-xfce/devices/128/computer-hello.png";
-
 #if defined(Q_OS_FREEBSD)
     QProcess p;
     p.setProgram("kenv");
@@ -1556,18 +1564,20 @@ AboutDialog::AboutDialog(QWidget *parent) : QDialog(parent)
     chassisType = chassisType.trimmed();
     qDebug() << "Chassis type:" << chassisType;
 
+    QIcon icon = QIcon::fromTheme("computer");
     // https://www.dmtf.org/sites/default/files/standards/documents/DSP0134_3.2.0.pdf#%5B%7B%22num%22%3A105%2C%22gen%22%3A0%7D%2C%7B%22name%22%3A%22XYZ%22%7D%2C70%2C555%2C0%5D
     if (chassisType.compare("Portable", Qt::CaseInsensitive) || chassisType.compare("Laptop", Qt::CaseInsensitive)
         || chassisType.compare("Notebook", Qt::CaseInsensitive) || chassisType.compare("Hand Held", Qt::CaseInsensitive)
         || chassisType.compare("Sub Notebook", Qt::CaseInsensitive) || chassisType.compare("Convertible", Qt::CaseInsensitive)) {
-        icon = "/usr/local/share/icons/elementary-xfce/devices/128/computer-laptop.png";
+        QIcon icon = QIcon::fromTheme("computer-laptop");
     }
 #endif
 
     if (QApplication::keyboardModifiers()){
         setWindowTitle(tr("About helloDesktop"));
 
-        _imageLabel->setPixmap(QPixmap(icon));
+        QPixmap pixmap = icon.pixmap(QSize(128, 128));
+        _imageLabel->setPixmap(pixmap);
         _textLabel->setText("<center><h3>helloDesktop</h3>"
                             "<p>Lovingly crafted by true connoisseurs<br>of the desktop metaphor</p>"
                             "<p>Inspired by the timeless vision<br>of Bill Atkinson and Andy Hertzfeld</p>"
@@ -1693,7 +1703,8 @@ AboutDialog::AboutDialog(QWidget *parent) : QDialog(parent)
             file.close();
         }
 
-        _imageLabel->setPixmap(QPixmap(icon));
+        QPixmap pixmap = icon.pixmap(QSize(128, 128)); // create a QPixmap from the QIcon
+        _imageLabel->setPixmap(pixmap);
         _textLabel->setText("<center><h3>" + vendorname + " " + productname  + "</h3>" + \
                             "<p>" + operatingsystem +"</p><small>" + \
                             "<p>FreeBSD kernel version: " + kernelVersion +"<br>" + \
