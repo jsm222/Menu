@@ -1566,11 +1566,13 @@ AboutDialog::AboutDialog(QWidget *parent) : QDialog(parent)
 
     QIcon icon = QIcon::fromTheme("computer");
     // https://www.dmtf.org/sites/default/files/standards/documents/DSP0134_3.2.0.pdf#%5B%7B%22num%22%3A105%2C%22gen%22%3A0%7D%2C%7B%22name%22%3A%22XYZ%22%7D%2C70%2C555%2C0%5D
-    if (chassisType.compare("Portable", Qt::CaseInsensitive) || chassisType.compare("Laptop", Qt::CaseInsensitive)
-        || chassisType.compare("Notebook", Qt::CaseInsensitive) || chassisType.compare("Hand Held", Qt::CaseInsensitive)
-        || chassisType.compare("Sub Notebook", Qt::CaseInsensitive) || chassisType.compare("Convertible", Qt::CaseInsensitive)) {
-        QIcon icon = QIcon::fromTheme("computer-laptop");
+
+    // If chassis type is "Notebook" or "Laptop" or "Portable" or "Hand Held" or "Sub Notebook" or "Convertible"
+    // then use "computer-laptop" icon
+    if (chassisType == "Notebook" || chassisType == "Laptop" || chassisType == "Portable" || chassisType == "Hand Held" || chassisType == "Sub Notebook" || chassisType == "Convertible") {
+        icon = QIcon::fromTheme("computer-laptop");
     }
+
 #endif
 
     if (QApplication::keyboardModifiers()){
