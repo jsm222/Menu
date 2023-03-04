@@ -15,10 +15,10 @@ static const QString ObjectPath = "/Audio";
 static const QString Interface = "org.panda.Audio";
 
 VolumeWidget::VolumeWidget(QWidget *parent)
-  : QWidget(parent),
-    m_iconButton(new QToolButton),
-    m_slider(new QSlider(Qt::Vertical)),
-    m_firstLoad(true)
+    : QWidget(parent),
+      m_iconButton(new QToolButton),
+      m_slider(new QSlider(Qt::Vertical)),
+      m_firstLoad(true)
 {
     QVBoxLayout *layout = new QVBoxLayout;
     layout->setMargin(0);
@@ -40,8 +40,8 @@ VolumeWidget::VolumeWidget(QWidget *parent)
     initSignal();
     QTimer::singleShot(100, this, &VolumeWidget::initUI);
 
-    QDBusServiceWatcher *serviceWatcher = new QDBusServiceWatcher(Service, QDBusConnection::sessionBus(),
-                                                                  QDBusServiceWatcher::WatchForRegistration);
+    QDBusServiceWatcher *serviceWatcher = new QDBusServiceWatcher(
+            Service, QDBusConnection::sessionBus(), QDBusServiceWatcher::WatchForRegistration);
     connect(serviceWatcher, &QDBusServiceWatcher::serviceRegistered, this, [=] {
         initSignal();
         initUI();
@@ -83,10 +83,10 @@ void VolumeWidget::initSignal()
     if (!iface.isValid())
         return;
 
-    QDBusConnection::sessionBus().connect(Service, ObjectPath, Interface, "volumeChanged",
-                                          this, SLOT(handleVolumeChanged(int)));
-    QDBusConnection::sessionBus().connect(Service, ObjectPath, Interface, "muteChanged",
-                                          this, SLOT(handleMuteChanged(bool)));
+    QDBusConnection::sessionBus().connect(Service, ObjectPath, Interface, "volumeChanged", this,
+                                          SLOT(handleVolumeChanged(int)));
+    QDBusConnection::sessionBus().connect(Service, ObjectPath, Interface, "muteChanged", this,
+                                          SLOT(handleMuteChanged(bool)));
 }
 
 void VolumeWidget::toggleMute()

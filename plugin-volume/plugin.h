@@ -12,11 +12,7 @@ class Plugin : public QObject, StatusBarExtension
     Q_INTERFACES(StatusBarExtension)
 
 public:
-    explicit Plugin(QObject *parent = nullptr)
-      : QObject(parent),
-        m_widget(new ControlWidget)
-    {
-    }
+    explicit Plugin(QObject *parent = nullptr) : QObject(parent), m_widget(new ControlWidget) { }
 
     QString pluginName() override { return "volume"; }
     QWidget *itemWidget() override { return m_widget; }

@@ -29,15 +29,9 @@
 #include <QFileInfo>
 #include <QDateTime>
 
-Thumbnail::Thumbnail(const QString &filename,
-                     QCryptographicHash::Algorithm hash,
-                     int iconSize,
+Thumbnail::Thumbnail(const QString &filename, QCryptographicHash::Algorithm hash, int iconSize,
                      QObject *parent)
-    : QObject(parent)
-    , _filename(filename)
-    , _hash(hash)
-    , _iconSize(iconSize)
-    , _valid(false)
+    : QObject(parent), _filename(filename), _hash(hash), _iconSize(iconSize), _valid(false)
 {
 }
 
@@ -64,7 +58,9 @@ const QString Thumbnail::getCachePath()
     }
     if (!QFile::exists(result)) {
         QDir dir(result);
-        if (!dir.mkpath(result)) { result.clear(); }
+        if (!dir.mkpath(result)) {
+            result.clear();
+        }
     }
     return result;
 }
@@ -73,7 +69,9 @@ const QString Thumbnail::getIconPath()
 {
     QString cache = getCachePath();
     QString hash = getFileHash();
-    if (cache.isEmpty() || hash.isEmpty()) { return QString(); }
+    if (cache.isEmpty() || hash.isEmpty()) {
+        return QString();
+    }
     return QString("%1/%2.png").arg(cache, hash);
 }
 
@@ -84,16 +82,14 @@ bool Thumbnail::isValid()
 
 const QString Thumbnail::getFileHash()
 {
-    if (!QFile::exists(_filename)) { return QString(); }
-    return QString(QCryptographicHash::hash(QUrl::fromLocalFile(_filename).toEncoded(), _hash).toHex());
+    if (!QFile::exists(_filename)) {
+        return QString();
+    }
+    return QString(
+            QCryptographicHash::hash(QUrl::fromLocalFile(_filename).toEncoded(), _hash).toHex());
 }
 
-Thumbnails::Thumbnails(QObject *parent)
-    : QObject(parent)
-    , _busy(false)
-    , _enabled(true)
-{
-}
+Thumbnails::Thumbnails(QObject *parent) : QObject(parent), _busy(false), _enabled(true) { }
 
 bool Thumbnails::isBusy()
 {
@@ -110,20 +106,14 @@ bool Thumbnails::isEnabled()
     return _enabled;
 }
 
-void Thumbnails::requestIcon(const QString &filename,
-                             QCryptographicHash::Algorithm hash,
+void Thumbnails::requestIcon(const QString &filename, QCryptographicHash::Algorithm hash,
                              int iconSize)
 {
     qDebug() << "requestIcon" << filename << hash << iconSize;
-    QtConcurrent::run(this,
-                      &Thumbnails::getIcon,
-                      filename,
-                      hash,
-                      iconSize);
+    QtConcurrent::run(this, &Thumbnails::getIcon, filename, hash, iconSize);
 }
 
-void Thumbnails::requestIcons(const QStringList &filenames,
-                              QCryptographicHash::Algorithm hash,
+void Thumbnails::requestIcons(const QStringList &filenames, QCryptographicHash::Algorithm hash,
                               int iconSize)
 {
     for (int i = 0; i < filenames.size(); ++i) {
@@ -131,14 +121,16 @@ void Thumbnails::requestIcons(const QStringList &filenames,
     }
 }
 
-void Thumbnails::getIcon(const QString &filename,
-                         QCryptographicHash::Algorithm hash,
-                         int iconSize)
+void Thumbnails::getIcon(const QString &filename, QCryptographicHash::Algorithm hash, int iconSize)
 {
-    if (!isEnabled()) { return; }
+    if (!isEnabled()) {
+        return;
+    }
     _busy = true;
     qDebug() << "getIcon" << filename << hash << iconSize;
     Thumbnail thumb(filename, hash, iconSize);
     _busy = false;
-    if (thumb.isValid()) { emit foundIcon(filename, thumb.getIconPath()); }
+    if (thumb.isValid()) {
+        emit foundIcon(filename, thumb.getIconPath());
+    }
 }

@@ -42,15 +42,15 @@ class QDBusServiceWatcher;
 class AppMenuModel;
 class MainWindow;
 
-class HMenu :public QMenu {
+class HMenu : public QMenu
+{
 
- Q_OBJECT
+    Q_OBJECT
 
 public:
-    HMenu(QWidget* parent=0):QMenu(parent) {
-        m_locale_lang = QLocale().language();
-    }
+    HMenu(QWidget *parent = 0) : QMenu(parent) { m_locale_lang = QLocale().language(); }
     std::chrono::high_resolution_clock::time_point lastOpened;
+
 protected:
     /**
      * Handles the given `QActionEvent` for the `HMenu`.
@@ -66,51 +66,55 @@ protected:
      *
      * @param e The `QActionEvent` to handle.
      */
-     void actionEvent(QActionEvent *e) override;
+    void actionEvent(QActionEvent *e) override;
 
 private:
-     QLocale::Language m_locale_lang;
-
+    QLocale::Language m_locale_lang;
 };
 
 class HDBusMenuImporter : public DBusMenuImporter
 {
 public:
-    HDBusMenuImporter(const QString &service, const QString &path, const enum DBusMenuImporterType type, QObject *parent=0)
-    : DBusMenuImporter(service, path, type,parent)
+    HDBusMenuImporter(const QString &service, const QString &path,
+                      const enum DBusMenuImporterType type, QObject *parent = 0)
+        : DBusMenuImporter(service, path, type, parent)
 
     {
         m_reshowTimer = new QTimer();
-        connect(m_reshowTimer,&QTimer::timeout,this,[this] {
-        if(recent) {
-                    recent->blockSignals(true);
-                    qDebug() << "reshow" <<__LINE__ <<recent->title();
-                    qobject_cast<QMenuBar*>(recent->parent()->parent())->setActiveAction(recent->menuAction());
-                    recent->blockSignals(false);
-                    recent=nullptr;
-        }
-    });
+        connect(m_reshowTimer, &QTimer::timeout, this, [this] {
+            if (recent) {
+                recent->blockSignals(true);
+                qDebug() << "reshow" << __LINE__ << recent->title();
+                qobject_cast<QMenuBar *>(recent->parent()->parent())
+                        ->setActiveAction(recent->menuAction());
+                recent->blockSignals(false);
+                recent = nullptr;
+            }
+        });
     }
 
     /* Workaround for e.g., Falkon History menu */
-    QMenu *createMenu(QWidget *parent) override {
-        HMenu * menu = new HMenu(parent);
+    QMenu *createMenu(QWidget *parent) override
+    {
+        HMenu *menu = new HMenu(parent);
         // Make some workarounds for focus loss which  calls closeAllPoupus();
-        if(parent && qobject_cast<QMenuBar*>(parent->parent())) {
-            connect(menu,&QMenu::aboutToShow,this,[this] {
-                recent = qobject_cast<HMenu*>(sender());
-                qobject_cast<HMenu*>(sender())->lastOpened = std::chrono::high_resolution_clock::now();
+        if (parent && qobject_cast<QMenuBar *>(parent->parent())) {
+            connect(menu, &QMenu::aboutToShow, this, [this] {
+                recent = qobject_cast<HMenu *>(sender());
+                qobject_cast<HMenu *>(sender())->lastOpened =
+                        std::chrono::high_resolution_clock::now();
                 m_reshowTimer->stop();
-
             });
-            connect(menu,&QMenu::aboutToHide,this,[this] {
-                HMenu *reshow = qobject_cast<HMenu*>(sender());
+            connect(menu, &QMenu::aboutToHide, this, [this] {
+                HMenu *reshow = qobject_cast<HMenu *>(sender());
 
                 m_reshowTimer->setSingleShot(true);
-                m_reshowTimer->setInterval(100); //if you show another menu within 100ms the reshow action is canceled.
-                std::chrono::duration<double,std::milli> dur = std::chrono::high_resolution_clock::now()-reshow->lastOpened;
+                m_reshowTimer->setInterval(100); // if you show another menu within 100ms the reshow
+                                                 // action is canceled.
+                std::chrono::duration<double, std::milli> dur =
+                        std::chrono::high_resolution_clock::now() - reshow->lastOpened;
 
-            if(dur.count()<350) //start reshow timer on fastly reclosed menus
+                if (dur.count() < 350) // start reshow timer on fastly reclosed menus
                     m_reshowTimer->start();
             });
         }
@@ -119,21 +123,24 @@ public:
 
 public:
     QTimer *m_reshowTimer;
-    HMenu* recent;
-
+    HMenu *recent;
 };
 
 class AppMenuModel : public QAbstractItemModel, public QAbstractNativeEventFilter
 {
     Q_OBJECT
 
-    Q_PROPERTY(bool menuAvailable READ menuAvailable WRITE setMenuAvailable NOTIFY menuAvailableChanged)
+    Q_PROPERTY(bool menuAvailable READ menuAvailable WRITE setMenuAvailable NOTIFY
+                       menuAvailableChanged)
     Q_PROPERTY(bool visible READ visible NOTIFY visibleChanged)
 
-    Q_PROPERTY(bool filterByActive READ filterByActive WRITE setFilterByActive NOTIFY filterByActiveChanged)
-    Q_PROPERTY(bool filterChildren READ filterChildren WRITE setFilterChildren NOTIFY filterChildrenChanged)
+    Q_PROPERTY(bool filterByActive READ filterByActive WRITE setFilterByActive NOTIFY
+                       filterByActiveChanged)
+    Q_PROPERTY(bool filterChildren READ filterChildren WRITE setFilterChildren NOTIFY
+                       filterChildrenChanged)
 
-    Q_PROPERTY(QRect screenGeometry READ screenGeometry WRITE setScreenGeometry NOTIFY screenGeometryChanged)
+    Q_PROPERTY(QRect screenGeometry READ screenGeometry WRITE setScreenGeometry NOTIFY
+                       screenGeometryChanged)
 
     Q_PROPERTY(QVariant winId READ winId WRITE setWinId NOTIFY winIdChanged)
 public:
@@ -156,14 +163,13 @@ public:
      */
     ~AppMenuModel() override;
 
-    enum AppMenuRole
-    {
+    enum AppMenuRole {
         MenuRole = Qt::UserRole + 1, // TODO this should be Qt::DisplayRole
         ActionRole
     };
-    QHash<QString,bool> m_pending_service;
+    QHash<QString, bool> m_pending_service;
 
-    QAction *findParent(QAction * child,QAction *root) const ;
+    QAction *findParent(QAction *child, QAction *root) const;
     /**
      * Returns the data for the given model index and role.
      *
@@ -203,7 +209,7 @@ public:
 
     bool hasChildren(const QModelIndex &parent = QModelIndex()) const override;
 
-    QMap<QString,QAction*> filteredActions() { return m_visibleActions; }
+    QMap<QString, QAction *> filteredActions() { return m_visibleActions; }
 
     /**
      * Updates the application menu with the given service name and menu object path.
@@ -223,7 +229,7 @@ public:
 
     void updateSearch();
 
-    void invalidateMenu() { m_menu=nullptr;}
+    void invalidateMenu() { m_menu = nullptr; }
 
     bool filterByActive() const;
 
@@ -239,7 +245,7 @@ public:
 
     void setMenuAvailable(bool set);
 
-    void clearFilteredActions() { m_visibleActions.clear();}
+    void clearFilteredActions() { m_visibleActions.clear(); }
 
     /**
      * Filters the given menu based on the given search string.
@@ -257,16 +263,16 @@ public:
      * @param names The list of names to which the action names will be added.
      * @return Whether any visible actions were found in the menu.
      */
-    bool filterMenu(QMenu *searchMenu, QString searchString, bool includeDisabled, QStringList names);
+    bool filterMenu(QMenu *searchMenu, QString searchString, bool includeDisabled,
+                    QStringList names);
 
     bool visible() const;
 
-    QList<QAction*>   mActions() { return m_actions; }
+    QList<QAction *> mActions() { return m_actions; }
 
     QRect screenGeometry() const;
 
     void setScreenGeometry(QRect geometry);
-
 
     QVariant winId() const;
 
@@ -290,7 +296,7 @@ public:
      * @param menu The menu to read actions from.
      * @param names The list of names to add the action names to.
      */
-    void readMenuActions(QMenu* menu,QStringList names);
+    void readMenuActions(QMenu *menu, QStringList names);
 
     QPointer<QMenu> menu() { return m_menu; }
 
@@ -361,9 +367,9 @@ signals:
     void winIdChanged();
 
 private:
-    void deleteActions(QMenu * menu());
+    void deleteActions(QMenu *menu());
     QWidget *w_parent;
-    QMap<QString,QAction*> m_names;
+    QMap<QString, QAction *> m_names;
     bool m_filterByActive = false;
     bool m_filterChildren = false;
     bool m_menuAvailable;
@@ -371,22 +377,22 @@ private:
     bool m_visible = true;
     bool m_awaitsUpdate;
     QRect m_screenGeometry;
-    bool    hasVisible =false;
-    QMap<QString,QAction*> m_visibleActions;
-    QVariant m_winId{-1};
+    bool hasVisible = false;
+    QMap<QString, QAction *> m_visibleActions;
+    QVariant m_winId{ -1 };
     //! current active window used
     WId m_currentWindowId = 0;
     WId m_initialApplicationFromWindowId = -1;
     //! window that its menu initialization may be delayed
     WId m_delayedMenuWindowId = 0;
-    QPointer<QMenu>  m_menu;
-    QList<QAction*> m_actions;
+    QPointer<QMenu> m_menu;
+    QList<QAction *> m_actions;
     QDBusServiceWatcher *m_serviceWatcher;
     QString m_serviceName;
     QString m_menuObjectPath;
     bool m_refreshSearch;
     DBusMenuImporter *m_importer;
-    QHash<QString,DBusMenuImporter*> m_importers;
+    QHash<QString, DBusMenuImporter *> m_importers;
 };
 
 #endif

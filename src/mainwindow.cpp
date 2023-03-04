@@ -39,26 +39,27 @@
 #include <xcb/xcb.h>
 #include <X11/Xlib.h>
 
-
 MainWindow::MainWindow(QWidget *parent)
     : QFrame(parent),
-      //m_fakeWidget(new QWidget(nullptr)),
+      // m_fakeWidget(new QWidget(nullptr)),
       applicationStartingLabel(new QLabel("", this)),
       m_MainWidget(new MainWidget(parent))
 {
     this->setObjectName("menuBar");
-    this->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+    this->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     qDebug() << "translated: tr(\"Log Out\"):" << tr("Log Out");
     qDebug() << "translated: tr(\"About This Computer\"):" << tr("About This Computer");
 
     QHBoxLayout *layout = new QHBoxLayout;
     layout->setAlignment(Qt::AlignCenter); // Center QHBoxLayout vertically
-    layout->addSpacing(7); // Left screen edge; if space is too small, blue box overlaps rounded corner
+    layout->addSpacing(
+            7); // Left screen edge; if space is too small, blue box overlaps rounded corner
     layout->addWidget(m_MainWidget);
 
     applicationStartingLabel->hide();
-    // TODO: Instead of having applicationStartingLabel here, we might want to make it a part of m_MainWidget
-    // to allow for it to be animated from the center to the side and morph into a menu with an animation...
+    // TODO: Instead of having applicationStartingLabel here, we might want to make it a part of
+    // m_MainWidget to allow for it to be animated from the center to the side and morph into a menu
+    // with an animation...
     applicationStartingLabel->setStyleSheet("align: center; font-weight: bold;");
     layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(applicationStartingLabel, 0, Qt::AlignCenter);
@@ -68,12 +69,13 @@ MainWindow::MainWindow(QWidget *parent)
     layout->setSpacing(10); // ?
     setLayout(layout);
 
-    //m_fakeWidget->setWindowFlags(Qt::FramelessWindowHint | Qt::WindowDoesNotAcceptFocus | Qt::SplashScreen);
-  //  m_fakeWidget->setAttribute(Qt::WA_TranslucentBackground);
+    // m_fakeWidget->setWindowFlags(Qt::FramelessWindowHint | Qt::WindowDoesNotAcceptFocus |
+    // Qt::SplashScreen);
+    //  m_fakeWidget->setAttribute(Qt::WA_TranslucentBackground);
 
     // Prevent menubar from becoming faded/translucent if we use a compositing manager
     // that fades/makes translucent inactive windows
-   // m_MainWidget->setWindowFlags(Qt::WindowDoesNotAcceptFocus);
+    // m_MainWidget->setWindowFlags(Qt::WindowDoesNotAcceptFocus);
 
     setAttribute(Qt::WA_NoSystemBackground, false);
     // setAttribute(Qt::WA_TranslucentBackground);
@@ -85,38 +87,49 @@ MainWindow::MainWindow(QWidget *parent)
     // This is a KDE extension to the _NET_WM_WINDOW_TYPE mechanism."
     // Source:
     // https://api.kde.org/frameworks/kwindowsystem/html/classNET.html#a4b3115c0f40e7bc8e38119cc44dd60e0
-    // Can be inspected with: xwininfo -wm, it contains "Window type: Kde Net Wm Window Type Topmenu"
-    // This should allow e.g., picom to set different settings regarding shadows and transparency
+    // Can be inspected with: xwininfo -wm, it contains "Window type: Kde Net Wm Window Type
+    // Topmenu" This should allow e.g., picom to set different settings regarding shadows and
+    // transparency
     KWindowSystem::setType(winId(), NET::TopMenu);
 
-    //TODO:
-    //Call this when the user sets the primary display via xrandr
+    // TODO:
+    // Call this when the user sets the primary display via xrandr
     initSize();
 
-    //subscribe to changes on our display like if we change the screen resolution, orientation etc..
+    // subscribe to changes on our display like if we change the screen resolution, orientation
+    // etc..
     connect(qApp->primaryScreen(), &QScreen::geometryChanged, this, &MainWindow::checkSize);
     connect(qApp->primaryScreen(), &QScreen::geometryChanged, this, &MainWindow::initSize);
     connect(qApp->primaryScreen(), &QScreen::orientationChanged, this, &MainWindow::initSize);
     connect(qApp->primaryScreen(), &QScreen::virtualGeometryChanged, this, &MainWindow::initSize);
     connect(qApp->primaryScreen(), &QScreen::availableGeometryChanged, this, &MainWindow::initSize);
-    connect(qApp->primaryScreen(), &QScreen::logicalDotsPerInchChanged, this, &MainWindow::initSize);
-    connect(qApp->primaryScreen(), &QScreen::physicalDotsPerInchChanged, this, &MainWindow::initSize);
+    connect(qApp->primaryScreen(), &QScreen::logicalDotsPerInchChanged, this,
+            &MainWindow::initSize);
+    connect(qApp->primaryScreen(), &QScreen::physicalDotsPerInchChanged, this,
+            &MainWindow::initSize);
     connect(qApp->primaryScreen(), &QScreen::physicalSizeChanged, this, &MainWindow::initSize);
-    connect(qApp->primaryScreen(), &QScreen::primaryOrientationChanged, this, &MainWindow::initSize);
-   
+    connect(qApp->primaryScreen(), &QScreen::primaryOrientationChanged, this,
+            &MainWindow::initSize);
+
     // Appear with an animation
     QPropertyAnimation *animation = new QPropertyAnimation(this, "pos");
     animation->setDuration(1500);
-    animation->setStartValue(QPoint(qApp->primaryScreen()->geometry().x(), -2 * qApp->primaryScreen()->geometry().height()));
-    animation->setEndValue(QPoint(qApp->primaryScreen()->geometry().x(),qApp->primaryScreen()->geometry().y()));
+    animation->setStartValue(QPoint(qApp->primaryScreen()->geometry().x(),
+                                    -2 * qApp->primaryScreen()->geometry().height()));
+    animation->setEndValue(
+            QPoint(qApp->primaryScreen()->geometry().x(), qApp->primaryScreen()->geometry().y()));
     animation->setEasingCurve(QEasingCurve::OutCubic);
     animation->start(QPropertyAnimation::DeleteWhenStopped);
-    //this->activateWindow(); // probono: Ensure that we have the focus when menu is launched so that one can enter text in the search box
-    //m_MainWidget->raise(); // probono: Trying to give typing focus to the search box that is in there. Needed? Does not seem tp hurt
+    // this->activateWindow(); // probono: Ensure that we have the focus when menu is launched so
+    // that one can enter text in the search box m_MainWidget->raise(); // probono: Trying to give
+    // typing focus to the search box that is in there. Needed? Does not seem tp hurt
 
-    connect(m_MainWidget->getAppMenuWidget(), &AppMenuWidget::menuAboutToBeImported, this, &MainWindow::stopShowingApplicationName);
-    // probono: The following is also needed, since the above does not work reliably enough all the time
-    connect(KWindowSystem::self(), &KWindowSystem::activeWindowChanged, this, &MainWindow::stopShowingApplicationName);
+    connect(m_MainWidget->getAppMenuWidget(), &AppMenuWidget::menuAboutToBeImported, this,
+            &MainWindow::stopShowingApplicationName);
+    // probono: The following is also needed, since the above does not work reliably enough all the
+    // time
+    connect(KWindowSystem::self(), &KWindowSystem::activeWindowChanged, this,
+            &MainWindow::stopShowingApplicationName);
 
     // probono: Check system requirements and inform users if they are not met but let them continue
 
@@ -125,71 +138,86 @@ MainWindow::MainWindow(QWidget *parent)
     // TODO: Further similar system health checks
     MainWindow::checkPeriodically();
     QTimer *periodicalCheckTimer = new QTimer(this);
-    periodicalCheckTimer->setInterval(1000*60); // Once a minute
+    periodicalCheckTimer->setInterval(1000 * 60); // Once a minute
     connect(periodicalCheckTimer, &QTimer::timeout, this, &MainWindow::checkPeriodically);
     periodicalCheckTimer->start();
 
     // Warn if SUDO_ASKPASS environment variable is missing
-    if(! QProcessEnvironment().systemEnvironment().contains("SUDO_ASKPASS")) {
+    if (!QProcessEnvironment().systemEnvironment().contains("SUDO_ASKPASS")) {
         QMessageBox::warning(nullptr, " ",
-                             tr("The SUDO_ASKPASS environment variable is missing. The system is not configured correctly."));
+                             tr("The SUDO_ASKPASS environment variable is missing. The system is "
+                                "not configured correctly."));
     }
 
     // Warn if UBUNTU_MENUPROXY environment variable is missing or not set to "1"
-    if(! QProcessEnvironment().systemEnvironment().contains("UBUNTU_MENUPROXY")) {
+    if (!QProcessEnvironment().systemEnvironment().contains("UBUNTU_MENUPROXY")) {
         QMessageBox::warning(nullptr, " ",
-                             tr("The UBUNTU_MENUPROXY environment variable is missing. The system is not configured correctly."));
+                             tr("The UBUNTU_MENUPROXY environment variable is missing. The system "
+                                "is not configured correctly."));
     } else if (QProcessEnvironment().systemEnvironment().value("UBUNTU_MENUPROXY") != "1") {
         QMessageBox::warning(nullptr, " ",
-                             tr("The UBUNTU_MENUPROXY environment variable is not set to \"1\". The system is not configured correctly."));
+                             tr("The UBUNTU_MENUPROXY environment variable is not set to \"1\". "
+                                "The system is not configured correctly."));
     }
 
     // Warn if GTK_MODULES environment variable is missing or does not contain "appmenu-gtk-module"
-    if(! QProcessEnvironment().systemEnvironment().contains("GTK_MODULES")) {
+    if (!QProcessEnvironment().systemEnvironment().contains("GTK_MODULES")) {
         QMessageBox::warning(nullptr, " ",
-                             tr("The GTK_MODULES environment variable is missing. The system is not configured correctly."));
-    } else if (! QProcessEnvironment().systemEnvironment().value("GTK_MODULES").contains("appmenu-gtk-module")) {
+                             tr("The GTK_MODULES environment variable is missing. The system is "
+                                "not configured correctly."));
+    } else if (!QProcessEnvironment()
+                        .systemEnvironment()
+                        .value("GTK_MODULES")
+                        .contains("appmenu-gtk-module")) {
         QMessageBox::warning(nullptr, " ",
-                             tr("The GTK_MODULES environment variable does not contain \"appmenu-gtk-module\". The system is not configured correctly."));
+                             tr("The GTK_MODULES environment variable does not contain "
+                                "\"appmenu-gtk-module\". The system is not configured correctly."));
     }
 
     // Warn if QT_QPA_PLATFORMTHEME environment variable is missing or not set to "panda"
-    if(! QProcessEnvironment().systemEnvironment().contains("QT_QPA_PLATFORMTHEME")) {
+    if (!QProcessEnvironment().systemEnvironment().contains("QT_QPA_PLATFORMTHEME")) {
         QMessageBox::warning(nullptr, " ",
-                             tr("The QT_QPA_PLATFORMTHEME environment variable is missing. The system is not configured correctly."));
-    } else if (! QProcessEnvironment().systemEnvironment().value("QT_QPA_PLATFORMTHEME").contains("panda")) {
+                             tr("The QT_QPA_PLATFORMTHEME environment variable is missing. The "
+                                "system is not configured correctly."));
+    } else if (!QProcessEnvironment()
+                        .systemEnvironment()
+                        .value("QT_QPA_PLATFORMTHEME")
+                        .contains("panda")) {
         QMessageBox::warning(nullptr, " ",
-                             tr("The QT_QPA_PLATFORMTHEME environment variable does not contain \"panda\". The system is not configured correctly."));
+                             tr("The QT_QPA_PLATFORMTHEME environment variable does not contain "
+                                "\"panda\". The system is not configured correctly."));
     }
 
     // Warn if XDG_SESSION_TYPE environment variable is missing or not set to "x11"
-    if(! QProcessEnvironment().systemEnvironment().contains("XDG_SESSION_TYPE")) {
+    if (!QProcessEnvironment().systemEnvironment().contains("XDG_SESSION_TYPE")) {
         QMessageBox::warning(nullptr, " ",
-                             tr("The XDG_SESSION_TYPE environment variable is missing. The system is not configured correctly."));
+                             tr("The XDG_SESSION_TYPE environment variable is missing. The system "
+                                "is not configured correctly."));
     } else if (QProcessEnvironment().systemEnvironment().value("XDG_SESSION_TYPE") != "x11") {
         QMessageBox::warning(nullptr, " ",
-                             tr("The XDG_SESSION_TYPE environment variable is not set to \"x11\". The system is not configured correctly."));
+                             tr("The XDG_SESSION_TYPE environment variable is not set to \"x11\". "
+                                "The system is not configured correctly."));
     }
-
 }
 
-MainWindow::~MainWindow()
+MainWindow::~MainWindow() { }
+
+void MainWindow::checkPeriodically()
 {
 
-}
-
-void MainWindow::checkPeriodically(){
-
     // Check free disk space
-    for(const QStorageInfo storage : QStorageInfo::mountedVolumes()){
-        if (storage.isReadOnly() || storage.bytesTotal() < 1024 * 10 || storage.fileSystemType() == "nullfs")
+    for (const QStorageInfo storage : QStorageInfo::mountedVolumes()) {
+        if (storage.isReadOnly() || storage.bytesTotal() < 1024 * 10
+            || storage.fileSystemType() == "nullfs")
             continue;
-        float usedSize = float(storage.bytesTotal() - storage.bytesAvailable())/float(storage.bytesTotal());
+        float usedSize = float(storage.bytesTotal() - storage.bytesAvailable())
+                / float(storage.bytesTotal());
         // Warn if any relevant disk is >95% full
-        if((usedSize > 0.95) && storage.fileSystemType() != "unionfs" ) {
+        if ((usedSize > 0.95) && storage.fileSystemType() != "unionfs") {
             QMessageBox::warning(nullptr, storage.rootPath(),
-                                 tr("Your disk '%1' is almost full. %2 percent left." )
-                                 .arg(storage.rootPath()).arg(100 - qRound(usedSize*100)));
+                                 tr("Your disk '%1' is almost full. %2 percent left.")
+                                         .arg(storage.rootPath())
+                                         .arg(100 - qRound(usedSize * 100)));
         }
     }
 
@@ -230,12 +258,16 @@ void MainWindow::paintEvent(QPaintEvent *e)
     QPainter p(this);
     p.setRenderHint(QPainter::Antialiasing);
     p.setPen(Qt::NoPen);
-    int round_pixels = 5; // like /usr/local/etc/xdg/picom.conf // probono: Make this relative to the height of the MainWindow?
-    // QPainterPath::subtracted() takes InnerPath and subtracts it from OuterPath to produce the final shape
+    int round_pixels = 5; // like /usr/local/etc/xdg/picom.conf // probono: Make this relative to
+                          // the height of the MainWindow?
+    // QPainterPath::subtracted() takes InnerPath and subtracts it from OuterPath to produce the
+    // final shape
     QPainterPath OuterPath;
-    OuterPath.addRect(0, 0, qApp->primaryScreen()->geometry().width(), 2*round_pixels);
+    OuterPath.addRect(0, 0, qApp->primaryScreen()->geometry().width(), 2 * round_pixels);
     QPainterPath InnerPath;
-    InnerPath.addRoundedRect(QRect(0, 0, qApp->primaryScreen()->geometry().width(), 4*round_pixels), round_pixels, round_pixels);
+    InnerPath.addRoundedRect(
+            QRect(0, 0, qApp->primaryScreen()->geometry().width(), 4 * round_pixels), round_pixels,
+            round_pixels);
     QPainterPath FillPath;
     FillPath = OuterPath.subtracted(InnerPath);
     p.fillPath(FillPath, Qt::black);
@@ -252,11 +284,11 @@ void MainWindow::initSize()
 
     setFixedHeight(m_MainWidget->sizeHint().height()); // Set height of the overall Menu application
 
-    //move this to the active screen and xrandr position
+    // move this to the active screen and xrandr position
     move(qApp->primaryScreen()->geometry().x(), qApp->primaryScreen()->geometry().y());
 
     setStrutPartial();
-    
+
     KWindowSystem::setState(winId(), NET::SkipTaskbar); // Do not show in Dock
     KWindowSystem::setState(winId(), NET::StaysOnTop);
     KWindowSystem::setState(winId(), NET::SkipPager);
@@ -270,8 +302,10 @@ void MainWindow::initSize()
     KWindowSystem::setType(winId(), NET::Dock);
 
     // probono: Set background gradient
-    // Commenting this out because possibly this interferes with theming via a QSS file via QtPlugin?
-    // this->setStyleSheet( "MainWindow { background-color: QLinearGradient( x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #fff, stop: 0.1 #eee, stop: 0.39 #eee, stop: 0.4 #ddd, stop: 1 #eee); }");
+    // Commenting this out because possibly this interferes with theming via a QSS file via
+    // QtPlugin? this->setStyleSheet( "MainWindow { background-color: QLinearGradient( x1: 0, y1: 0,
+    // x2: 0, y2: 1, stop: 0 #fff, stop: 0.1 #eee, stop: 0.39 #eee, stop: 0.4 #ddd, stop: 1 #eee);
+    // }");
 }
 
 void MainWindow::checkSize()
@@ -279,9 +313,10 @@ void MainWindow::checkSize()
     QRect primaryRect = qApp->primaryScreen()->geometry();
     // Warn if screen is too small
     // NOTE: 640x480 is relatively arbitrary, but we don't want people abuse Menu for mobile screens
-    if(primaryRect.width() < 640 || primaryRect.height() < 480) {
-        QMessageBox::warning(nullptr, " ",
-                             tr("Screen resolution is below the minimum system requirement of 640x480 pixels."));
+    if (primaryRect.width() < 640 || primaryRect.height() < 480) {
+        QMessageBox::warning(
+                nullptr, " ",
+                tr("Screen resolution is below the minimum system requirement of 640x480 pixels."));
     }
 }
 
@@ -294,31 +329,24 @@ void MainWindow::setStrutPartial()
 
     NETExtendedStrut strut;
 
-    strut.top_width = height(); // + 1; // 1 pixel between menu bar and maximized window not needed if we have a shadow
+    strut.top_width = height(); // + 1; // 1 pixel between menu bar and maximized window not needed
+                                // if we have a shadow
     strut.top_start = x();
     strut.top_end = x() + width();
 
-    KWindowSystem::setExtendedStrut(winId(),
-                                     strut.left_width,
-                                     strut.left_start,
-                                     strut.left_end,
-                                     strut.right_width,
-                                     strut.right_start,
-                                     strut.right_end,
-                                     strut.top_width,
-                                     strut.top_start,
-                                     strut.top_end,
-                                     strut.bottom_width,
-                                     strut.bottom_start,
-                                     strut.bottom_end);
+    KWindowSystem::setExtendedStrut(winId(), strut.left_width, strut.left_start, strut.left_end,
+                                    strut.right_width, strut.right_start, strut.right_end,
+                                    strut.top_width, strut.top_start, strut.top_end,
+                                    strut.bottom_width, strut.bottom_start, strut.bottom_end);
 }
 
 QString MainWindow::showApplicationName(const QString &arg)
 {
     qDebug() << "showApplicationName" << arg << "got called";
 
-    if(arg == "Filer"){
-        return QString("showApplicationName(\"%1\") ignored for Filer").arg(arg); // Return to calling application via D-Bus
+    if (arg == "Filer") {
+        return QString("showApplicationName(\"%1\") ignored for Filer")
+                .arg(arg); // Return to calling application via D-Bus
     }
 
     // Find out whether we already have a window open from this application;
@@ -350,13 +378,13 @@ QString MainWindow::showApplicationName(const QString &arg)
     // being launched from two different locations. Maybe this is good enough for now
     ApplicationInfo *ai = new ApplicationInfo();
     const QList<WId> windows = KWindowSystem::windows();
-    for (WId winId : windows){
-        if(ai->applicationNiceNameForWId(winId) == arg){
+    for (WId winId : windows) {
+        if (ai->applicationNiceNameForWId(winId) == arg) {
             alreadyRunningApp = true;
             break;
         }
         // Additionally check for applications not launched from bundles
-        if(ai->pathForWId(winId).endsWith("/" + arg)){
+        if (ai->pathForWId(winId).endsWith("/" + arg)) {
             alreadyRunningApp = true;
             break;
         }
@@ -372,21 +400,24 @@ QString MainWindow::showApplicationName(const QString &arg)
     }
     ai->~ApplicationInfo();
 
-    if (! alreadyRunningApp) {
+    if (!alreadyRunningApp) {
         m_MainWidget->hide();
         applicationStartingLabel->setText(arg.split("/").last());
         applicationStartingLabel->show();
         // applicationStartingLabel->setVisible(true);
         QTimer::singleShot(30000, this, SLOT(stopShowingApplicationName()));
-        return QString("showApplicationName(\"%1\") got executed").arg(arg); // Return to calling application via D-Bus
+        return QString("showApplicationName(\"%1\") got executed")
+                .arg(arg); // Return to calling application via D-Bus
     } else {
-        return QString("showApplicationName(\"%1\") ignored, an application at this path is already running").arg(arg); // Return to calling application via D-Bus
+        return QString("showApplicationName(\"%1\") ignored, an application at this path is "
+                       "already running")
+                .arg(arg); // Return to calling application via D-Bus
     }
 }
 
 void MainWindow::stopShowingApplicationName()
 {
-    qDebug()<< __func__;
+    qDebug() << __func__;
     MainWindow::applicationStartingLabel->hide();
     m_MainWidget->show();
 }

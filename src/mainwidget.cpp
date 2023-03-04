@@ -32,8 +32,8 @@
 #include <QMessageBox>
 #include <QDialog>
 
-//store our layout for rebuilding the menu
-QHBoxLayout* m_layout;
+// store our layout for rebuilding the menu
+QHBoxLayout *m_layout;
 
 MainWidget::MainWidget(QWidget *parent)
     : QWidget(parent),
@@ -51,17 +51,27 @@ MainWidget::MainWidget(QWidget *parent)
 
     QWidget *statusnotifierWidget = new QWidget;
     statusnotifierWidget->setLayout(m_statusnotifierLayout);
-    statusnotifierWidget->setSizePolicy(QSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum)); // Naming is counterintuitive. "Maximum" keeps its size to a minimum!
+    statusnotifierWidget->setSizePolicy(QSizePolicy(
+            QSizePolicy::Maximum, QSizePolicy::Maximum)); // Naming is counterintuitive. "Maximum"
+                                                          // keeps its size to a minimum!
     m_statusnotifierLayout->setMargin(0);
 
     QWidget *dateTimeWidget = new QWidget;
     dateTimeWidget->setLayout(m_dateTimeLayout);
-    dateTimeWidget->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Expanding); // Naming is counterintuitive. "Maximum" keeps its size to a minimum! Need "Expanding" in y direction so that font will be centered
+    dateTimeWidget->setSizePolicy(
+            QSizePolicy::Maximum,
+            QSizePolicy::Expanding); // Naming is counterintuitive. "Maximum" keeps its size to a
+                                     // minimum! Need "Expanding" in y direction so that font will
+                                     // be centered
     m_dateTimeLayout->setMargin(0);
 
     QWidget *windowsWidget = new QWidget;
     windowsWidget->setLayout(m_windowsLayout);
-    windowsWidget->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Expanding); // Naming is counterintuitive. "Maximum" keeps its size to a minimum! Need "Expanding" in y direction so that font will be centered
+    windowsWidget->setSizePolicy(
+            QSizePolicy::Maximum,
+            QSizePolicy::Expanding); // Naming is counterintuitive. "Maximum" keeps its size to a
+                                     // minimum! Need "Expanding" in y direction so that font will
+                                     // be centered
     m_windowsLayout->setMargin(0);
 
     m_controlCenterLayout->setSpacing(6);
@@ -82,17 +92,16 @@ MainWidget::MainWidget(QWidget *parent)
 
     layout->setContentsMargins(0, 0, 0, 0);
     setLayout(layout);
-    setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Minimum);
+    setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
     loadModules();
     m_layout = layout;
-
 }
 
 void MainWidget::rebuildSystemMenu()
 {
     qDebug() << "SIGSUR1 recived, rebuild the system menu";
 
-    if(m_appMenuWidget){
+    if (m_appMenuWidget) {
         m_layout->removeWidget(m_appMenuWidget);
         delete m_appMenuWidget;
         m_appMenuWidget = new AppMenuWidget();
@@ -100,7 +109,8 @@ void MainWidget::rebuildSystemMenu()
         m_layout->insertWidget(0, m_appMenuWidget);
     }
 }
-void MainWidget::triggerFocusMenu() {
+void MainWidget::triggerFocusMenu()
+{
     m_appMenuWidget->focusMenu();
 }
 void MainWidget::loadModules()
@@ -128,4 +138,3 @@ void MainWidget::mouseDoubleClickEvent(QMouseEvent *e)
     // if (e->button() == Qt::LeftButton)
     //     m_appMenuWidget->toggleMaximizeWindow();
 }
-

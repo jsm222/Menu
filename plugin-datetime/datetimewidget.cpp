@@ -16,8 +16,9 @@ DateTimeWidget::DateTimeWidget(QWidget *parent)
     layout->setAlignment(Qt::AlignCenter); // Center QHBoxLayout vertically
     layout->setMargin(0);
     layout->setSpacing(0);
-    // m_label->setStyleSheet("padding-top: 2px;"); // FIXME: Find a way to achieve vertically centered text without this crude workaround
-    // m_label->setStyleSheet("color: grey;"); // Does not work; presumably due the QtPlugin theme overriding it
+    // m_label->setStyleSheet("padding-top: 2px;"); // FIXME: Find a way to achieve vertically
+    // centered text without this crude workaround m_label->setStyleSheet("color: grey;"); // Does
+    // not work; presumably due the QtPlugin theme overriding it
 
     layout->addWidget(m_menubar);
     m_menubar->addMenu(m_menu);
@@ -36,16 +37,20 @@ DateTimeWidget::DateTimeWidget(QWidget *parent)
 
 void DateTimeWidget::updateCurrentTimeString()
 {
-    m_menu->menuAction()->setText(QLocale::system().toString(QTime::currentTime(), QLocale::ShortFormat)); // Only time
-    // m_menu->menuAction()->setText(QLocale::system().toString(QDateTime::currentDateTime(), QLocale::ShortFormat)); // Date and time
-    dateAction->setText(QLocale::system().toString(QDateTime::currentDateTime(), QLocale::LongFormat)); // Weekday, date and time with seconds and timezone
+    m_menu->menuAction()->setText(
+            QLocale::system().toString(QTime::currentTime(), QLocale::ShortFormat)); // Only time
+    // m_menu->menuAction()->setText(QLocale::system().toString(QDateTime::currentDateTime(),
+    // QLocale::ShortFormat)); // Date and time
+    dateAction->setText(QLocale::system().toString(
+            QDateTime::currentDateTime(),
+            QLocale::LongFormat)); // Weekday, date and time with seconds and timezone
 }
 
 void DateTimeWidget::change()
 {
     qDebug() << "pronbono: To be implemented";
     QProcess *p = new QProcess();
-    p->setArguments({"Date and Time"});
+    p->setArguments({ "Date and Time" });
     p->setProgram("launch");
     p->startDetached();
 }

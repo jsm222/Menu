@@ -24,36 +24,33 @@
 #include <QApplication>
 #include <QList>
 
-PluginManager::PluginManager(QObject *parent)
-  : QObject(parent)
-{
-
-}
+PluginManager::PluginManager(QObject *parent) : QObject(parent) { }
 
 void PluginManager::start()
 {
     QList<QDir> pluginsDirs;
 
     // Load plugins from FHS location
-    auto pluginsDir = QDir(QDir(QCoreApplication::applicationDirPath() + \
-        QString("/Resources/plugins")).canonicalPath());
+    auto pluginsDir =
+            QDir(QDir(QCoreApplication::applicationDirPath() + QString("/Resources/plugins"))
+                         .canonicalPath());
     pluginsDirs.append(pluginsDir);
 
     // Load plugins from build/ subdirectories (useful during development)
     QStringList filters;
     filters << "plugin-*";
-    const QStringList dirs = QDir(QCoreApplication::applicationDirPath() + \
-                            QString("/../")).entryList(filters);
+    const QStringList dirs =
+            QDir(QCoreApplication::applicationDirPath() + QString("/../")).entryList(filters);
 
     {
-        for(const QString &dir : dirs) {
-            auto additionalPluginsDir = QDir(QCoreApplication::applicationDirPath() + \
-                                             QString("/../") + dir);
+        for (const QString &dir : dirs) {
+            auto additionalPluginsDir =
+                    QDir(QCoreApplication::applicationDirPath() + QString("/../") + dir);
             pluginsDirs.append(QDir(additionalPluginsDir.canonicalPath()));
         }
     }
 
-    for(const auto &pluginsDir : pluginsDirs) {
+    for (const auto &pluginsDir : pluginsDirs) {
         const QFileInfoList files = pluginsDir.entryInfoList(QDir::Files);
         for (const QFileInfo &file : files) {
             const QString filePath = file.filePath();
@@ -74,7 +71,7 @@ void PluginManager::start()
     }
 }
 
-ExtensionWidget* PluginManager::plugin(const QString &pluginName)
+ExtensionWidget *PluginManager::plugin(const QString &pluginName)
 {
     return m_extensions.value(pluginName, nullptr);
 }

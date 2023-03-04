@@ -34,7 +34,8 @@
 #include <QMenu>
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 5, 0)
-template <typename T> inline T qFromUnaligned(const uchar *src)
+template<typename T>
+inline T qFromUnaligned(const uchar *src)
 {
     T dest;
     const size_t size = sizeof(T);
@@ -53,10 +54,7 @@ public:
     StatusNotifierButton(QString service, QString objectPath, QWidget *parent = nullptr);
     ~StatusNotifierButton();
 
-    enum Status
-    {
-        Passive, Active, NeedsAttention
-    };
+    enum Status { Passive, Active, NeedsAttention };
 
     QImage convertToGrayScale(const QImage &srcImage);
 public slots:
@@ -74,11 +72,11 @@ private:
     QIcon m_icon, m_overlayIcon, m_attentionIcon, m_fallbackIcon;
 
 protected:
-    void contextMenuEvent(QContextMenuEvent * event);
+    void contextMenuEvent(QContextMenuEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
     void wheelEvent(QWheelEvent *event);
 
-    void refetchIcon(Status status, const QString& themePath);
+    void refetchIcon(Status status, const QString &themePath);
     void resetIcon();
 };
 

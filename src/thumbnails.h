@@ -30,17 +30,14 @@ class Thumbnail : public QObject
     Q_OBJECT
 
 public:
-    enum ThumbnailSize
-    {
+    enum ThumbnailSize {
         ThumbnailSizeNormal /* 128x128 */,
         ThumbnailSizeLarge /* 256x256 */,
         ThumbnailSizeXLarge /* 512x512 */,
         ThumbnailSizeXXLarge /* 1024x1024 */
     };
-    explicit Thumbnail(const QString &filename,
-                       QCryptographicHash::Algorithm hash,
-                       int iconSize = ThumbnailSizeLarge,
-                       QObject *parent = Q_NULLPTR);
+    explicit Thumbnail(const QString &filename, QCryptographicHash::Algorithm hash,
+                       int iconSize = ThumbnailSizeLarge, QObject *parent = Q_NULLPTR);
     const QString getCachePath();
     const QString getIconPath();
     bool isValid();
@@ -64,8 +61,7 @@ public:
     bool isEnabled();
 
 signals:
-    void foundIcon(const QString &filename,
-                   const QString &icon);
+    void foundIcon(const QString &filename, const QString &icon);
 
 public slots:
     void requestIcon(const QString &filename,

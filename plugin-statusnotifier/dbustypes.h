@@ -1,9 +1,10 @@
 #include <QDBusArgument>
 
 #ifndef DBUSTYPES_H
-#define DBUSTYPES_H
+#  define DBUSTYPES_H
 
-struct IconPixmap {
+struct IconPixmap
+{
     int width;
     int height;
     QByteArray bytes;
@@ -11,7 +12,8 @@ struct IconPixmap {
 
 typedef QList<IconPixmap> IconPixmapList;
 
-struct ToolTip {
+struct ToolTip
+{
     QString iconName;
     QList<IconPixmap> iconPixmap;
     QString title;

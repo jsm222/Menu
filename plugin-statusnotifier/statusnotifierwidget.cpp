@@ -26,39 +26,42 @@
 #include "../src/mainwindow.h"
 
 StatusNotifierWidget::StatusNotifierWidget(QWidget *parent)
-  : QWidget(parent),
-    m_layout(new QHBoxLayout(this))
+    : QWidget(parent), m_layout(new QHBoxLayout(this))
 {
     m_layout->setAlignment(Qt::AlignCenter); // Center QHBoxLayout vertically
     m_layout->setSpacing(10);
     m_layout->setMargin(0);
 
-    QFutureWatcher<StatusNotifierWatcher *> * future_watcher = new QFutureWatcher<StatusNotifierWatcher *>;
-    connect(future_watcher, &QFutureWatcher<StatusNotifierWatcher *>::finished, this, [this, future_watcher]
-        {
-            m_watcher = future_watcher->future().result();
+    QFutureWatcher<StatusNotifierWatcher *> *future_watcher =
+            new QFutureWatcher<StatusNotifierWatcher *>;
+    connect(future_watcher, &QFutureWatcher<StatusNotifierWatcher *>::finished, this,
+            [this, future_watcher] {
+                m_watcher = future_watcher->future().result();
 
-            connect(m_watcher, &StatusNotifierWatcher::StatusNotifierItemRegistered,
-                    this, &StatusNotifierWidget::itemAdded);
-            connect(m_watcher, &StatusNotifierWatcher::StatusNotifierItemUnregistered,
-                    this, &StatusNotifierWidget::itemRemoved);
+                connect(m_watcher, &StatusNotifierWatcher::StatusNotifierItemRegistered, this,
+                        &StatusNotifierWidget::itemAdded);
+                connect(m_watcher, &StatusNotifierWatcher::StatusNotifierItemUnregistered, this,
+                        &StatusNotifierWidget::itemRemoved);
 
-            qDebug() << m_watcher->RegisteredStatusNotifierItems();
+                qDebug() << m_watcher->RegisteredStatusNotifierItems();
 
-            future_watcher->deleteLater();
-        });
+                future_watcher->deleteLater();
+            });
 
-    QFuture<StatusNotifierWatcher *> future = QtConcurrent::run([]
-        {
-            QString dbusName = QStringLiteral("org.kde.StatusNotifierHost-%1-%2").arg(QApplication::applicationPid()).arg(1);
-            if (QDBusConnectionInterface::ServiceNotRegistered == QDBusConnection::sessionBus().interface()->registerService(dbusName, QDBusConnectionInterface::DontQueueService))
-                qDebug() << "unable to register service for " << dbusName;
+    QFuture<StatusNotifierWatcher *> future = QtConcurrent::run([] {
+        QString dbusName = QStringLiteral("org.kde.StatusNotifierHost-%1-%2")
+                                   .arg(QApplication::applicationPid())
+                                   .arg(1);
+        if (QDBusConnectionInterface::ServiceNotRegistered
+            == QDBusConnection::sessionBus().interface()->registerService(
+                    dbusName, QDBusConnectionInterface::DontQueueService))
+            qDebug() << "unable to register service for " << dbusName;
 
-            StatusNotifierWatcher * watcher = new StatusNotifierWatcher;
-            watcher->RegisterStatusNotifierHost(dbusName);
-            watcher->moveToThread(QApplication::instance()->thread());
-            return watcher;
-        });
+        StatusNotifierWatcher *watcher = new StatusNotifierWatcher;
+        watcher->RegisterStatusNotifierHost(dbusName);
+        watcher->moveToThread(QApplication::instance()->thread());
+        return watcher;
+    });
 
     future_watcher->setFuture(future);
 }
@@ -87,7 +90,7 @@ void StatusNotifierWidget::itemAdded(QString serviceAndPath)
     // Hence using D-Bus to do the same thing, which does not crash
     if (QDBusConnection::sessionBus().isConnected()) {
         QDBusInterface iface("local.Menu", "/", "", QDBusConnection::sessionBus());
-        if (! iface.isValid()) {
+        if (!iface.isValid()) {
             printf("D-Bus interface not valid\n");
         } else {
             iface.call(QDBus::NoBlock, "stopShowingApplicationName");

@@ -41,7 +41,7 @@ private:
     QHBoxLayout *m_layout;
     StatusNotifierWatcher *m_watcher;
 
-    QHash<QString, StatusNotifierButton*> m_services;
+    QHash<QString, StatusNotifierButton *> m_services;
 };
 
 #endif // STATUSNOTIFIERWIDGET_H

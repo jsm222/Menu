@@ -24,9 +24,10 @@ public:
     QString pathForWId(unsigned long long id);
     QString applicationNiceNameForWId(unsigned long long id);
     void setWindowProperty(WId winId, const QByteArray name, const QByteArray value);
-    const QString getWindowProperty(WId id, const QByteArray & name);
+    const QString getWindowProperty(WId id, const QByteArray &name);
     QString environmentVariableForPId(unsigned int pid, const QByteArray &environmentVariable);
-    const QString environmentVariableForWId(unsigned long long winId, const QByteArray &environmentVariable);
+    const QString environmentVariableForWId(unsigned long long winId,
+                                            const QByteArray &environmentVariable);
 };
 
 #endif // APPLICATIONINFO_H

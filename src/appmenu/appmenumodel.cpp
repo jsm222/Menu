@@ -44,143 +44,133 @@
 #include <QWidgetAction>
 #include <QHBoxLayout>
 #include <QDebug>
-#include<QModelIndex>
+#include <QModelIndex>
 #include <dbusmenu-qt5/dbusmenuimporter.h>
 
 QMutex mutex;
-static const QByteArray s_x11AppMenuServiceNamePropertyName = QByteArrayLiteral("_KDE_NET_WM_APPMENU_SERVICE_NAME");
-static const QByteArray s_x11AppMenuObjectPathPropertyName = QByteArrayLiteral("_KDE_NET_WM_APPMENU_OBJECT_PATH");
+static const QByteArray s_x11AppMenuServiceNamePropertyName =
+        QByteArrayLiteral("_KDE_NET_WM_APPMENU_SERVICE_NAME");
+static const QByteArray s_x11AppMenuObjectPathPropertyName =
+        QByteArrayLiteral("_KDE_NET_WM_APPMENU_OBJECT_PATH");
 
 static QHash<QByteArray, xcb_atom_t> s_atoms;
 
-void HMenu::actionEvent(QActionEvent *e) {
-    if(e->type() == QEvent::ActionAdded) {
+void HMenu::actionEvent(QActionEvent *e)
+{
+    if (e->type() == QEvent::ActionAdded) {
         // probono: Remove mnemonics (underlined characters in menus represented by "&" in code)
         // QtPlugin doesn't show the underlines, but they are still functional unless we remove them
-        e->action()->setText(e->action()->text().replace("&","")); // probono: Remove mnemonics
-        if (qobject_cast<QMenuBar*>(parent())!=nullptr) { // only happens for first level
-            if(e->action()->menu())
-                qobject_cast<QMenuBar*>(parent())->addMenu(e->action()->menu());
-            if(m_locale_lang == QLocale::German) {
-                if(e->action()->text().replace("&","") == "Datei") {
+        e->action()->setText(e->action()->text().replace("&", "")); // probono: Remove mnemonics
+        if (qobject_cast<QMenuBar *>(parent()) != nullptr) { // only happens for first level
+            if (e->action()->menu())
+                qobject_cast<QMenuBar *>(parent())->addMenu(e->action()->menu());
+            if (m_locale_lang == QLocale::German) {
+                if (e->action()->text().replace("&", "") == "Datei") {
                     e->action()->setText("Ablage");
                 }
             }
         }
-
-
     }
-    if(e->type() == QEvent::ActionRemoved) {
-        if (qobject_cast<QMenuBar*>(parent())!=nullptr) {
-            qobject_cast<QMenuBar*>(parent())->removeAction(e->action());
-
+    if (e->type() == QEvent::ActionRemoved) {
+        if (qobject_cast<QMenuBar *>(parent()) != nullptr) {
+            qobject_cast<QMenuBar *>(parent())->removeAction(e->action());
         }
     }
     QMenu::actionEvent(e);
 }
 
 AppMenuModel::AppMenuModel(QObject *parent)
-    : QAbstractItemModel(parent),
-      m_serviceWatcher(new QDBusServiceWatcher(this))
+    : QAbstractItemModel(parent), m_serviceWatcher(new QDBusServiceWatcher(this))
 {
-    w_parent = qobject_cast<QWidget*>(parent);
+    w_parent = qobject_cast<QWidget *>(parent);
     if (!KWindowSystem::isPlatformX11()) {
         return;
     }
 
-    connect(this, &AppMenuModel::winIdChanged, this, [this] {
-        onActiveWindowChanged(m_winId.toUInt());
-    });
+    connect(this, &AppMenuModel::winIdChanged, this,
+            [this] { onActiveWindowChanged(m_winId.toUInt()); });
 
-    connect(KWindowSystem::self(), &KWindowSystem::activeWindowChanged, this, &AppMenuModel::onActiveWindowChanged);
-    connect(KWindowSystem::self()
-            , static_cast<void (KWindowSystem::*)(WId)>(&KWindowSystem::windowChanged)
-            , this
-            , &AppMenuModel::onWindowChanged);
-    connect(KWindowSystem::self()
-            , static_cast<void (KWindowSystem::*)(WId)>(&KWindowSystem::windowRemoved)
-            , this
-            , &AppMenuModel::onWindowRemoved);
+    connect(KWindowSystem::self(), &KWindowSystem::activeWindowChanged, this,
+            &AppMenuModel::onActiveWindowChanged);
+    connect(KWindowSystem::self(),
+            static_cast<void (KWindowSystem::*)(WId)>(&KWindowSystem::windowChanged), this,
+            &AppMenuModel::onWindowChanged);
+    connect(KWindowSystem::self(),
+            static_cast<void (KWindowSystem::*)(WId)>(&KWindowSystem::windowRemoved), this,
+            &AppMenuModel::onWindowRemoved);
 
     connect(this, &AppMenuModel::modelNeedsUpdate, this, [this] {
-        if (!m_updatePending)
-        {
+        if (!m_updatePending) {
             m_updatePending = true;
             QMetaObject::invokeMethod(this, "update", Qt::QueuedConnection);
         }
     });
 
-    connect(this, &AppMenuModel::screenGeometryChanged, this, [this] {
-        onWindowChanged(m_currentWindowId);
-    });
+    connect(this, &AppMenuModel::screenGeometryChanged, this,
+            [this] { onWindowChanged(m_currentWindowId); });
 
     onActiveWindowChanged(KWindowSystem::activeWindow());
 
     m_serviceWatcher->setConnection(QDBusConnection::sessionBus());
-    //if our current DBus connection gets lost, close the menu
-    //we'll select the new menu when the focus changes
-    connect(m_serviceWatcher, &QDBusServiceWatcher::serviceUnregistered, this, [this](const QString & serviceName) {
-        if (serviceName == m_serviceName) {
-            setMenuAvailable(false);
-            emit modelNeedsUpdate();
-
-
-        }
-    });
+    // if our current DBus connection gets lost, close the menu
+    // we'll select the new menu when the focus changes
+    connect(m_serviceWatcher, &QDBusServiceWatcher::serviceUnregistered, this,
+            [this](const QString &serviceName) {
+                if (serviceName == m_serviceName) {
+                    setMenuAvailable(false);
+                    emit modelNeedsUpdate();
+                }
+            });
 }
 
 AppMenuModel::~AppMenuModel() = default;
 
-QModelIndex AppMenuModel::index(int row, int column, const QModelIndex &parent)
-const
+QModelIndex AppMenuModel::index(int row, int column, const QModelIndex &parent) const
 {
     if (!hasIndex(row, column, parent)) {
         return QModelIndex();
     }
 
     QAction *parentItem;
-    parentItem = static_cast<QAction*>(parent.internalPointer());
+    parentItem = static_cast<QAction *>(parent.internalPointer());
 
     if (!parent.isValid()) {
         parentItem = m_menu->menuAction();
-
     }
-    if( row >= 0 && parentItem->menu() && row < parentItem->menu()->actions().count() ) {
+    if (row >= 0 && parentItem->menu() && row < parentItem->menu()->actions().count()) {
         return createIndex(row, column, parentItem->menu()->actions().at(row));
-    }
-    else
+    } else
         return QModelIndex();
 }
 
-QAction * AppMenuModel::findParent(QAction * child,QAction *root) const {
+QAction *AppMenuModel::findParent(QAction *child, QAction *root) const
+{
 
-    QAction * menu = qobject_cast<QMenu*>(child->parent())->menuAction();
+    QAction *menu = qobject_cast<QMenu *>(child->parent())->menuAction();
 
     return menu;
 }
-int AppMenuModel::columnCount(const QModelIndex &parent) const {
+int AppMenuModel::columnCount(const QModelIndex &parent) const
+{
     return 1;
 }
 
 QModelIndex AppMenuModel::parent(const QModelIndex &index) const
 {
 
-
     if (!index.isValid())
         return QModelIndex();
     int row;
-    QAction *item = static_cast<QAction*>(index.internalPointer());
-    QAction *p = findParent(item,m_menu->menuAction());
-    if( p == m_menu->menuAction() ) {
+    QAction *item = static_cast<QAction *>(index.internalPointer());
+    QAction *p = findParent(item, m_menu->menuAction());
+    if (p == m_menu->menuAction()) {
 
         return QModelIndex();
     }
 
-    QAction *gp = findParent(p,m_menu->menuAction());
+    QAction *gp = findParent(p, m_menu->menuAction());
 
     row = gp->menu()->actions().indexOf(p);
-
-
 
     return createIndex(row, 0, p);
 }
@@ -225,7 +215,7 @@ void AppMenuModel::setMenuAvailable(bool set)
 
     if (m_menuAvailable != set) {
         m_menuAvailable = set;
-        //onWindowChanged(m_currentWindowId);
+        // onWindowChanged(m_currentWindowId);
         emit menuAvailableChanged();
     }
 }
@@ -287,17 +277,14 @@ int AppMenuModel::rowCount(const QModelIndex &parent) const
     if (!parent.isValid())
         parentItem = m_menu->menuAction();
     else
-        parentItem = static_cast<QAction*>(parent.internalPointer());
+        parentItem = static_cast<QAction *>(parent.internalPointer());
 
-    if(parentItem->menu()) {
+    if (parentItem->menu()) {
 
-
-
-        return  parentItem->menu()->actions().count();
+        return parentItem->menu()->actions().count();
     }
     return 0;
 }
-
 
 void AppMenuModel::update()
 {
@@ -306,35 +293,34 @@ void AppMenuModel::update()
     m_updatePending = false;
 }
 
-
 void AppMenuModel::onActiveWindowChanged(WId id)
 {
-    if(id == 0)
+    if (id == 0)
         return;
 
     qApp->removeNativeEventFilter(this);
 
-    auto pw = qobject_cast<QWidget*>(w_parent);
+    auto pw = qobject_cast<QWidget *>(w_parent);
 
-    if(pw){
-        if(id == pw->effectiveWinId()) {
+    if (pw) {
+        if (id == pw->effectiveWinId()) {
             /// Get more options for search
-            if(m_initialApplicationFromWindowId == -1) {
+            if (m_initialApplicationFromWindowId == -1) {
                 return;
             }
-
 
             if (KWindowSystem::isPlatformX11()) {
                 auto *c = QX11Info::connection();
 
-                auto getWindowPropertyString = [c, this](WId id, const QByteArray & name) -> QByteArray {
+                auto getWindowPropertyString = [c, this](WId id,
+                                                         const QByteArray &name) -> QByteArray {
                     QByteArray value;
 
-
                     if (!s_atoms.contains(name)) {
-                        const xcb_intern_atom_cookie_t atomCookie = xcb_intern_atom(c, false, name.length(), name.constData());
-                        QScopedPointer<xcb_intern_atom_reply_t,
-                                QScopedPointerPodDeleter> atomReply(xcb_intern_atom_reply(c, atomCookie, nullptr));
+                        const xcb_intern_atom_cookie_t atomCookie =
+                                xcb_intern_atom(c, false, name.length(), name.constData());
+                        QScopedPointer<xcb_intern_atom_reply_t, QScopedPointerPodDeleter> atomReply(
+                                xcb_intern_atom_reply(c, atomCookie, nullptr));
 
                         if (atomReply.isNull()) {
                             return value;
@@ -348,18 +334,19 @@ void AppMenuModel::onActiveWindowChanged(WId id)
                     }
 
                     static const long MAX_PROP_SIZE = 10000;
-                    auto propertyCookie = xcb_get_property(c, false, id, s_atoms[name], XCB_ATOM_STRING, 0, MAX_PROP_SIZE);
-                    QScopedPointer<xcb_get_property_reply_t,
-                            QScopedPointerPodDeleter> propertyReply(xcb_get_property_reply(c, propertyCookie, nullptr));
+                    auto propertyCookie = xcb_get_property(c, false, id, s_atoms[name],
+                                                           XCB_ATOM_STRING, 0, MAX_PROP_SIZE);
+                    QScopedPointer<xcb_get_property_reply_t, QScopedPointerPodDeleter>
+                            propertyReply(xcb_get_property_reply(c, propertyCookie, nullptr));
 
-                    if (propertyReply.isNull())
-                    {
+                    if (propertyReply.isNull()) {
                         return value;
                     }
 
-                    if (propertyReply->type == XCB_ATOM_STRING && propertyReply->format == 8 && propertyReply->value_len > 0)
-                    {
-                        const char *data = (const char *) xcb_get_property_value(propertyReply.data());
+                    if (propertyReply->type == XCB_ATOM_STRING && propertyReply->format == 8
+                        && propertyReply->value_len > 0) {
+                        const char *data =
+                                (const char *)xcb_get_property_value(propertyReply.data());
                         int len = propertyReply->value_len;
 
                         if (data) {
@@ -370,30 +357,26 @@ void AppMenuModel::onActiveWindowChanged(WId id)
                     return value;
                 };
 
-                const QString serviceName = QString::fromUtf8(
-                            getWindowPropertyString(m_initialApplicationFromWindowId,
-                                                    s_x11AppMenuServiceNamePropertyName));
+                const QString serviceName = QString::fromUtf8(getWindowPropertyString(
+                        m_initialApplicationFromWindowId, s_x11AppMenuServiceNamePropertyName));
 
-                const QString menuObjectPath = QString::fromUtf8(
-                            getWindowPropertyString(m_initialApplicationFromWindowId,
-                                                    s_x11AppMenuObjectPathPropertyName));
+                const QString menuObjectPath = QString::fromUtf8(getWindowPropertyString(
+                        m_initialApplicationFromWindowId, s_x11AppMenuObjectPathPropertyName));
 
-
-                if(m_serviceName == serviceName &&
-                        m_menuObjectPath == menuObjectPath) {
-                    m_pending_service[m_serviceName]=true;
+                if (m_serviceName == serviceName && m_menuObjectPath == menuObjectPath) {
+                    m_pending_service[m_serviceName] = true;
                     updateApplicationMenu(m_serviceName, m_menuObjectPath);
-                }else {
+                } else {
                     m_initialApplicationFromWindowId = -1;
                 }
-            }else {
+            } else {
                 m_initialApplicationFromWindowId = -1;
             }
             return;
         }
     }
 
-    if (m_winId != -1  && m_winId != id) {
+    if (m_winId != -1 && m_winId != id) {
         //! ignore any other window except the one preferred from plasmoid
         return;
     }
@@ -407,12 +390,14 @@ void AppMenuModel::onActiveWindowChanged(WId id)
     if (KWindowSystem::isPlatformX11()) {
         auto *c = QX11Info::connection();
 
-        auto getWindowPropertyString = [c, this](WId id, const QByteArray & name) -> QByteArray {
+        auto getWindowPropertyString = [c, this](WId id, const QByteArray &name) -> QByteArray {
             QByteArray value;
 
             if (!s_atoms.contains(name)) {
-                const xcb_intern_atom_cookie_t atomCookie = xcb_intern_atom(c, false, name.length(), name.constData());
-                QScopedPointer<xcb_intern_atom_reply_t, QScopedPointerPodDeleter> atomReply(xcb_intern_atom_reply(c, atomCookie, nullptr));
+                const xcb_intern_atom_cookie_t atomCookie =
+                        xcb_intern_atom(c, false, name.length(), name.constData());
+                QScopedPointer<xcb_intern_atom_reply_t, QScopedPointerPodDeleter> atomReply(
+                        xcb_intern_atom_reply(c, atomCookie, nullptr));
 
                 if (atomReply.isNull()) {
                     return value;
@@ -426,17 +411,18 @@ void AppMenuModel::onActiveWindowChanged(WId id)
             }
 
             static const long MAX_PROP_SIZE = 10000;
-            auto propertyCookie = xcb_get_property(c, false, id, s_atoms[name], XCB_ATOM_STRING, 0, MAX_PROP_SIZE);
-            QScopedPointer<xcb_get_property_reply_t, QScopedPointerPodDeleter> propertyReply(xcb_get_property_reply(c, propertyCookie, nullptr));
+            auto propertyCookie = xcb_get_property(c, false, id, s_atoms[name], XCB_ATOM_STRING, 0,
+                                                   MAX_PROP_SIZE);
+            QScopedPointer<xcb_get_property_reply_t, QScopedPointerPodDeleter> propertyReply(
+                    xcb_get_property_reply(c, propertyCookie, nullptr));
 
-            if (propertyReply.isNull())
-            {
+            if (propertyReply.isNull()) {
                 return value;
             }
 
-            if (propertyReply->type == XCB_ATOM_STRING && propertyReply->format == 8 && propertyReply->value_len > 0)
-            {
-                const char *data = (const char *) xcb_get_property_value(propertyReply.data());
+            if (propertyReply->type == XCB_ATOM_STRING && propertyReply->format == 8
+                && propertyReply->value_len > 0) {
+                const char *data = (const char *)xcb_get_property_value(propertyReply.data());
                 int len = propertyReply->value_len;
 
                 if (data) {
@@ -448,15 +434,19 @@ void AppMenuModel::onActiveWindowChanged(WId id)
         };
 
         auto updateMenuFromWindowIfHasMenu = [this, &getWindowPropertyString](WId id) {
-            const QString serviceName = QString::fromUtf8(getWindowPropertyString(id, s_x11AppMenuServiceNamePropertyName));
-            const QString menuObjectPath = QString::fromUtf8(getWindowPropertyString(id, s_x11AppMenuObjectPathPropertyName));
+            const QString serviceName = QString::fromUtf8(
+                    getWindowPropertyString(id, s_x11AppMenuServiceNamePropertyName));
+            const QString menuObjectPath = QString::fromUtf8(
+                    getWindowPropertyString(id, s_x11AppMenuObjectPathPropertyName));
 
-            qDebug() << "probono: WM_CLASS" << QString::fromUtf8(getWindowPropertyString(id, QByteArrayLiteral("WM_CLASS")));
+            qDebug() << "probono: WM_CLASS"
+                     << QString::fromUtf8(
+                                getWindowPropertyString(id, QByteArrayLiteral("WM_CLASS")));
             qDebug() << serviceName << menuObjectPath << __LINE__ << id;
             if (!serviceName.isEmpty() && !menuObjectPath.isEmpty()) {
                 m_initialApplicationFromWindowId = id;
                 mutex.lock();
-                m_pending_service[m_serviceName]=true;
+                m_pending_service[m_serviceName] = true;
                 updateApplicationMenu(serviceName, menuObjectPath);
                 mutex.unlock();
                 return true;
@@ -465,15 +455,17 @@ void AppMenuModel::onActiveWindowChanged(WId id)
             return false;
         };
 
-        KWindowInfo info(id, NET::WMState | NET::WMWindowType | NET::WMGeometry, NET::WM2TransientFor);
+        KWindowInfo info(id, NET::WMState | NET::WMWindowType | NET::WMGeometry,
+                         NET::WM2TransientFor);
 
-        if (info.hasState(NET::SkipTaskbar) ||
-                info.windowType(NET::UtilityMask) == NET::Utility)  {
+        if (info.hasState(NET::SkipTaskbar) || info.windowType(NET::UtilityMask) == NET::Utility) {
 
             //! hide when the windows or their transiet(s) do not have a menu
             if (filterByActive()) {
 
-                KWindowInfo transientInfo = KWindowInfo(info.transientFor(), NET::WMState | NET::WMWindowType | NET::WMGeometry, NET::WM2TransientFor);
+                KWindowInfo transientInfo = KWindowInfo(
+                        info.transientFor(), NET::WMState | NET::WMWindowType | NET::WMGeometry,
+                        NET::WM2TransientFor);
 
                 while (transientInfo.win()) {
                     if (transientInfo.win() == m_currentWindowId) {
@@ -481,7 +473,9 @@ void AppMenuModel::onActiveWindowChanged(WId id)
                         return;
                     }
 
-                    transientInfo = KWindowInfo(transientInfo.transientFor(), NET::WMState | NET::WMWindowType | NET::WMGeometry, NET::WM2TransientFor);
+                    transientInfo = KWindowInfo(transientInfo.transientFor(),
+                                                NET::WMState | NET::WMWindowType | NET::WMGeometry,
+                                                NET::WM2TransientFor);
                 }
             }
 
@@ -499,7 +493,9 @@ void AppMenuModel::onActiveWindowChanged(WId id)
         m_currentWindowId = id;
 
         if (!filterChildren()) {
-            KWindowInfo transientInfo = KWindowInfo(info.transientFor(), NET::WMState | NET::WMWindowType | NET::WMGeometry, NET::WM2TransientFor);
+            KWindowInfo transientInfo = KWindowInfo(
+                    info.transientFor(), NET::WMState | NET::WMWindowType | NET::WMGeometry,
+                    NET::WM2TransientFor);
 
             // look at transient windows first
             while (transientInfo.win()) {
@@ -508,7 +504,9 @@ void AppMenuModel::onActiveWindowChanged(WId id)
                     return;
                 }
 
-                transientInfo = KWindowInfo(transientInfo.transientFor(), NET::WMState | NET::WMWindowType | NET::WMGeometry, NET::WM2TransientFor);
+                transientInfo = KWindowInfo(transientInfo.transientFor(),
+                                            NET::WMState | NET::WMWindowType | NET::WMGeometry,
+                                            NET::WM2TransientFor);
             }
         }
 
@@ -518,25 +516,25 @@ void AppMenuModel::onActiveWindowChanged(WId id)
         }
 
         // monitor whether an app menu becomes available later
-        // this can happen when an app starts, shows its window, and only later announces global menu (e.g. Firefox)
+        // this can happen when an app starts, shows its window, and only later announces global
+        // menu (e.g. Firefox)
         qApp->installNativeEventFilter(this);
         m_delayedMenuWindowId = id;
 
-        //no menu found, set it to unavailable
+        // no menu found, set it to unavailable
 
         setMenuAvailable(false);
         emit modelNeedsUpdate();
-
-
     }
 }
 
-bool AppMenuModel::hasChildren(const QModelIndex &parent) const {
-    QAction * parentItem;
-    if(!parent.isValid())
+bool AppMenuModel::hasChildren(const QModelIndex &parent) const
+{
+    QAction *parentItem;
+    if (!parent.isValid())
         return true;
 
-    parentItem =static_cast<QAction*>(parent.internalPointer());
+    parentItem = static_cast<QAction *>(parent.internalPointer());
 
     return (bool)(parentItem->menu());
 }
@@ -582,34 +580,35 @@ QHash<int, QByteArray> AppMenuModel::roleNames() const
     return roleNames;
 }
 
-bool AppMenuModel::filterMenu(QMenu* searchMenu,QString searchString,bool includeDisabled,QStringList names) {
+bool AppMenuModel::filterMenu(QMenu *searchMenu, QString searchString, bool includeDisabled,
+                              QStringList names)
+{
 
-    if(!searchMenu) {
+    if (!searchMenu) {
         return false;
     }
-    searchMenu->menuAction()->setVisible(searchString=="");
+    searchMenu->menuAction()->setVisible(searchString == "");
 
-    if(!searchMenu->title().isEmpty())
+    if (!searchMenu->title().isEmpty())
         names << searchMenu->title();
 
-    const QList<QAction*> actions = searchMenu->actions();
-    for(QAction *action : actions) {
-        action->setVisible(searchString=="");
+    const QList<QAction *> actions = searchMenu->actions();
+    for (QAction *action : actions) {
+        action->setVisible(searchString == "");
 
-        if(action->menu()) {
-            if(searchString != "" && action->text().contains(searchString,Qt::CaseInsensitive)) {
+        if (action->menu()) {
+            if (searchString != "" && action->text().contains(searchString, Qt::CaseInsensitive)) {
                 action->setVisible(true);
 
+                QAction *parent = qobject_cast<QMenu *>(action->parent())->menuAction();
 
-                QAction*  parent = qobject_cast<QMenu*>(action->parent())->menuAction();
-
-                while(parent) {
+                while (parent) {
                     parent->setVisible(true);
                     parent->setVisible(!parent->isSeparator());
-                    if(parent->menu() && parent->menu()->parent()) {
+                    if (parent->menu() && parent->menu()->parent()) {
 
-                        QMenu *p = qobject_cast<QMenu*>(parent->menu()->parent());
-                        if(!p)
+                        QMenu *p = qobject_cast<QMenu *>(parent->menu()->parent());
+                        if (!p)
                             break;
                         parent = p->menuAction();
                     } else {
@@ -618,40 +617,42 @@ bool AppMenuModel::filterMenu(QMenu* searchMenu,QString searchString,bool includ
                 }
 
             } else {
-                filterMenu(action->menu(),searchString,searchString=="",names);
+                filterMenu(action->menu(), searchString, searchString == "", names);
             }
 
         } else {
-            if(searchString == "") {
+            if (searchString == "") {
                 hasVisible = true;
                 action->setVisible(true);
-                if(!includeDisabled) {
+                if (!includeDisabled) {
                     action->setVisible(action->isEnabled());
-                    ;               hasVisible= action->isEnabled();
+                    ;
+                    hasVisible = action->isEnabled();
                 }
-            } if(!searchString.isEmpty() && action->text().contains(searchString,Qt::CaseInsensitive))
-            {
+            }
+            if (!searchString.isEmpty()
+                && action->text().contains(searchString, Qt::CaseInsensitive)) {
 
                 action->setVisible(true);
                 // hasVisible = !action->isSeparator() && action->isEnabled();
-                hasVisible = !action->isSeparator(); // FIXME: https://github.com/helloSystem/Menu/issues/99#issuecomment-1281166629
+                hasVisible =
+                        !action->isSeparator(); // FIXME:
+                                                // https://github.com/helloSystem/Menu/issues/99#issuecomment-1281166629
 
                 action->setVisible(hasVisible);
 
-
-                if(hasVisible) {
-                    QAction * parent = nullptr;
-                    QMenu*  parentMenu = qobject_cast<QMenu*>(action->parent());
-                    if(parentMenu) {
+                if (hasVisible) {
+                    QAction *parent = nullptr;
+                    QMenu *parentMenu = qobject_cast<QMenu *>(action->parent());
+                    if (parentMenu) {
                         parent = parentMenu->menuAction();
                     }
-                    while(parent) {
+                    while (parent) {
                         parent->setVisible(!parent->isSeparator());
-                        if(parent->menu() && parent->menu()->parent()) {
+                        if (parent->menu() && parent->menu()->parent()) {
 
-
-                            QMenu * p = qobject_cast<QMenu*>(parent->menu()->parent());
-                            if(!p)
+                            QMenu *p = qobject_cast<QMenu *>(parent->menu()->parent());
+                            if (!p)
                                 break;
                             parent = p->menuAction();
 
@@ -660,27 +661,26 @@ bool AppMenuModel::filterMenu(QMenu* searchMenu,QString searchString,bool includ
                         }
                     }
 
-                    m_visibleActions[names.join(" ▸ ") + " ▸ " + action->text()]=action;
+                    m_visibleActions[names.join(" ▸ ") + " ▸ " + action->text()] = action;
                 }
-            } else if(qobject_cast<QWidgetAction*>(action) != nullptr && action->text()==QString("")) {
+            } else if (qobject_cast<QWidgetAction *>(action) != nullptr
+                       && action->text() == QString("")) {
 
                 action->setVisible(true);
 
-            }else if (!searchString.isEmpty()) {
+            } else if (!searchString.isEmpty()) {
                 action->setVisible(false);
                 hasVisible = false;
             }
-
-
         }
-
     }
 
     names.clear();
     return hasVisible;
 }
 
-void AppMenuModel::readMenuActions(QMenu* menu,QStringList names) {
+void AppMenuModel::readMenuActions(QMenu *menu, QStringList names)
+{
     // See https://doc.qt.io/qt-5/qaction.html#menu
     // If a QAction does not have menu in it, then
     // the pointer returned by QAction::menu will be
@@ -689,27 +689,21 @@ void AppMenuModel::readMenuActions(QMenu* menu,QStringList names) {
         return;
     if (!menu->title().isEmpty())
         names << menu->title();
-    const QList<QAction*> actions = menu->actions();
-    for (auto action: actions)
-    {
-        if (action->menu() != NULL)
-        {
+    const QList<QAction *> actions = menu->actions();
+    for (auto action : actions) {
+        if (action->menu() != NULL) {
 
-            readMenuActions(action->menu(),names);
-
+            readMenuActions(action->menu(), names);
         }
 
         QString actionName = action->text().replace("&", "");
-        if(!actionName.isEmpty() && action->isEnabled() &&   action->menu()==NULL) {
+        if (!actionName.isEmpty() && action->isEnabled() && action->menu() == NULL) {
 
             actionName = names.join(" ▸ ") + " ▸ " + actionName;
-            m_names.insert(actionName,action);
+            m_names.insert(actionName, action);
         }
-
     }
-
 }
-
 
 QVariant AppMenuModel::data(const QModelIndex &index, int role) const
 {
@@ -721,10 +715,9 @@ QVariant AppMenuModel::data(const QModelIndex &index, int role) const
     if (!index.isValid()) {
 
         if (role == Qt::DisplayRole) {
-            return QVariant::fromValue( m_menu->menuAction());
+            return QVariant::fromValue(m_menu->menuAction());
         }
     }
-
 
     const int row = index.row();
     /*if (row == actions.count() && m_searchAction) {
@@ -738,11 +731,11 @@ QVariant AppMenuModel::data(const QModelIndex &index, int role) const
     ;
     if (role == Qt::DisplayRole) {
 
-        return QVariant::fromValue(static_cast< QAction*>(index.internalPointer()));
+        return QVariant::fromValue(static_cast<QAction *>(index.internalPointer()));
     }
     if (role == Qt::EditRole) {
 
-        return QVariant::fromValue(static_cast< QAction*>(index.internalPointer()));
+        return QVariant::fromValue(static_cast<QAction *>(index.internalPointer()));
     }
     return QVariant();
 }
@@ -755,48 +748,44 @@ void AppMenuModel::execute(QString actionName)
     }
 }*/
 
-void AppMenuModel::refreshSearch() {
-
-}
+void AppMenuModel::refreshSearch() { }
 
 void AppMenuModel::updateApplicationMenu(const QString &serviceName, const QString &menuObjectPath)
 {
-    if(m_pending_service[serviceName] && m_serviceName == serviceName) {
-        qDebug() << "Skipping" << serviceName << menuObjectPath <<"switching too fast";
+    if (m_pending_service[serviceName] && m_serviceName == serviceName) {
+        qDebug() << "Skipping" << serviceName << menuObjectPath << "switching too fast";
     }
-    QMenuBar * menuBar = qobject_cast<QMenuBar*>(w_parent);/*m_importers[serviceName+menuObjectPath]->menu()->parent());*/
+    QMenuBar *menuBar = qobject_cast<QMenuBar *>(
+            w_parent); /*m_importers[serviceName+menuObjectPath]->menu()->parent());*/
     int cnt = menuBar->actions().count();
-    QList<QAction*> remove;
-    for(int i=2;i<cnt;i++)
+    QList<QAction *> remove;
+    for (int i = 2; i < cnt; i++)
         remove.append(menuBar->actions().at(i));
-    for(QAction *r : remove) {
+    for (QAction *r : remove) {
         menuBar->removeAction(r);
-
     }
-    if(m_importers[serviceName+menuObjectPath]) {
-        m_importers[serviceName+menuObjectPath]->deleteLater();
-
+    if (m_importers[serviceName + menuObjectPath]) {
+        m_importers[serviceName + menuObjectPath]->deleteLater();
     }
 
     m_serviceName = serviceName;
     m_menuObjectPath = menuObjectPath;
-    m_serviceWatcher->setWatchedServices(QStringList({m_serviceName}));
+    m_serviceWatcher->setWatchedServices(QStringList({ m_serviceName }));
     emit menuAboutToBeImported();
 
-    HDBusMenuImporter *importer = new HDBusMenuImporter(serviceName, menuObjectPath, DBusMenuImporterType::SYNCHRONOUS);
+    HDBusMenuImporter *importer =
+            new HDBusMenuImporter(serviceName, menuObjectPath, DBusMenuImporterType::SYNCHRONOUS);
 
-    m_importers[serviceName+menuObjectPath]=importer;
-    m_importers[serviceName+menuObjectPath]->menu()->setParent(w_parent);
-    m_menu = m_importers[serviceName+menuObjectPath]->menu();
+    m_importers[serviceName + menuObjectPath] = importer;
+    m_importers[serviceName + menuObjectPath]->menu()->setParent(w_parent);
+    m_menu = m_importers[serviceName + menuObjectPath]->menu();
 
     setMenuAvailable(!m_menu.isNull());
 
     emit menuImported(serviceName);
 }
 
-void AppMenuModel::updateSearch() {
-
-}
+void AppMenuModel::updateSearch() { }
 
 bool AppMenuModel::nativeEventFilter(const QByteArray &eventType, void *message, long *result)
 {
@@ -817,7 +806,8 @@ bool AppMenuModel::nativeEventFilter(const QByteArray &eventType, void *message,
             auto serviceNameAtom = s_atoms.value(s_x11AppMenuServiceNamePropertyName);
             auto objectPathAtom = s_atoms.value(s_x11AppMenuObjectPathPropertyName);
 
-            if (serviceNameAtom != XCB_ATOM_NONE && objectPathAtom != XCB_ATOM_NONE) { // shouldn't happen
+            if (serviceNameAtom != XCB_ATOM_NONE
+                && objectPathAtom != XCB_ATOM_NONE) { // shouldn't happen
                 if (event->atom == serviceNameAtom || event->atom == objectPathAtom) {
                     // see if we now have a menu
                     onActiveWindowChanged(KWindowSystem::activeWindow());

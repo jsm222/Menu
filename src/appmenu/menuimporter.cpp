@@ -33,17 +33,17 @@
 #include <KWindowSystem>
 #include <KWindowInfo>
 
-static const char* DBUS_SERVICE = "com.canonical.AppMenu.Registrar";
-static const char* DBUS_OBJECT_PATH = "/com/canonical/AppMenu/Registrar";
+static const char *DBUS_SERVICE = "com.canonical.AppMenu.Registrar";
+static const char *DBUS_OBJECT_PATH = "/com/canonical/AppMenu/Registrar";
 
-MenuImporter::MenuImporter(QObject* parent)
-: QObject(parent)
-, m_serviceWatcher(new QDBusServiceWatcher(this))
+MenuImporter::MenuImporter(QObject *parent)
+    : QObject(parent), m_serviceWatcher(new QDBusServiceWatcher(this))
 {
-    //qDBusRegisterMetaType<DBusMenuLayoutItem>();
+    // qDBusRegisterMetaType<DBusMenuLayoutItem>();
     m_serviceWatcher->setConnection(QDBusConnection::sessionBus());
     m_serviceWatcher->setWatchMode(QDBusServiceWatcher::WatchForUnregistration);
-    connect(m_serviceWatcher, &QDBusServiceWatcher::serviceUnregistered, this, &MenuImporter::slotServiceUnregistered);
+    connect(m_serviceWatcher, &QDBusServiceWatcher::serviceUnregistered, this,
+            &MenuImporter::slotServiceUnregistered);
 }
 
 MenuImporter::~MenuImporter()
@@ -62,7 +62,7 @@ bool MenuImporter::connectToBus()
     return true;
 }
 
-void MenuImporter::RegisterWindow(WId id, const QDBusObjectPath& path)
+void MenuImporter::RegisterWindow(WId id, const QDBusObjectPath &path)
 {
     qDebug() << path.path() << __LINE__ << message().service();
     KWindowInfo info(id, NET::WMWindowType, NET::WM2WindowClass);
@@ -76,31 +76,31 @@ void MenuImporter::RegisterWindow(WId id, const QDBusObjectPath& path)
         return;
     }
     // Menu can try to register, right click in gimp for example
-    if (info.windowType(mask) & (NET::Menu|NET::DropdownMenu|NET::PopupMenu)) {
+    if (info.windowType(mask) & (NET::Menu | NET::DropdownMenu | NET::PopupMenu)) {
         return;
     }
 
-    if (path.path().isEmpty()) //prevent bad dbusmenu usage
+    if (path.path().isEmpty()) // prevent bad dbusmenu usage
         return;
-
-
 
     QString classClass = info.windowClassClass();
     m_windowClasses.insert(id, classClass);
     m_menuServices.insert(id, service);
     m_menuPaths.insert(id, path);
 
-
-
     // Fix for Chrome and Firefox, thanks Jesper Schmitz Mouridsen (jsmdk)
-   if(path.path().startsWith(QStringLiteral("/com/canonical/menu")) && KWindowSystem::isPlatformX11()) {
+    if (path.path().startsWith(QStringLiteral("/com/canonical/menu"))
+        && KWindowSystem::isPlatformX11()) {
         auto *c = QX11Info::connection();
-        xcb_change_property(c, XCB_PROP_MODE_REPLACE, id, get_xcb_atom(_KDE_NET_WM_APPMENU_OBJECT_PATH,c), XCB_ATOM_STRING, 8, path.path().size(), qPrintable(path.path()));
-	xcb_change_property(c, XCB_PROP_MODE_REPLACE, id, get_xcb_atom(_KDE_NET_WM_APPMENU_SERVICE_PATH,c), XCB_ATOM_STRING, 8, service.length(), qPrintable(service));
-   }
+        xcb_change_property(c, XCB_PROP_MODE_REPLACE, id,
+                            get_xcb_atom(_KDE_NET_WM_APPMENU_OBJECT_PATH, c), XCB_ATOM_STRING, 8,
+                            path.path().size(), qPrintable(path.path()));
+        xcb_change_property(c, XCB_PROP_MODE_REPLACE, id,
+                            get_xcb_atom(_KDE_NET_WM_APPMENU_SERVICE_PATH, c), XCB_ATOM_STRING, 8,
+                            service.length(), qPrintable(service));
+    }
     emit WindowRegistered(id, service, path);
 }
-
 
 void MenuImporter::UnregisterWindow(WId id)
 {
@@ -111,13 +111,13 @@ void MenuImporter::UnregisterWindow(WId id)
     emit WindowUnregistered(id);
 }
 
-QString MenuImporter::GetMenuForWindow(WId id, QDBusObjectPath& path)
+QString MenuImporter::GetMenuForWindow(WId id, QDBusObjectPath &path)
 {
     path = m_menuPaths.value(id);
     return m_menuServices.value(id);
 }
 
-void MenuImporter::slotServiceUnregistered(const QString& service)
+void MenuImporter::slotServiceUnregistered(const QString &service)
 {
     WId id = m_menuServices.key(service);
     m_menuServices.remove(id);
@@ -126,17 +126,18 @@ void MenuImporter::slotServiceUnregistered(const QString& service)
     emit WindowUnregistered(id);
     m_serviceWatcher->removeWatchedService(service);
 }
-const xcb_atom_t MenuImporter::get_xcb_atom(const QByteArray name,xcb_connection_t *c) {
-   if (!m_atoms.value(name)) {
-     const xcb_intern_atom_cookie_t cookie = xcb_intern_atom(c, false, name.length(), name.constData());
-     xcb_intern_atom_reply_t *reply = xcb_intern_atom_reply(c, cookie, nullptr);
-     if(reply) {
-       m_atoms[name] = reply->atom;
-       free(reply);
-     } else {
-       return XCB_ATOM_NONE;
-     }
-   }
-     return m_atoms[name];
-
+const xcb_atom_t MenuImporter::get_xcb_atom(const QByteArray name, xcb_connection_t *c)
+{
+    if (!m_atoms.value(name)) {
+        const xcb_intern_atom_cookie_t cookie =
+                xcb_intern_atom(c, false, name.length(), name.constData());
+        xcb_intern_atom_reply_t *reply = xcb_intern_atom_reply(c, cookie, nullptr);
+        if (reply) {
+            m_atoms[name] = reply->atom;
+            free(reply);
+        } else {
+            return XCB_ATOM_NONE;
+        }
+    }
+    return m_atoms[name];
 }

@@ -20,14 +20,14 @@ set(SRCS
     appmenuwidget.h
     appmenu/appmenumodel.h
     appmenu/appmenumodel.cpp
-    # appmenu/dbusmenuimporter.h
-    # appmenu/dbusmenuimporter.cpp
-    # appmenu/dbusmenu_interface.h
-    # appmenu/dbusmenu_interface.cpp
-    # appmenu/dbusmenushortcut_p.h
-    # appmenu/dbusmenushortcut_p.cpp
-    # appmenu/dbusmenutypes_p.h
-    # appmenu/dbusmenutypes_p.cpp
+#appmenu / dbusmenuimporter.h
+#appmenu / dbusmenuimporter.cpp
+#appmenu / dbusmenu_interface.h
+#appmenu / dbusmenu_interface.cpp
+#appmenu / dbusmenushortcut_p.h
+#appmenu / dbusmenushortcut_p.cpp
+#appmenu / dbusmenutypes_p.h
+#appmenu / dbusmenutypes_p.cpp
     appmenu/menuimporteradaptor.h
     appmenu/menuimporteradaptor.cpp
     appmenu/menuimporter.h
@@ -40,7 +40,7 @@ set(SRCS
     thumbnails.cpp
 )
 
-# Create TS_FILES variable that contains all .ts files
+#Create TS_FILES variable that contains all.ts files
 file(GLOB TS_FILES translations/*.ts)
 
 # Create/update .ts files from the source code

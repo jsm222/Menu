@@ -26,12 +26,12 @@
 #include <QDebug>
 
 ExtensionWidget::ExtensionWidget(StatusBarExtension *extension, QWidget *parent)
-  : QWidget(parent),
-    m_extension(extension),
-    m_popupTextDelayTimer(new QTimer(this)),
-    m_popupText(new BlurWindow),
-    m_popupWindow(new PopupWindow(this)),
-    m_contentWidget(extension->itemWidget())
+    : QWidget(parent),
+      m_extension(extension),
+      m_popupTextDelayTimer(new QTimer(this)),
+      m_popupText(new BlurWindow),
+      m_popupWindow(new PopupWindow(this)),
+      m_contentWidget(extension->itemWidget())
 {
     m_popupTextDelayTimer->setInterval(300);
     m_popupTextDelayTimer->setSingleShot(true);
@@ -81,14 +81,14 @@ void ExtensionWidget::mousePressEvent(QMouseEvent *e)
 {
     QWidget::mousePressEvent(e);
 
-    hidePopupText();    
+    hidePopupText();
 }
 
 void ExtensionWidget::mouseReleaseEvent(QMouseEvent *e)
 {
     QWidget::mouseReleaseEvent(e);
 
-    showPopupWindow();    
+    showPopupWindow();
 }
 
 QPoint ExtensionWidget::popupPoint(int contentWidth)
@@ -139,7 +139,7 @@ void ExtensionWidget::showPopupWindow()
 bool ExtensionWidget::eventFilter(QObject *watched, QEvent *event)
 {
     // if (watched == m_contentWidget) {
-    //     if (event->type() == QEvent::MouseButtonPress || 
+    //     if (event->type() == QEvent::MouseButtonPress ||
     //         event->type() == QEvent::MouseButtonRelease) {
     //         return true;
     //     }

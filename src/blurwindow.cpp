@@ -29,16 +29,15 @@
 #include <QLabel>
 #include <QEvent>
 
-BlurWindow::BlurWindow(QWidget *parent)
-    : QWidget(parent),
-      m_textLabel(new QLabel)
+BlurWindow::BlurWindow(QWidget *parent) : QWidget(parent), m_textLabel(new QLabel)
 {
     QHBoxLayout *layout = new QHBoxLayout;
     layout->addWidget(m_textLabel);
     setLayout(layout);
 
     installEventFilter(this);
-    setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint | Qt::WindowDoesNotAcceptFocus | Qt::ToolTip);
+    setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint | Qt::WindowDoesNotAcceptFocus
+                   | Qt::ToolTip);
     setAttribute(Qt::WA_TranslucentBackground);
     setVisible(false);
 }
@@ -64,7 +63,7 @@ void BlurWindow::paintEvent(QPaintEvent *e)
     backgroundColor.setAlpha(100);
     painter.setPen(Qt::NoPen);
     painter.setBrush(backgroundColor);
-    const qreal radius = 7.0; //std::min(rect().height(), rect().width()) / 2 - 2;
+    const qreal radius = 7.0; // std::min(rect().height(), rect().width()) / 2 - 2;
     painter.drawRoundedRect(rect(), radius, radius);
 }
 
@@ -89,7 +88,8 @@ bool BlurWindow::eventFilter(QObject *obj, QEvent *e)
     case QEvent::LayoutRequest:
         updateBlurRegion();
         break;
-    default: break;
+    default:
+        break;
     }
 
     return false;

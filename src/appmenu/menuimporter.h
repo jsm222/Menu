@@ -36,15 +36,13 @@
 #include <QX11Info>
 #include <QWidget> // For WId
 
-
-
 class MenuImporter : public QObject, protected QDBusContext
 {
     Q_OBJECT
     Q_CLASSINFO("D-Bus Interface", "com.canonical.AppMenu.Registrar")
 
 public:
-    explicit MenuImporter(QObject*);
+    explicit MenuImporter(QObject *);
     ~MenuImporter() override;
 
     bool connectToBus();
@@ -58,27 +56,28 @@ public:
     QList<WId> ids() { return m_menuServices.keys(); }
 
 Q_SIGNALS:
-    void WindowRegistered(WId id, const QString& service, const QDBusObjectPath&);
+    void WindowRegistered(WId id, const QString &service, const QDBusObjectPath &);
     void WindowUnregistered(WId id);
 
 public Q_SLOTS:
-    Q_NOREPLY void RegisterWindow(WId id, const QDBusObjectPath& path);
+    Q_NOREPLY void RegisterWindow(WId id, const QDBusObjectPath &path);
     Q_NOREPLY void UnregisterWindow(WId id);
-    QString GetMenuForWindow(WId id, QDBusObjectPath& path);
+    QString GetMenuForWindow(WId id, QDBusObjectPath &path);
 
 private Q_SLOTS:
-    void slotServiceUnregistered(const QString& service);
+    void slotServiceUnregistered(const QString &service);
 
 private:
-    QDBusServiceWatcher* m_serviceWatcher;
+    QDBusServiceWatcher *m_serviceWatcher;
     QHash<WId, QString> m_menuServices;
     QHash<WId, QDBusObjectPath> m_menuPaths;
     QHash<WId, QString> m_windowClasses;
     QHash<QByteArray, xcb_atom_t> m_atoms;
-    const QByteArray _KDE_NET_WM_APPMENU_OBJECT_PATH = QByteArrayLiteral("_KDE_NET_WM_APPMENU_OBJECT_PATH");
-    const QByteArray _KDE_NET_WM_APPMENU_SERVICE_PATH = QByteArrayLiteral("_KDE_NET_WM_APPMENU_SERVICE_NAME");
-    const xcb_atom_t get_xcb_atom(const QByteArray name,xcb_connection_t *c);
-
+    const QByteArray _KDE_NET_WM_APPMENU_OBJECT_PATH =
+            QByteArrayLiteral("_KDE_NET_WM_APPMENU_OBJECT_PATH");
+    const QByteArray _KDE_NET_WM_APPMENU_SERVICE_PATH =
+            QByteArrayLiteral("_KDE_NET_WM_APPMENU_SERVICE_NAME");
+    const xcb_atom_t get_xcb_atom(const QByteArray name, xcb_connection_t *c);
 };
 
 #endif /* MENUIMPORTER_H */

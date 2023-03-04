@@ -2,9 +2,7 @@
 #include <QHBoxLayout>
 #include <QPainter>
 
-ControlWidget::ControlWidget(QWidget *parent)
-  : QWidget(parent),
-    m_widget(new VolumeWidget)
+ControlWidget::ControlWidget(QWidget *parent) : QWidget(parent), m_widget(new VolumeWidget)
 {
     QHBoxLayout *layout = new QHBoxLayout;
     layout->setAlignment(Qt::AlignCenter); // Center QHBoxLayout vertically
@@ -14,7 +12,7 @@ ControlWidget::ControlWidget(QWidget *parent)
 
     setFixedSize(QSize(30, 30));
 
-    connect(m_widget, &VolumeWidget::requestUpdateIcon, this, [=] (QString iconName) {
+    connect(m_widget, &VolumeWidget::requestUpdateIcon, this, [=](QString iconName) {
         m_iconPixmap = QIcon::fromTheme(iconName).pixmap(24, 24);
         QWidget::update();
     });
@@ -31,5 +29,6 @@ void ControlWidget::paintEvent(QPaintEvent *e)
 
     QPainter painter(this);
     const QRectF &pixmapRect = QRectF(m_iconPixmap.rect());
-    painter.drawPixmap(rect().center() - pixmapRect.center() / m_iconPixmap.devicePixelRatioF(), m_iconPixmap);
+    painter.drawPixmap(rect().center() - pixmapRect.center() / m_iconPixmap.devicePixelRatioF(),
+                       m_iconPixmap);
 }

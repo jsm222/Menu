@@ -37,46 +37,50 @@
 #include "appmenu/appmenumodel.h"
 #include "appmenu/menuimporter.h"
 
-class SearchLineEdit: public QLineEdit {
+class SearchLineEdit : public QLineEdit
+{
     Q_OBJECT
 public:
-    SearchLineEdit(QWidget *parent=0) : QLineEdit(parent) {
-
-    }
-void keyPressEvent(QKeyEvent * event) override;
-
+    SearchLineEdit(QWidget *parent = 0) : QLineEdit(parent) { }
+    void keyPressEvent(QKeyEvent *event) override;
 };
 
-class CloneAction : public QAction {
+class CloneAction : public QAction
+{
     Q_OBJECT
-  public:
-    CloneAction(QAction *original, QObject *parent = 0) : QAction(parent){
-      m_orig = original;
-        connect(m_orig, &QAction::changed, this, &CloneAction::updateMe);  // update on change
-      connect(m_orig, &QAction::destroyed, this, &QAction::deleteLater); // delete on destroyed
-      connect(this, &QAction::triggered, m_orig, &QAction::triggered); // trigger on triggered
+public:
+    CloneAction(QAction *original, QObject *parent = 0) : QAction(parent)
+    {
+        m_orig = original;
+        connect(m_orig, &QAction::changed, this, &CloneAction::updateMe); // update on change
+        connect(m_orig, &QAction::destroyed, this, &QAction::deleteLater); // delete on destroyed
+        connect(this, &QAction::triggered, m_orig, &QAction::triggered); // trigger on triggered
     }
-  public slots:
-    void updateMe(){
-        const QStringList props = QStringList() << "autoRepeat" << "checkable" << "checked" <<"enabled"
-                                                << "icon"  << "iconText"
+public slots:
+    void updateMe()
+    {
+        const QStringList props = QStringList() << "autoRepeat"
+                                                << "checkable"
+                                                << "checked"
+                                                << "enabled"
+                                                << "icon"
+                                                << "iconText"
                                                 << "iconVisibleInMenu"
                                                 << "statusTip"
                                                 << "toolTip"
                                                 << "whatsThis";
-      foreach(const QString prop, props) {
-          setProperty(qPrintable(prop), m_orig->property(qPrintable(prop)));
-      }
+        foreach (const QString prop, props) {
+            setProperty(qPrintable(prop), m_orig->property(qPrintable(prop)));
+        }
     }
     void setDisconnectOnClear(QMetaObject::Connection con) { m_con = con; }
-    void disconnectOnClear() { QObject::disconnect(m_con);}
-    void resetOrigShortcutContext() {
-        m_orig->setShortcutContext(Qt::ApplicationShortcut);
-    }
-  private:
+    void disconnectOnClear() { QObject::disconnect(m_con); }
+    void resetOrigShortcutContext() { m_orig->setShortcutContext(Qt::ApplicationShortcut); }
+
+private:
     QAction *m_orig;
     QMetaObject::Connection m_con;
-  };
+};
 
 class AppMenuWidget : public QWidget
 {
@@ -92,12 +96,14 @@ public:
     void focusMenu();
 signals:
     void menuAboutToBeImported();
+
 protected:
     bool event(QEvent *e) override;
-    bool eventFilter(QObject *watched, QEvent *event) override; // Make it possible to click on the menu entry for a submenu
+    bool eventFilter(QObject *watched, QEvent *event)
+            override; // Make it possible to click on the menu entry for a submenu
 
 private:
-    bool m_isSearching=false;
+    bool m_isSearching = false;
     QStringList watchedLocations;
     bool isAcceptWindow(WId id);
     void delayUpdateActiveWindow();
@@ -126,54 +132,53 @@ public slots:
 private slots:
     //   void handleActivated(const QString&);
     void searchMenu();
-/// For Action Search
+    /// For Action Search
 private:
     void updateActionSearch();
 
-/// For System Main Menu.
+    /// For System Main Menu.
 private:
-     QMenu *m_systemMenu;
-     bool m_searchMenuOpened=false;
-     QMenu *m_searchMenu;
-     QList<QAction *> searchResults;
-     QMap<QAction*,QString*> filteredActions;
-    void integrateSystemMenu(QMenuBar*);
+    QMenu *m_systemMenu;
+    bool m_searchMenuOpened = false;
+    QMenu *m_searchMenu;
+    QList<QAction *> searchResults;
+    QMap<QAction *, QString *> filteredActions;
+    void integrateSystemMenu(QMenuBar *);
     void searchEditingDone();
     void refreshTimer();
     void addAppToMenu(QString candidate, QMenu *submenu);
 
 private:
-
     QWidget *searchLineWidget;
     SearchLineEdit *searchLineEdit;
     QCompleter *actionCompleter;
     AppMenuModel *m_appMenuModel;
     MenuImporter *m_menuImporter;
     QWidget *m_buttonsWidget;
-    struct cmpAction {
-     std::string pText;
-     std::string text;
-      int     row;
-    };
-    friend inline bool operator==(struct AppMenuWidget::cmpAction& lhs, const struct AppMenuWidget::cmpAction& rhs)
+    struct cmpAction
     {
-        return lhs.pText == rhs.pText &&
-               lhs.text     ==rhs.text &&
-               lhs.row      == rhs.row;
+        std::string pText;
+        std::string text;
+        int row;
+    };
+    friend inline bool operator==(struct AppMenuWidget::cmpAction &lhs,
+                                  const struct AppMenuWidget::cmpAction &rhs)
+    {
+        return lhs.pText == rhs.pText && lhs.text == rhs.text && lhs.row == rhs.row;
     }
 
     std::vector<cmpAction> m_wasVisible;
-    WId m_currentWindowID=0;
+    WId m_currentWindowID = 0;
     // QToolButton *m_minButton;
     // QToolButton *m_restoreButton;
     // QToolButton *m_closeButton;
-    //QPropertyAnimation *m_buttonsAnimation;
+    // QPropertyAnimation *m_buttonsAnimation;
     WId m_windowID;
     QTimer *m_typingTimer;
     QTimer *m_clearTimer;
-    //int m_buttonsWidth;
+    // int m_buttonsWidth;
 
-    void keyPressEvent(QKeyEvent * event) override;
+    void keyPressEvent(QKeyEvent *event) override;
 };
 
 class AboutDialog : public QDialog
