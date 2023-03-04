@@ -376,7 +376,26 @@ void AppMenuWidget::addAppToMenu(QString candidate, QMenu *submenu)
                     // qDebug() << "#   Did not find thumbnail" << IconCand << "TODO: Request it from thumbnailer";
                 }
             }
-
+            else if (file.isExecutable() && !file.isDir()) {
+                // qDebug() << "# Found" << file.fileName();
+                QFileInfo fi(file.fileName());
+                QString base = fi.completeBaseName(); // baseName() gets it wrong e.g., when there are dots in version numbers
+                QStringList executableAndArgs = {fi.absoluteFilePath()};
+                QAction *action = submenu->addAction(base);
+                connect(action,&QAction::triggered,this,[this, action]{
+                    actionLaunch(action);
+                    searchLineEdit->setText("");
+                    emit searchLineEdit->textChanged("");
+                    m_searchMenu->close();
+                });
+                searchResults << action; // The items in searchResults get removed when search results change
+                action->setToolTip(file.absoluteFilePath());
+                action->setProperty("path", file.absoluteFilePath());
+                                action->setToolTip(file.absoluteFilePath());
+                action->setProperty("path", file.absoluteFilePath());
+                action->setIcon(QIcon::fromTheme("application-x-executable"));
+                action->setIconVisibleInMenu(true); // So that an icon is shown even though the theme sets Qt::AA_DontShowIconsInMenus
+            }
 }
 
 void AppMenuWidget::findAppsInside(QStringList locationsContainingApps)
@@ -1047,6 +1066,12 @@ return;
 
             // If it is an application, add it to the menu using the application's icon
             if(iter.filePath().toLower().endsWith(".desktop") || iter.filePath().toLower().endsWith(".app") || iter.filePath().toLower().endsWith(".appdir") || iter.filePath().toLower().endsWith(".appimage")) {
+                addAppToMenu(iter.filePath(), m_searchMenu);
+                continue;
+            }
+
+            // If it is a file that has the executable bit set, also add it to the menu
+            if (QFileInfo(iter.filePath()).isExecutable() && not QFileInfo(iter.filePath()).isDir()) {
                 addAppToMenu(iter.filePath(), m_searchMenu);
                 continue;
             }
