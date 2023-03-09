@@ -15,7 +15,7 @@ jobs:
   build_and_test:
     if: contains(toJson(github.event.commits), '***NO_CI***') == false && contains(toJson(github.event.commits), '[ci skip]') == false && contains(toJson(github.event.commits), '[skip ci]') == false
     name: Apply clang-format to pull request
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     
     steps:
     - name: Install Linux Deps
