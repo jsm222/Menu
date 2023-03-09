@@ -21,6 +21,7 @@
 #include "appmenuwidget.h"
 #include "appmenu/menuimporteradaptor.h"
 #include "mainwidget.h"
+#include "menuqcalc.h"
 #include <chrono>
 #include <QProcess>
 #include <QHBoxLayout>
@@ -830,7 +831,19 @@ void AppMenuWidget::searchMenu()
     }
 
     QMimeDatabase mimeDatabase;
+    if (searchString.startsWith("= ")) {
+	MenuQCalc *menuQCalc = new MenuQCalc();	
+    	QString  result = menuQCalc->getResult(searchString.remove(0,1).trimmed());
+	QIcon icon = QIcon::fromTheme("accessories-calculator");
+                            QAction *res = new QAction(result);
+                            res->setIcon(icon);
+                            res->setIconVisibleInMenu(true);
+                            m_searchMenu->addAction(res);
+                            searchResults << res;
 
+	qDebug() << result;
+	return;
+    }
     // Only initialize fscompleter if searhcstring hints a path;
     if (searchString.startsWith("/") || searchString == "~") {
 
