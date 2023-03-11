@@ -23,8 +23,19 @@ public:
           po.lower_case_e = true;
           po.use_unicode_signs = true;
     }
-    QString getResult(QString expr) {
-         return QString::fromStdString(calculate(expr.toStdString(),eo).print(po));
+    QString getResult(QString expr, bool retErrors) {
+         MathStructure mstruct = calculate(unlocalizeExpression(expr.toStdString(),eo.parse_options),eo);
+         QStringList errors;
+             for (auto msg = message(); msg; msg = nextMessage())
+                 errors << QString::fromUtf8(message()->c_message());
+         if(!errors.isEmpty()) {
+             if(retErrors) {
+                return errors.join(" ");
+             } else {
+                 return "Does not compute";
+             }
+         }
+         return QString::fromStdString(mstruct.print(po));
     }
     virtual ~MenuQCalc() {}
         EvaluationOptions eo;

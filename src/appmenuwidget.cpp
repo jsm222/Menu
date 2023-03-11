@@ -514,6 +514,7 @@ AppMenuWidget::AppMenuWidget(QWidget *parent)
     // probono: Reload menu when something changed in a watched directory
     // https://github.com/helloSystem/Menu/issues/15
     connect(watcher, SIGNAL(directoryChanged(QString)), SLOT(rebuildMenu()));
+    m_menuQCalc = new MenuQCalc();
 
     QHBoxLayout *layout = new QHBoxLayout;
     layout->setAlignment(Qt::AlignCenter); // Center QHBoxLayout vertically
@@ -832,8 +833,7 @@ void AppMenuWidget::searchMenu()
 
     QMimeDatabase mimeDatabase;
     if (searchString.startsWith("= ")) {
-	MenuQCalc *menuQCalc = new MenuQCalc();	
-    	QString  result = menuQCalc->getResult(searchString.remove(0,1).trimmed());
+        QString  result = m_menuQCalc->getResult(searchString.remove(0,1).trimmed(),true);
 	QIcon icon = QIcon::fromTheme("accessories-calculator");
                             QAction *res = new QAction(result);
                             res->setIcon(icon);
@@ -893,6 +893,17 @@ void AppMenuWidget::searchMenu()
 
     // Check whether it is on the $PATH and is executable
     if (searchString != "") {
+        QString mathRes = m_menuQCalc->getResult(searchString,false);
+        if(mathRes != "Does not compute") {
+               QIcon icon = QIcon::fromTheme("accessories-calculator");
+                                   QAction *res = new QAction(mathRes);
+                                    res->setIcon(icon);
+                                    res->setIconVisibleInMenu(true);
+                                    m_searchMenu->addAction(res);
+                                    searchResults << res;
+
+
+        }
         QString command = searchString.split(" ").first();
         QString pathEnv = getenv("PATH");
         QStringList directories = pathEnv.split(":");
