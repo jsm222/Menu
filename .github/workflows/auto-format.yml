@@ -41,4 +41,4 @@ jobs:
       with:
         message: "Apply clang-format"
         branch: ${{ github.head_ref }}
-        github_token: ${{ secrets.GITHUB_TOKEN }}
+        github_token: ${{ secrets.GH_TOKEN }}
