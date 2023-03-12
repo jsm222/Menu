@@ -3,6 +3,13 @@
 #include <QObject>
 #include <QPointer>
 #include <libqalculate/Calculator.h>
+using std::cout;
+using std::endl;
+using std::map;
+using std::pair;
+using std::string;
+using std::vector;
+
 // derived from calculator_qalculate plugin in albertlauncher Copyright (c) 2023 Manuel Schneider
 class MenuQCalc : public Calculator
 {
@@ -38,19 +45,17 @@ public:
 
     QString getResult(QString expr, bool retErrors)
     {
-        MathStructure mstruct =
-                calculate(unlocalizeExpression(expr.toStdString(), eo.parse_options), eo);
-        QStringList errors;
-        for (auto msg = message(); msg; msg = nextMessage())
-            errors << QString::fromUtf8(message()->c_message());
-        if (!errors.isEmpty()) {
-            if (retErrors) {
-                return errors.join(" ");
-            } else {
-                return "Does not compute";
-            }
-        }
-        return QString::fromStdString(mstruct.print(po));
+        string str = unlocalizeExpression(expr.toStdString(), eo.parse_options);
+        string parsed;
+        int max_length = 100 - unicode_length(str);
+        if (max_length < 50)
+            max_length = 50;
+        bool result_is_comparison = false;
+        string result = calculateAndPrint(str, 100, eo, po, AUTOMATIC_FRACTION_AUTO,
+                                          AUTOMATIC_APPROXIMATION_AUTO, &parsed, max_length,
+                                          &result_is_comparison);
+
+        return QString::fromStdString(result);
     }
     virtual ~MenuQCalc() { }
     EvaluationOptions eo;
