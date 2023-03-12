@@ -3,12 +3,7 @@
 #include <QObject>
 #include <QPointer>
 #include <libqalculate/Calculator.h>
-using std::cout;
-using std::endl;
-using std::map;
-using std::pair;
 using std::string;
-using std::vector;
 
 // derived from calculator_qalculate plugin in albertlauncher Copyright (c) 2023 Manuel Schneider
 class MenuQCalc : public Calculator
