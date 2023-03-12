@@ -833,16 +833,16 @@ void AppMenuWidget::searchMenu()
 
     QMimeDatabase mimeDatabase;
     if (searchString.startsWith("= ")) {
-        QString  result = m_menuQCalc->getResult(searchString.remove(0,1).trimmed(),true);
-	QIcon icon = QIcon::fromTheme("accessories-calculator");
-                            QAction *res = new QAction(result);
-                            res->setIcon(icon);
-                            res->setIconVisibleInMenu(true);
-                            m_searchMenu->addAction(res);
-                            searchResults << res;
+        QString result = m_menuQCalc->getResult(searchString.remove(0, 1).trimmed(), true);
+        QIcon icon = QIcon::fromTheme("accessories-calculator");
+        QAction *res = new QAction(result);
+        res->setIcon(icon);
+        res->setIconVisibleInMenu(true);
+        m_searchMenu->addAction(res);
+        searchResults << res;
 
-	qDebug() << result;
-	return;
+        qDebug() << result;
+        return;
     }
     // Only initialize fscompleter if searhcstring hints a path;
     if (searchString.startsWith("/") || searchString == "~") {
@@ -893,16 +893,14 @@ void AppMenuWidget::searchMenu()
 
     // Check whether it is on the $PATH and is executable
     if (searchString != "") {
-        QString mathRes = m_menuQCalc->getResult(searchString,false);
-        if(mathRes != "Does not compute") {
-               QIcon icon = QIcon::fromTheme("accessories-calculator");
-                                   QAction *res = new QAction(mathRes);
-                                    res->setIcon(icon);
-                                    res->setIconVisibleInMenu(true);
-                                    m_searchMenu->addAction(res);
-                                    searchResults << res;
-
-
+        QString mathRes = m_menuQCalc->getResult(searchString, false);
+        if (mathRes != "") {
+            QIcon icon = QIcon::fromTheme("accessories-calculator");
+            QAction *res = new QAction(mathRes);
+            res->setIcon(icon);
+            res->setIconVisibleInMenu(true);
+            m_searchMenu->addAction(res);
+            searchResults << res;
         }
         QString command = searchString.split(" ").first();
         QString pathEnv = getenv("PATH");

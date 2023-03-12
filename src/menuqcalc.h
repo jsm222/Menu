@@ -5,7 +5,9 @@
 #include <libqalculate/Calculator.h>
 using std::string;
 
-// derived from calculator_qalculate plugin in albertlauncher Copyright (c) 2023 Manuel Schneider
+// Derived from calculator_qalculate plugin in albertlauncher Copyright (c) 2023 Manuel Schneider
+// and Qalculate/qalculate-gtk/blob/master/src/searchprovider.cc Copyright (C) 2020  Hanna Knutsson
+
 class MenuQCalc : public Calculator
 {
 public:
@@ -38,6 +40,18 @@ public:
         // Now "1 m to cm" works but "9 to hex" does not
     }
 
+    bool has_error()
+    {
+        while (message()) {
+            if (message()->type() == MESSAGE_ERROR) {
+                clearMessages();
+                return true;
+            }
+            nextMessage();
+        }
+        return false;
+    }
+
     QString getResult(QString expr, bool retErrors)
     {
         string str = unlocalizeExpression(expr.toStdString(), eo.parse_options);
@@ -49,6 +63,18 @@ public:
         string result = calculateAndPrint(str, 100, eo, po, AUTOMATIC_FRACTION_AUTO,
                                           AUTOMATIC_APPROXIMATION_AUTO, &parsed, max_length,
                                           &result_is_comparison);
+
+        po.number_fraction_format = FRACTION_DECIMAL;
+        if (has_error() || result.empty() || parsed.find(abortedMessage()) != string::npos
+            || parsed.find(timedOutString()) != string::npos) {
+            return (QString::fromStdString(""));
+        }
+        if (result.find(abortedMessage()) != string::npos
+            || result.find(timedOutString()) != string::npos) {
+            if (parsed.empty())
+                return (QString::fromStdString(""));
+            result = "";
+        }
 
         return QString::fromStdString(result);
     }
