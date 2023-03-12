@@ -36,7 +36,7 @@
 #include <QVariant>
 #include "appmenu/appmenumodel.h"
 #include "appmenu/menuimporter.h"
-
+class MenuQCalc;
 class SearchLineEdit : public QLineEdit
 {
     Q_OBJECT
@@ -103,6 +103,7 @@ protected:
             override; // Make it possible to click on the menu entry for a submenu
 
 private:
+    MenuQCalc * m_menuQCalc;
     bool m_isSearching = false;
     QStringList watchedLocations;
     bool isAcceptWindow(WId id);
