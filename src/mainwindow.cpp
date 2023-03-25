@@ -210,6 +210,11 @@ void MainWindow::checkPeriodically()
         if (storage.isReadOnly() || storage.bytesTotal() < 1024 * 10
             || storage.fileSystemType() == "nullfs")
             continue;
+        // Do not warn about mountpoints that are in /tmp (e.g., AppImages)
+        // These should not be warned about anyway, since they are read-only
+        // but apparently QStorageInfo::isReadOnly() does not work for AppImages
+        if (storage.rootPath().startsWith("/tmp/"))
+            continue;
         float usedSize = float(storage.bytesTotal() - storage.bytesAvailable())
                 / float(storage.bytesTotal());
         // Warn if any relevant disk is >95% full
