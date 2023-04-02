@@ -6,7 +6,7 @@
     <message>
         <location filename="../appmenuwidget.cpp" line="1724"/>
         <source>About helloDesktop</source>
-        <translation type="unfinished"></translation>
+        <translation>Acerca de helloDesktop</translation>
     </message>
     <message>
         <location filename="../appmenuwidget.cpp" line="1737"/>
@@ -16,7 +16,7 @@
     <message>
         <location filename="../appmenuwidget.cpp" line="1846"/>
         <source>Unknown</source>
-        <translation type="unfinished"></translation>
+        <translation>Desconocido</translation>
     </message>
 </context>
 <context>
@@ -41,12 +41,12 @@
     <message>
         <location filename="../appmenuwidget.cpp" line="578"/>
         <source>System</source>
-        <translation type="unfinished"></translation>
+        <translation>Sistema</translation>
     </message>
     <message>
         <location filename="../appmenuwidget.cpp" line="636"/>
         <source>Force Quit Application</source>
-        <translation type="unfinished"></translation>
+        <translation>Forzar el cierre de la aplicación</translation>
     </message>
     <message>
         <location filename="../appmenuwidget.cpp" line="658"/>
@@ -66,42 +66,42 @@
     <message>
         <location filename="../appmenuwidget.cpp" line="1263"/>
         <source>File</source>
-        <translation type="unfinished"></translation>
+        <translation>Archivo</translation>
     </message>
     <message>
         <location filename="../appmenuwidget.cpp" line="1264"/>
         <source>Close</source>
-        <translation type="unfinished"></translation>
+        <translation>Cerrar</translation>
     </message>
     <message>
         <location filename="../appmenuwidget.cpp" line="1277"/>
         <source>Quit</source>
-        <translation type="unfinished"></translation>
+        <translation>Abandonar</translation>
     </message>
     <message>
         <location filename="../appmenuwidget.cpp" line="1292"/>
         <source>Edit</source>
-        <translation type="unfinished"></translation>
+        <translation>Editar</translation>
     </message>
     <message>
         <location filename="../appmenuwidget.cpp" line="1293"/>
         <source>Undo</source>
-        <translation type="unfinished"></translation>
+        <translation>Deshacer</translation>
     </message>
     <message>
         <location filename="../appmenuwidget.cpp" line="1322"/>
         <source>Cut</source>
-        <translation type="unfinished"></translation>
+        <translation>Cortar</translation>
     </message>
     <message>
         <location filename="../appmenuwidget.cpp" line="1327"/>
         <source>Copy</source>
-        <translation type="unfinished"></translation>
+        <translation>Copiar</translation>
     </message>
     <message>
         <location filename="../appmenuwidget.cpp" line="1332"/>
         <source>Paste</source>
-        <translation type="unfinished"></translation>
+        <translation>Pegar</translation>
     </message>
 </context>
 <context>
@@ -188,57 +188,57 @@
     <message>
         <location filename="../mainwindow.cpp" line="148"/>
         <source>The SUDO_ASKPASS environment variable is missing. The system is not configured correctly.</source>
-        <translation type="unfinished"></translation>
+        <translation>Falta la variable del entorno SUDO_ASKPASS. El sistema no está configurado correctamente.</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="155"/>
         <source>The UBUNTU_MENUPROXY environment variable is missing. The system is not configured correctly.</source>
-        <translation type="unfinished"></translation>
+        <translation>Falta la variable de entorno UBUNTU_MENUPROXY. El sistema no está configurado correctamente.</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="159"/>
         <source>The UBUNTU_MENUPROXY environment variable is not set to &quot;1&quot;. The system is not configured correctly.</source>
-        <translation type="unfinished"></translation>
+        <translation>La variable del entorno UBUNTU_MENUPROXY no está establecida en &quot;1&quot;. El sistema no está configurado correctamente.</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="166"/>
         <source>The GTK_MODULES environment variable is missing. The system is not configured correctly.</source>
-        <translation type="unfinished"></translation>
+        <translation>Falta la variable del entorno GTK_MODULES. El sistema no está configurado correctamente.</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="173"/>
         <source>The GTK_MODULES environment variable does not contain &quot;appmenu-gtk-module&quot;. The system is not configured correctly.</source>
-        <translation type="unfinished"></translation>
+        <translation>La variable del entorno GTK_MODULES no contiene &quot;appmenu-gtk-module&quot;. El sistema no está configurado correctamente.</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="180"/>
         <source>The QT_QPA_PLATFORMTHEME environment variable is missing. The system is not configured correctly.</source>
-        <translation type="unfinished"></translation>
+        <translation>Falta la variable del entorno QT_QPA_PLATFORMTHEME. El sistema no está configurado correctamente.</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="187"/>
         <source>The QT_QPA_PLATFORMTHEME environment variable does not contain &quot;panda&quot;. The system is not configured correctly.</source>
-        <translation type="unfinished"></translation>
+        <translation>La variable del entorno QT_QPA_PLATFORMTHEME no contiene &quot;panda&quot;. El sistema no está configurado correctamente.</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="194"/>
         <source>The XDG_SESSION_TYPE environment variable is missing. The system is not configured correctly.</source>
-        <translation type="unfinished"></translation>
+        <translation>Falta la variable del entorno XDG_SESSION_TYPE. El sistema no está configurado correctamente.</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="198"/>
         <source>The XDG_SESSION_TYPE environment variable is not set to &quot;x11&quot;. The system is not configured correctly.</source>
-        <translation type="unfinished"></translation>
+        <translation>La variable del entorno XDG_SESSION_TYPE no está establecida en &quot;x11&quot;. El sistema no está configurado correctamente.</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="218"/>
         <source>Your disk &apos;%1&apos; is almost full. %2 percent left.</source>
-        <translation type="unfinished"></translation>
+        <translation>Tú disco &apos;%1&apos; está casi lleno. Queda %2 por ciento.</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="319"/>
         <source>Screen resolution is below the minimum system requirement of 640x480 pixels.</source>
-        <translation type="unfinished"></translation>
+        <translation>La resolución de pantalla está por debajo del requisito mínimo del sistema de 640x480 píxeles.</translation>
     </message>
 </context>
 <context>
@@ -259,7 +259,7 @@
     <message>
         <location filename="../appmenuwidget.cpp" line="119"/>
         <source>About helloDesktop</source>
-        <translation type="unfinished"></translation>
+        <translation>Acerca de helloDesktop</translation>
     </message>
 </context>
 <context>
@@ -267,58 +267,58 @@
     <message>
         <location filename="../../plugin-windows/windowswidget.cpp" line="23"/>
         <source>Windows</source>
-        <translation type="unfinished"></translation>
+        <translation>Windows</translation>
     </message>
     <message>
         <location filename="../../plugin-windows/windowswidget.cpp" line="112"/>
         <source>Hide %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Ocultar %1</translation>
     </message>
     <message>
         <location filename="../../plugin-windows/windowswidget.cpp" line="135"/>
         <source>Hide Others</source>
-        <translation type="unfinished"></translation>
+        <translation>Ocultar otros</translation>
     </message>
     <message>
         <location filename="../../plugin-windows/windowswidget.cpp" line="150"/>
         <source>Show All</source>
-        <translation type="unfinished"></translation>
+        <translation>Mostrar todos</translation>
     </message>
     <message>
         <location filename="../../plugin-windows/windowswidget.cpp" line="169"/>
         <source>Overview</source>
-        <translation type="unfinished"></translation>
+        <translation>Descripción general</translation>
     </message>
     <message>
         <location filename="../../plugin-windows/windowswidget.cpp" line="239"/>
         <location filename="../../plugin-windows/windowswidget.cpp" line="288"/>
         <source>Desktop</source>
-        <translation type="unfinished"></translation>
+        <translation>Escritorio</translation>
     </message>
     <message>
         <location filename="../../plugin-windows/windowswidget.cpp" line="322"/>
         <source>Zoom In</source>
-        <translation type="unfinished"></translation>
+        <translation>Acercarse</translation>
     </message>
     <message>
         <location filename="../../plugin-windows/windowswidget.cpp" line="337"/>
         <source>Zoom Out</source>
-        <translation type="unfinished"></translation>
+        <translation>Alejarse</translation>
     </message>
     <message>
         <location filename="../../plugin-windows/windowswidget.cpp" line="371"/>
         <source>Increase Screen Brightness</source>
-        <translation type="unfinished"></translation>
+        <translation>Aumentar el brillo de la pantalla</translation>
     </message>
     <message>
         <location filename="../../plugin-windows/windowswidget.cpp" line="390"/>
         <source>Decrease Screen Brightness</source>
-        <translation type="unfinished"></translation>
+        <translation>Reducir el brillo de la pantalla</translation>
     </message>
     <message>
         <location filename="../../plugin-windows/windowswidget.cpp" line="412"/>
         <source>Full Screen</source>
-        <translation type="unfinished"></translation>
+        <translation>Pantalla completa</translation>
     </message>
 </context>
 </TS>
