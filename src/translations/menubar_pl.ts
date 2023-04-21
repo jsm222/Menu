@@ -29,7 +29,7 @@
     <message>
         <location filename="../appmenuwidget.cpp" line="1724"/>
         <source>About helloDesktop</source>
-        <translation type="unfinished"></translation>
+        <translation>O helloDesktop</translation>
     </message>
     <message>
         <location filename="../appmenuwidget.cpp" line="1737"/>
@@ -39,7 +39,7 @@
     <message>
         <location filename="../appmenuwidget.cpp" line="1846"/>
         <source>Unknown</source>
-        <translation type="unfinished"></translation>
+        <translation>Nieznany</translation>
     </message>
 </context>
 <context>
@@ -64,12 +64,12 @@
     <message>
         <location filename="../appmenuwidget.cpp" line="578"/>
         <source>System</source>
-        <translation type="unfinished"></translation>
+        <translation>System</translation>
     </message>
     <message>
         <location filename="../appmenuwidget.cpp" line="636"/>
         <source>Force Quit Application</source>
-        <translation type="unfinished"></translation>
+        <translation>Wymuś zamknięcie aplikacji</translation>
     </message>
     <message>
         <location filename="../appmenuwidget.cpp" line="658"/>
@@ -89,42 +89,42 @@
     <message>
         <location filename="../appmenuwidget.cpp" line="1263"/>
         <source>File</source>
-        <translation type="unfinished"></translation>
+        <translation>Plik</translation>
     </message>
     <message>
         <location filename="../appmenuwidget.cpp" line="1264"/>
         <source>Close</source>
-        <translation type="unfinished"></translation>
+        <translation>Zamknij</translation>
     </message>
     <message>
         <location filename="../appmenuwidget.cpp" line="1277"/>
         <source>Quit</source>
-        <translation type="unfinished"></translation>
+        <translation>Wyjdź</translation>
     </message>
     <message>
         <location filename="../appmenuwidget.cpp" line="1292"/>
         <source>Edit</source>
-        <translation type="unfinished"></translation>
+        <translation>Edycja</translation>
     </message>
     <message>
         <location filename="../appmenuwidget.cpp" line="1293"/>
         <source>Undo</source>
-        <translation type="unfinished"></translation>
+        <translation>Cofnij</translation>
     </message>
     <message>
         <location filename="../appmenuwidget.cpp" line="1322"/>
         <source>Cut</source>
-        <translation type="unfinished"></translation>
+        <translation>Wytnij</translation>
     </message>
     <message>
         <location filename="../appmenuwidget.cpp" line="1327"/>
         <source>Copy</source>
-        <translation type="unfinished"></translation>
+        <translation>Kopiuj</translation>
     </message>
     <message>
         <location filename="../appmenuwidget.cpp" line="1332"/>
         <source>Paste</source>
-        <translation type="unfinished"></translation>
+        <translation>Wklej</translation>
     </message>
 </context>
 <context>
@@ -211,12 +211,12 @@
     <message>
         <location filename="../mainwindow.cpp" line="148"/>
         <source>The SUDO_ASKPASS environment variable is missing. The system is not configured correctly.</source>
-        <translation type="unfinished"></translation>
+        <translation>Brakuje zmiennej środowiskowej SUDO_ASKPASS. System nie jest poprawnie skonfigurowany.</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="155"/>
         <source>The UBUNTU_MENUPROXY environment variable is missing. The system is not configured correctly.</source>
-        <translation type="unfinished"></translation>
+        <translation>Brak zmiennej środowiskowej UBUNTU_MENUPROXY. System nie jest poprawnie skonfigurowany.</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="159"/>
@@ -261,7 +261,7 @@
     <message>
         <location filename="../mainwindow.cpp" line="319"/>
         <source>Screen resolution is below the minimum system requirement of 640x480 pixels.</source>
-        <translation type="unfinished"></translation>
+        <translation>Rozdzielczość ekranu jest poniżej minimalnych wymagań systemowych 640x480 pikseli.</translation>
     </message>
 </context>
 <context>
@@ -282,7 +282,7 @@
     <message>
         <location filename="../appmenuwidget.cpp" line="119"/>
         <source>About helloDesktop</source>
-        <translation type="unfinished"></translation>
+        <translation>O helloDesktop</translation>
     </message>
 </context>
 <context>
@@ -295,38 +295,38 @@
     <message>
         <location filename="../../plugin-windows/windowswidget.cpp" line="112"/>
         <source>Hide %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Ukryj %1</translation>
     </message>
     <message>
         <location filename="../../plugin-windows/windowswidget.cpp" line="135"/>
         <source>Hide Others</source>
-        <translation type="unfinished"></translation>
+        <translation>Ukryj pozostałe</translation>
     </message>
     <message>
         <location filename="../../plugin-windows/windowswidget.cpp" line="150"/>
         <source>Show All</source>
-        <translation type="unfinished"></translation>
+        <translation>Pokaż wszystkie</translation>
     </message>
     <message>
         <location filename="../../plugin-windows/windowswidget.cpp" line="169"/>
         <source>Overview</source>
-        <translation type="unfinished"></translation>
+        <translation>Przegląd</translation>
     </message>
     <message>
         <location filename="../../plugin-windows/windowswidget.cpp" line="239"/>
         <location filename="../../plugin-windows/windowswidget.cpp" line="288"/>
         <source>Desktop</source>
-        <translation type="unfinished"></translation>
+        <translation>Pulpit</translation>
     </message>
     <message>
         <location filename="../../plugin-windows/windowswidget.cpp" line="322"/>
         <source>Zoom In</source>
-        <translation type="unfinished"></translation>
+        <translation>Zbliżenie</translation>
     </message>
     <message>
         <location filename="../../plugin-windows/windowswidget.cpp" line="337"/>
         <source>Zoom Out</source>
-        <translation type="unfinished"></translation>
+        <translation>Pomniejsz</translation>
     </message>
     <message>
         <location filename="../../plugin-windows/windowswidget.cpp" line="371"/>
@@ -341,7 +341,7 @@
     <message>
         <location filename="../../plugin-windows/windowswidget.cpp" line="412"/>
         <source>Full Screen</source>
-        <translation type="unfinished"></translation>
+        <translation>Pełny ekran</translation>
     </message>
 </context>
 </TS>
