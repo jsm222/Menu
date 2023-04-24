@@ -221,42 +221,42 @@
     <message>
         <location filename="../mainwindow.cpp" line="159"/>
         <source>The UBUNTU_MENUPROXY environment variable is not set to &quot;1&quot;. The system is not configured correctly.</source>
-        <translation type="unfinished"></translation>
+        <translation>Zmienna środowiskowa UBUNTU_MENUPROXY nie jest ustawiona na „1”. System nie jest poprawnie skonfigurowany.</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="166"/>
         <source>The GTK_MODULES environment variable is missing. The system is not configured correctly.</source>
-        <translation type="unfinished"></translation>
+        <translation>Brakuje zmiennej środowiskowej GTK_MODULES. System nie jest poprawnie skonfigurowany.</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="173"/>
         <source>The GTK_MODULES environment variable does not contain &quot;appmenu-gtk-module&quot;. The system is not configured correctly.</source>
-        <translation type="unfinished"></translation>
+        <translation>Zmienna środowiskowa GTK_MODULES nie zawiera „appmenu-gtk-module”. System nie jest poprawnie skonfigurowany.</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="180"/>
         <source>The QT_QPA_PLATFORMTHEME environment variable is missing. The system is not configured correctly.</source>
-        <translation type="unfinished"></translation>
+        <translation>Brakuje zmiennej środowiskowej QT_QPA_PLATFORMTHEME. System nie jest poprawnie skonfigurowany.</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="187"/>
         <source>The QT_QPA_PLATFORMTHEME environment variable does not contain &quot;panda&quot;. The system is not configured correctly.</source>
-        <translation type="unfinished"></translation>
+        <translation>Zmienna środowiskowa QT_QPA_PLATFORMTHEME nie zawiera „panda”. System nie jest poprawnie skonfigurowany.</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="194"/>
         <source>The XDG_SESSION_TYPE environment variable is missing. The system is not configured correctly.</source>
-        <translation type="unfinished"></translation>
+        <translation>Brakuje zmiennej środowiskowej XDG_SESSION_TYPE. System nie jest poprawnie skonfigurowany.</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="198"/>
         <source>The XDG_SESSION_TYPE environment variable is not set to &quot;x11&quot;. The system is not configured correctly.</source>
-        <translation type="unfinished"></translation>
+        <translation>Zmienna środowiskowa XDG_SESSION_TYPE nie jest ustawiona na „x11”. System nie jest poprawnie skonfigurowany.</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="218"/>
         <source>Your disk &apos;%1&apos; is almost full. %2 percent left.</source>
-        <translation type="unfinished"></translation>
+        <translation>Dysk „%1” jest prawie pełny. Pozostało %2 procent.</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="319"/>
@@ -290,7 +290,7 @@
     <message>
         <location filename="../../plugin-windows/windowswidget.cpp" line="23"/>
         <source>Windows</source>
-        <translation type="unfinished"></translation>
+        <translation>Okna</translation>
     </message>
     <message>
         <location filename="../../plugin-windows/windowswidget.cpp" line="112"/>
@@ -331,12 +331,12 @@
     <message>
         <location filename="../../plugin-windows/windowswidget.cpp" line="371"/>
         <source>Increase Screen Brightness</source>
-        <translation type="unfinished"></translation>
+        <translation>Zwiększ jasność ekranu</translation>
     </message>
     <message>
         <location filename="../../plugin-windows/windowswidget.cpp" line="390"/>
         <source>Decrease Screen Brightness</source>
-        <translation type="unfinished"></translation>
+        <translation>Zmniejsz jasność ekranu</translation>
     </message>
     <message>
         <location filename="../../plugin-windows/windowswidget.cpp" line="412"/>
