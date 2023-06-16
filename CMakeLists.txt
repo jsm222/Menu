@@ -10,7 +10,7 @@ set(CMAKE_INSTALL_PREFIX "/System/Menu.app")
 # https://github.com/helloSystem/Menu/issues/118
 # Needed for libstatusnotifier.so
 if(BSD)
-    set(CMAKE_EXE_LINKER_FLAGS ${CMAKE_EXE_LINKER_FLAGS} "-Xlinker --export-dynamic")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Xlinker --export-dynamic")
 else()
     set(CMAKE_EXE_LINKER_FLAGS "-Wl,-export-dynamic")
 endif()
