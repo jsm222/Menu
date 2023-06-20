@@ -61,6 +61,7 @@
 #include <KF5/KWindowSystem/NETWM>
 #include <kglobalaccel.h>
 #include <cmath>
+#include <QClipboard>
 
 #if defined(Q_OS_FREEBSD)
 #  include <magic.h>
@@ -1700,6 +1701,7 @@ AboutDialog::AboutDialog(QWidget *parent) : QDialog(parent)
     _imageLabel = new QLabel;
     _textLabel = new QLabel;
     _hardwareProbeButton = new QPushButton("Hardware Probe");
+    _copyButton = new QPushButton("Copy to Clipboard");
 
     _textLabel->setContentsMargins(20, 0, 20, 0);
 
@@ -1707,6 +1709,7 @@ AboutDialog::AboutDialog(QWidget *parent) : QDialog(parent)
     _layout->addWidget(_imageLabel, 0, Qt::AlignHCenter);
     _layout->addWidget(_textLabel, 0, Qt::AlignHCenter);
     _layout->addWidget(_hardwareProbeButton, 0, Qt::AlignHCenter);
+    _layout->addWidget(_copyButton, 0, Qt::AlignHCenter);
 
     // Insert spacing above and below the "Hardware Probe" button
     _layout->insertSpacing(2, 14);
@@ -1717,6 +1720,32 @@ AboutDialog::AboutDialog(QWidget *parent) : QDialog(parent)
         accept();
     });
     _hardwareProbeButton->setEnabled(QFile::exists("/Applications/Utilities/Hardware Probe.app"));
+
+    connect(_copyButton, &QPushButton::clicked, [=]() {
+        qDebug() << "Copying to clipboard";
+        QClipboard *clipboard = QApplication::clipboard();
+        // TODO: Put together the text to be copied to the clipboard
+        // in a more elegant way
+        // Strip HTML tags
+        QString text = _textLabel->text();
+        text.replace("<br>", "\n");
+        text.replace("</p>", "\n");
+        text.replace("</h3>", "\n");
+        text.remove(QRegularExpression("<[^>]*>"));
+        // Remove all lines after the 9th
+        QStringList lines = text.split("\n");
+        if (lines.size() > 9) {
+            lines = lines.mid(0, 9);
+        }
+        text = lines.join("\n");
+        clipboard->setText(text);
+        accept();
+    });
+    _copyButton->setEnabled(true);
+    // Make the font size of the button 8pt, overriding stylesheet
+    QFont font = _copyButton->font();
+    font.setPointSize(7);
+    _copyButton->setFont(font);
 
 #if defined(Q_OS_FREEBSD)
     QProcess p;
@@ -1890,7 +1919,6 @@ AboutDialog::AboutDialog(QWidget *parent) : QDialog(parent)
                 + "<p><a href='file:///COPYRIGHT'>FreeBSD copyright information</a><br>"
                 + "Other components are subject to<br>their respective license terms</p>"
                 + "</small></center>");
-
 #else
         msgBox->setText(
                 QString("<center><h3>helloDesktop</h3>"

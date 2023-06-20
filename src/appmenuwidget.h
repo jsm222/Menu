@@ -103,7 +103,7 @@ protected:
             override; // Make it possible to click on the menu entry for a submenu
 
 private:
-    MenuQCalc * m_menuQCalc;
+    MenuQCalc *m_menuQCalc;
     bool m_isSearching = false;
     QStringList watchedLocations;
     bool isAcceptWindow(WId id);
@@ -186,6 +186,7 @@ class AboutDialog : public QDialog
 {
     QLabel *_imageLabel, *_textLabel;
     QPushButton *_hardwareProbeButton;
+    QPushButton *_copyButton;
     QVBoxLayout *_layout;
 
 public:
