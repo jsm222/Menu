@@ -68,8 +68,10 @@ void MenuImporter::RegisterWindow(WId id, const QDBusObjectPath &path)
     KWindowInfo info(id, NET::WMWindowType, NET::WM2WindowClass);
     NET::WindowTypes mask = NET::AllTypesMask;
     QString service = message().service();
-    if (!m_serviceWatcher->watchedServices().contains(service)) {
+    if (!m_serviceWatcher->watchedServices().contains(service) || m_menuPaths[id]!=path) {
+       if(!m_serviceWatcher->watchedServices().contains(service)) {
         m_serviceWatcher->addWatchedService(service);
+       }
     } else {
         emit WindowRegistered(id, service, m_menuPaths[id]);
 
