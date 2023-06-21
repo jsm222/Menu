@@ -29,7 +29,7 @@
     <message>
         <location filename="../appmenuwidget.cpp" line="1724"/>
         <source>About helloDesktop</source>
-        <translation type="unfinished"></translation>
+        <translation>關於 Hello 桌面</translation>
     </message>
     <message>
         <location filename="../appmenuwidget.cpp" line="1737"/>
@@ -39,7 +39,7 @@
     <message>
         <location filename="../appmenuwidget.cpp" line="1846"/>
         <source>Unknown</source>
-        <translation type="unfinished"></translation>
+        <translation>未知</translation>
     </message>
 </context>
 <context>
@@ -64,12 +64,12 @@
     <message>
         <location filename="../appmenuwidget.cpp" line="578"/>
         <source>System</source>
-        <translation type="unfinished"></translation>
+        <translation>系统</translation>
     </message>
     <message>
         <location filename="../appmenuwidget.cpp" line="636"/>
         <source>Force Quit Application</source>
-        <translation type="unfinished"></translation>
+        <translation>強制結束應用程式</translation>
     </message>
     <message>
         <location filename="../appmenuwidget.cpp" line="658"/>
@@ -89,42 +89,42 @@
     <message>
         <location filename="../appmenuwidget.cpp" line="1263"/>
         <source>File</source>
-        <translation type="unfinished"></translation>
+        <translation>檔案</translation>
     </message>
     <message>
         <location filename="../appmenuwidget.cpp" line="1264"/>
         <source>Close</source>
-        <translation type="unfinished"></translation>
+        <translation>關閉</translation>
     </message>
     <message>
         <location filename="../appmenuwidget.cpp" line="1277"/>
         <source>Quit</source>
-        <translation type="unfinished"></translation>
+        <translation>結束</translation>
     </message>
     <message>
         <location filename="../appmenuwidget.cpp" line="1292"/>
         <source>Edit</source>
-        <translation type="unfinished"></translation>
+        <translation>編輯</translation>
     </message>
     <message>
         <location filename="../appmenuwidget.cpp" line="1293"/>
         <source>Undo</source>
-        <translation type="unfinished"></translation>
+        <translation>復原</translation>
     </message>
     <message>
         <location filename="../appmenuwidget.cpp" line="1322"/>
         <source>Cut</source>
-        <translation type="unfinished"></translation>
+        <translation>剪下</translation>
     </message>
     <message>
         <location filename="../appmenuwidget.cpp" line="1327"/>
         <source>Copy</source>
-        <translation type="unfinished"></translation>
+        <translation>複製</translation>
     </message>
     <message>
         <location filename="../appmenuwidget.cpp" line="1332"/>
         <source>Paste</source>
-        <translation type="unfinished"></translation>
+        <translation>貼上</translation>
     </message>
 </context>
 <context>
@@ -211,57 +211,57 @@
     <message>
         <location filename="../mainwindow.cpp" line="148"/>
         <source>The SUDO_ASKPASS environment variable is missing. The system is not configured correctly.</source>
-        <translation type="unfinished"></translation>
+        <translation>系統配置不正確，缺少 SUDO_ASKPASS 環境變數。</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="155"/>
         <source>The UBUNTU_MENUPROXY environment variable is missing. The system is not configured correctly.</source>
-        <translation type="unfinished"></translation>
+        <translation>系統配置不正確，缺少 UBUNTU_MENUPROXY 環境變數。</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="159"/>
         <source>The UBUNTU_MENUPROXY environment variable is not set to &quot;1&quot;. The system is not configured correctly.</source>
-        <translation type="unfinished"></translation>
+        <translation>系統配置不正確，UBUNTU_MENUPROXY 環境變數未設置為“1”。</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="166"/>
         <source>The GTK_MODULES environment variable is missing. The system is not configured correctly.</source>
-        <translation type="unfinished"></translation>
+        <translation>系統配置不正確，缺少 GTK_MODULES 環境變數。</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="173"/>
         <source>The GTK_MODULES environment variable does not contain &quot;appmenu-gtk-module&quot;. The system is not configured correctly.</source>
-        <translation type="unfinished"></translation>
+        <translation>系統配置不正確，GTK_MODULES 環境變數不包含 「appmenu-gtk-module」。</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="180"/>
         <source>The QT_QPA_PLATFORMTHEME environment variable is missing. The system is not configured correctly.</source>
-        <translation type="unfinished"></translation>
+        <translation>系統配置不正確，缺少 QT_QPA_PLATFORMTHEME 環境變數。</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="187"/>
         <source>The QT_QPA_PLATFORMTHEME environment variable does not contain &quot;panda&quot;. The system is not configured correctly.</source>
-        <translation type="unfinished"></translation>
+        <translation>系統配置不正確，QT_QPA_PLATFORMTHEME 環境變數不包含「panda」。</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="194"/>
         <source>The XDG_SESSION_TYPE environment variable is missing. The system is not configured correctly.</source>
-        <translation type="unfinished"></translation>
+        <translation>系統配置不正確，缺少 XDG_SESSION_TYPE 環境變數。</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="198"/>
         <source>The XDG_SESSION_TYPE environment variable is not set to &quot;x11&quot;. The system is not configured correctly.</source>
-        <translation type="unfinished"></translation>
+        <translation>系統配置不正確，XDG_SESSION_TYPE 環境變數未設置為「x11」。</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="218"/>
         <source>Your disk &apos;%1&apos; is almost full. %2 percent left.</source>
-        <translation type="unfinished"></translation>
+        <translation>您的磁碟「%1」將滿。還剩下 %2 %。</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="319"/>
         <source>Screen resolution is below the minimum system requirement of 640x480 pixels.</source>
-        <translation type="unfinished"></translation>
+        <translation>您的螢幕解析度低於系統最低要求 640x480 像素。</translation>
     </message>
 </context>
 <context>
@@ -282,7 +282,7 @@
     <message>
         <location filename="../appmenuwidget.cpp" line="119"/>
         <source>About helloDesktop</source>
-        <translation type="unfinished"></translation>
+        <translation>關於 Hello 桌面</translation>
     </message>
 </context>
 <context>
@@ -290,58 +290,58 @@
     <message>
         <location filename="../../plugin-windows/windowswidget.cpp" line="23"/>
         <source>Windows</source>
-        <translation type="unfinished"></translation>
+        <translation>視窗</translation>
     </message>
     <message>
         <location filename="../../plugin-windows/windowswidget.cpp" line="112"/>
         <source>Hide %1</source>
-        <translation type="unfinished"></translation>
+        <translation>隱藏 %1</translation>
     </message>
     <message>
         <location filename="../../plugin-windows/windowswidget.cpp" line="135"/>
         <source>Hide Others</source>
-        <translation type="unfinished"></translation>
+        <translation>隱藏其他</translation>
     </message>
     <message>
         <location filename="../../plugin-windows/windowswidget.cpp" line="150"/>
         <source>Show All</source>
-        <translation type="unfinished"></translation>
+        <translation>全部顯示</translation>
     </message>
     <message>
         <location filename="../../plugin-windows/windowswidget.cpp" line="169"/>
         <source>Overview</source>
-        <translation type="unfinished"></translation>
+        <translation>總覽</translation>
     </message>
     <message>
         <location filename="../../plugin-windows/windowswidget.cpp" line="239"/>
         <location filename="../../plugin-windows/windowswidget.cpp" line="288"/>
         <source>Desktop</source>
-        <translation type="unfinished"></translation>
+        <translation>桌面</translation>
     </message>
     <message>
         <location filename="../../plugin-windows/windowswidget.cpp" line="322"/>
         <source>Zoom In</source>
-        <translation type="unfinished"></translation>
+        <translation>放大</translation>
     </message>
     <message>
         <location filename="../../plugin-windows/windowswidget.cpp" line="337"/>
         <source>Zoom Out</source>
-        <translation type="unfinished"></translation>
+        <translation>縮小</translation>
     </message>
     <message>
         <location filename="../../plugin-windows/windowswidget.cpp" line="371"/>
         <source>Increase Screen Brightness</source>
-        <translation type="unfinished"></translation>
+        <translation>增加螢幕亮度</translation>
     </message>
     <message>
         <location filename="../../plugin-windows/windowswidget.cpp" line="390"/>
         <source>Decrease Screen Brightness</source>
-        <translation type="unfinished"></translation>
+        <translation>降低螢幕亮度</translation>
     </message>
     <message>
         <location filename="../../plugin-windows/windowswidget.cpp" line="412"/>
         <source>Full Screen</source>
-        <translation type="unfinished"></translation>
+        <translation>全螢幕</translation>
     </message>
 </context>
 </TS>
