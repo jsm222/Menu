@@ -1634,6 +1634,17 @@ void AppMenuWidget::actionLogout()
 void AppMenuWidget::actionForceQuit()
 {
     qDebug() << "actionForceQuit() called";
+
+    // TODO: Do the following without using notify-send. DBus is so complicated!
+    QString program = "notify-send";
+    QStringList arguments;
+    arguments
+            << tr("Force Quit Application")
+            << tr("Click on the window of the application you would like to force quit. To cancel, "
+                  "right-click.");
+
+    QProcess::execute(program, arguments);
+
     QProcess *p = new QProcess();
     p->setProgram("xkill");
     p->startDetached();
