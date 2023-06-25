@@ -46,6 +46,7 @@ private:
     void setStrutPartial();
 
 private:
+    QMessageBox *m_warningWindow;
     QWidget *m_fakeWidget;
     QLabel *applicationStartingLabel;
     void checkPeriodically();

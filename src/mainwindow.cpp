@@ -41,6 +41,7 @@
 
 MainWindow::MainWindow(QWidget *parent)
     : QFrame(parent),
+      m_warningWindow(nullptr),
       // m_fakeWidget(new QWidget(nullptr)),
       applicationStartingLabel(new QLabel("", this)),
       m_MainWidget(new MainWidget(parent))
@@ -200,7 +201,10 @@ MainWindow::MainWindow(QWidget *parent)
     }
 }
 
-MainWindow::~MainWindow() { }
+MainWindow::~MainWindow()
+{
+    delete m_warningWindow;
+}
 
 void MainWindow::checkPeriodically()
 {
@@ -319,9 +323,13 @@ void MainWindow::checkSize()
     // Warn if screen is too small
     // NOTE: 640x480 is relatively arbitrary, but we don't want people abuse Menu for mobile screens
     if (primaryRect.width() < 640 || primaryRect.height() < 480) {
-        QMessageBox::warning(
-                nullptr, " ",
-                tr("Screen resolution is below the minimum system requirement of 640x480 pixels."));
+        // Check if the warning window is already visible
+        if (!m_warningWindow) {
+            m_warningWindow = new QMessageBox(QMessageBox::Warning, " ",
+                                              tr("Screen resolution is below the minimum system "
+                                                 "requirement of 640x480 pixels."));
+            m_warningWindow->show();
+        }
     }
 }
 
